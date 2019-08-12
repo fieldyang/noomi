@@ -1,0 +1,15 @@
+整体架构
+cell 挂载到指定方法
+cellpool存放初始化的cell，每次调用时，从cellpool找到空闲的cell，然后给cell挂载指定方法，cell负责计算过程管理，比如局部变量、外部引用
+
+
+InstanceFactory 实例工厂
+Context 上下文
+
+Web包
+
+启动过程
+1. 读config/noomi.ini文件
+2. 找到context文件路径
+3. 读context文件并进行实例创建
+4. 
