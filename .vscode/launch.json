@@ -8,8 +8,8 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            // "program":"${file}",
-            "program": "${workspaceFolder}/core/web/ts/app.ts",
+            "program":"${file}",
+            // "program": "${workspaceFolder}/test/app/app.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "sourceMaps": true,
 

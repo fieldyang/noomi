@@ -1,4 +1,4 @@
-import { RouteFactory } from "routefactory";
+import { RouteFactory } from "./routefactory";
 class noomi {
     constructor(port) {
         const http = require("http");
@@ -24,6 +24,24 @@ class noomi {
                 }
             }*/
         }).listen(port);
+    }
+    /**
+     * 初始化
+     */
+    init() {
+        let basePath = __dirname;
+    }
+    /**
+     * 加载context
+     * @param path
+     */
+    loadCtx(path) {
+    }
+    /**
+     * 加载路由
+     * @param path
+     */
+    loadRoute(path) {
     }
 }
 export { noomi };
