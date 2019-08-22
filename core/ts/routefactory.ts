@@ -9,7 +9,7 @@ interface RouteCfg{
     method:string;
 }
 class RouteFactory{
-    static routes:RouteCfg[];
+    static routes:RouteCfg[] = new Array();
     /**
      * 添加路由
      * @param path      路由路径，支持通配符*，需要method支持
@@ -46,7 +46,7 @@ class RouteFactory{
                 //通配符处理
                 if(index !== -1){
                     //*通配符方法
-                    method = path.substr(index-1);
+                    method = path.substr(index);
                 }
                 //看是否存在对应的类和方法，如果存在，置找到标志
                 //从工厂找到实例
@@ -54,16 +54,16 @@ class RouteFactory{
                 if(instance === undefined){
                     throw "未找到实例，请检查实例配置文件";
                 }
-                if(instance[method] !== undefined && instance[method].constructor === 'function'){
+                if(instance[method] !== undefined && typeof instance[method] === 'function'){
                     //设置找到标志
                     isMatch = true;
                 }
                 break;
             }
         }
-        //未找到，跳转到404
+        //未找到，跳转到404，可能处理404，再考虑
         if(!isMatch){
-            throw "http:404";
+            return null;
         }else{
             return new Promise((resolve,reject)=>{
                 try{
@@ -88,8 +88,8 @@ class RouteFactory{
             routes:Array<any>;       //实例配置数组
         }
         //设置默认命名空间
-        ns = ns?ns:'/';
-
+        ns = ns||'/';
+        const pathTool = require('path');
         const fs = require("fs");
         //读取文件
         let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
@@ -100,10 +100,9 @@ class RouteFactory{
             throw e;
         }
 
-        
         if(json.files !== undefined && json.files.length>0){
             json.files.forEach((item)=>{
-                this.parseFile(item,ns);
+                this.parseFile(pathTool.resolve(pathTool.dirname(path), item),ns);
             });
         }
 

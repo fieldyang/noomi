@@ -1,8 +1,13 @@
+import { DateHandler } from "../common/datehandler";
+
 /**
  * 测试用户
  */
 class UserQuery{
-    
+    dateHandler:DateHandler;
+    constructor(params:Object){
+        console.log(params);
+    }
     /**
      * 获取用户信息
      */
@@ -11,10 +16,11 @@ class UserQuery{
             success:true,
             result:{
                 userId:1,
-                userName:'yang'
+                userName:'yang',
+                // date:this.dateHandler.tickerToDTString((new Date()).valueOf())
             }
         }
     }
 }
 
-export{UserQuery};
+export {UserQuery};

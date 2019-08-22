@@ -1,0 +1,9 @@
+{
+    "instances":[
+        {
+            "name":"dateHandler", 	
+            "className":"DateHandler",
+            "path":"common/datehandler"
+        }
+    ]
+}

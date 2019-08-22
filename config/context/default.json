@@ -1,0 +1,19 @@
+{
+	"files":[
+		"common.json"
+	],
+	"instances":[
+		{
+			"name":"userQuery", 	
+			"className":"UserQuery",
+			"path":"user/user",
+			"singleton":true, 
+			"params":[			
+				{
+					"type":"",	
+					"value":""	
+				} 
+			]
+		}
+	]
+}

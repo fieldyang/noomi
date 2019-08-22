@@ -1,0 +1,11 @@
+{
+    "namespace":"/",        
+    "files":[],             
+    "routes":[              
+        {
+            "path":"userq_*",
+            "className":"UserQuery",
+            "method":""         
+        }
+    ]
+}

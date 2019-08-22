@@ -7,21 +7,37 @@ interface Argument{
 }
 interface InstanceCfg{
     name:string;            //实例名
+    path:string;
     className:string;       //类名
     args:Array<Argument>;   //参数列表
 }
 
 class InstanceFactory{
     static factory:any = new Map();
+    static mdlBasePath:string;
     /**
      * 添加单例到工厂
      * @param cfg 实例配置
      */
     static addInstance(cfg:InstanceCfg){
-        if(this.factory.has(cfg.name)){
-            throw "该实例名已存在";
+        // if(this.factory.has(cfg.name)){
+        //     throw "该实例名已存在";
+        // }
+        // let path = this.mdlBasePath + "/" + cfg.path;
+        // //替换//为/
+        // path = path.replace(/\/\//g,'/');
+        const path = require('path');
+        // console.log(process.cwd())
+        let mdl = require(path.resolve(this.mdlBasePath,cfg.path));
+        //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
+        if(typeof mdl === 'object'){
+            mdl = mdl[cfg.className];
         }
-        this.factory.set(cfg.className,Reflect.construct(eval(cfg.className),cfg.args)); 
+        // class
+        if(typeof mdl !== 'function'){
+            throw "模块必须为class";
+        }
+        this.factory.set(cfg.className,new mdl(cfg.args)); 
     }
 
     /**
@@ -42,14 +58,15 @@ class InstanceFactory{
      * 解析实例配置文件
      * @param path 文件路径
      */
-    static parseFile(path:string){
+    static parseFile(path:string,mdlPath?:string){
         interface InstanceJSON{
             files:Array<string>;        //引入文件
             instances:Array<any>;       //实例配置数组
         }
-
+        const pathTool = require('path');
         const fs = require("fs");
-    
+        this.mdlBasePath = mdlPath || './';
+        console.log(this.mdlBasePath,path);
         //读取文件
         let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
         let json:InstanceJSON = null;
@@ -61,7 +78,7 @@ class InstanceFactory{
 
         if(json.files !== undefined && json.files.length>0){
             json.files.forEach((item)=>{
-                this.parseFile(item);
+                this.parseFile(pathTool.resolve(pathTool.dirname(path),item),this.mdlBasePath);
             });
         }
 
