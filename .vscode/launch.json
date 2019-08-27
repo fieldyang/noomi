@@ -15,16 +15,8 @@
 
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
-            ]
-            /*"name": "Current TS File",
-            "type": "node",
-            "request": "launch",
-            "program": "/usr/local/bin/ts-node",
-            "args": [
-                "${relativeFile}"
             ],
-            "cwd": "${workspaceRoot}",
-            "protocol": "inspector"*/
+            "cwd": "${workspaceRoot}"
         }
     ]
 }

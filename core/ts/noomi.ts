@@ -5,7 +5,8 @@ import {NoomiHttp} from "./noomihttp";
 class noomi{
     constructor(port){
         const mdlPath = require('path');
-        this.init(mdlPath.join(__dirname,'../../config'));
+        console.log(process.cwd())
+        this.init(mdlPath.join(process.cwd(),'config'));
         const http = require("http");
         const url = require("url");
         const querystring = require("querystring");
@@ -13,7 +14,6 @@ class noomi{
             let path = url.parse(req.url).pathname;
             const paramstr = url.parse(req.url).query;
             const params = querystring.parse(paramstr);
-            
             let re = RouteFactory.handleRoute(path,params);
             if(re){
                 re.then((result)=>{
