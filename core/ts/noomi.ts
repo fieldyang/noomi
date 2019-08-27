@@ -1,5 +1,7 @@
 import {InstanceFactory} from "./instancefactory";
 import {RouteFactory} from "./routefactory";
+import {StaticLoader} from "./staticloader";
+import {NoomiHttp} from "./noomihttp";
 class noomi{
     constructor(port){
         this.init(process.cwd() + '/config');
@@ -14,34 +16,16 @@ class noomi{
             let re = RouteFactory.handleRoute(path,params);
             if(re){
                 re.then((result)=>{
-                    let str:string = JSON.stringify(result);
-                    res.writeHead(200, { 'Content-Type': 'text/html',
-                          'Content-Length':Buffer.byteLength(str)});
-                    res.write(str);
-                    // response.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' });
-                    res.end();
+                    NoomiHttp.writeDataToClient(res,{
+                        data:result,
+                        charset:'utf8'
+                    });        
                 });
             }else{ //静态资源判断
+                //判断是否在static包含目录中
                 
             }
-            
-            
-            
-            /*console.log(__dirname);
-            path = __dirname + path;
-            noomifs.readFile(path,'binary',(err,file)=>{
-                if(err){
-                    console.log('not found')
-                }else{
-                    res.writeHead(200,{
-                        'Content-type':'html'
-                    });
-                    res.write(file,'binary');
-                    res.end();
-                }
-            }*/
         }).listen(port);
-        
     }
 
     /**
@@ -78,6 +62,8 @@ class noomi{
                 this.loadRoute(path.resolve('config',rPath));
             }
         }
+
+        //aop初始化
     }
 
     /**

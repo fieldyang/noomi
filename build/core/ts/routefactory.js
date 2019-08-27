@@ -63,7 +63,7 @@ class RouteFactory {
             return new Promise((resolve, reject) => {
                 try {
                     //调用方法
-                    let re = instance[method].call(null, params);
+                    let re = instance[method](params);
                     resolve(re);
                 }
                 catch (e) {

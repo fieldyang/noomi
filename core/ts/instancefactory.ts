@@ -45,13 +45,29 @@ class InstanceFactory{
      * @param name 类名  
      */
     static getInstance(name:string){
-        
         let fs = require("fs");
         if(!this.factory.has(name)){
             throw "实例不存在";
         }
-
         return this.factory.get(name);
+    }
+
+    /**
+     * 执行方法
+     * @param className     类名 
+     * @param method        方法名
+     */
+    static exec(className:string,method:string):any{
+        //获取实例
+        let instance = this.factory.get(className);
+        if(!instance || !instance[method]){
+            throw "实例或方法不存在！";
+        }
+
+        //前置aop检查
+        
+
+        //后置aop检查
     }
 
     /**
@@ -66,7 +82,6 @@ class InstanceFactory{
         const pathTool = require('path');
         const fs = require("fs");
         this.mdlBasePath = mdlPath || './';
-        console.log(this.mdlBasePath,path);
         //读取文件
         let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
         let json:InstanceJSON = null;

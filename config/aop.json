@@ -1,0 +1,40 @@
+{
+    "files":[],
+    "aspects":[
+        {
+            "class":"",
+            "points":[{
+                "id":"getpoint",
+                "expression":"UserQuery.get*"
+            },{
+                "id":"editpoint",
+                "expression":"*.edit*"
+            }],
+
+            "aops":[
+                {
+                    "pointid":"testpoint",
+                    "type":"before",
+                    "method":"beforeMethod"
+                },{
+                    "pointid":"getpoint",
+                    "type":"after",
+                    "method":"afterMethod"
+                },{
+                    "pointid":"getpoint",
+                    "type":"return",
+                    "method":"returnMethod"
+                },{
+                    "pointid":"getpoint",
+                    "type":"throw",
+                    "method":"throwMethod"
+                },{
+                    "pointid":"editpoint",
+                    "type":"round",
+                    "method":"roundMethod"
+                }
+            ]
+        }
+
+    ]
+}

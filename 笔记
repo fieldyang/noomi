@@ -6,10 +6,15 @@ cellpool存放初始化的cell，每次调用时，从cellpool找到空闲的cel
 InstanceFactory 实例工厂
 Context 上下文
 
-Web包
+mime: 需要安装mime包
+
+IoC : 注入类型问题，node没有类型，ts的类型编译后无法用
+Aop : 
 
 启动过程
 1. 读config/noomi.ini文件
-2. 找到context文件路径
-3. 读context文件并进行实例创建
-4. 
+2. session 工厂建立
+3. 找到context文件路径
+4. 读instance context文件并进行实例工厂初始化
+5. 读route 文件进行路由工厂初始化
+6. 读aop文件进行aop工厂初始化

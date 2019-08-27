@@ -1,23 +1,34 @@
 import { DateHandler } from "../common/datehandler";
+import { Inject } from "../../../../core/ts/decorator";
 
+// function Inject(className:string){
+//     console.log(className);
+//     return className;
+// }
 /**
  * 测试用户
  */
 class UserQuery{
+    
+    @Inject("DateHandler")
     dateHandler:DateHandler;
+
     constructor(params:Object){
-        console.log(params);
+        // console.log(params);
     }
     /**
      * 获取用户信息
      */
+    
+    
     getInfo(){
+        console.log(this.dateHandler);
         return {
             success:true,
             result:{
                 userId:1,
                 userName:'yang',
-                // date:this.dateHandler.tickerToDTString((new Date()).valueOf())
+                date:this.dateHandler.tickerToDTString((new Date()).valueOf())
             }
         }
     }

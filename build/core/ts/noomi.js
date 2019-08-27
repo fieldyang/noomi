@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const instancefactory_1 = require("./instancefactory");
 const routefactory_1 = require("./routefactory");
+const noomihttp_1 = require("./noomihttp");
 class noomi {
     constructor(port) {
         this.init(process.cwd() + '/config');
@@ -15,29 +16,15 @@ class noomi {
             let re = routefactory_1.RouteFactory.handleRoute(path, params);
             if (re) {
                 re.then((result) => {
-                    let str = JSON.stringify(result);
-                    res.writeHead(200, { 'Content-Type': 'text/html',
-                        'Content-Length': Buffer.byteLength(str) });
-                    res.write(str);
-                    // response.addTrailers({ 'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667' });
-                    res.end();
+                    noomihttp_1.NoomiHttp.writeDataToClient(res, {
+                        data: result,
+                        charset: 'utf8'
+                    });
                 });
             }
             else { //静态资源判断
+                //判断是否在static包含目录中
             }
-            /*console.log(__dirname);
-            path = __dirname + path;
-            noomifs.readFile(path,'binary',(err,file)=>{
-                if(err){
-                    console.log('not found')
-                }else{
-                    res.writeHead(200,{
-                        'Content-type':'html'
-                    });
-                    res.write(file,'binary');
-                    res.end();
-                }
-            }*/
         }).listen(port);
     }
     /**
@@ -73,6 +60,7 @@ class noomi {
                 this.loadRoute(path.resolve('config', rPath));
             }
         }
+        //aop初始化
     }
     /**
      * 加载context
