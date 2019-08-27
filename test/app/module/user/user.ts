@@ -22,7 +22,6 @@ class UserQuery{
     
     
     getInfo(){
-        console.log(this.dateHandler);
         return {
             success:true,
             result:{

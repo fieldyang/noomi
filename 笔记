@@ -8,7 +8,7 @@ Context 上下文
 
 mime: 需要安装mime包
 
-IoC : 注入类型问题，node没有类型，ts的类型编译后无法用
+IoC : 采用装饰器进行注入
 Aop : 
 
 启动过程

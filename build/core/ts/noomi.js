@@ -5,7 +5,8 @@ const routefactory_1 = require("./routefactory");
 const noomihttp_1 = require("./noomihttp");
 class noomi {
     constructor(port) {
-        this.init(process.cwd() + '/config');
+        const mdlPath = require('path');
+        this.init(mdlPath.join(__dirname, '../../config'));
         const http = require("http");
         const url = require("url");
         const querystring = require("querystring");

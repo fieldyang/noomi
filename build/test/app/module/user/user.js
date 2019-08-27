@@ -22,7 +22,6 @@ class UserQuery {
      * 获取用户信息
      */
     getInfo() {
-        console.log(this.dateHandler);
         return {
             success: true,
             result: {
