@@ -2,10 +2,10 @@ import {InstanceFactory} from "./instancefactory";
 import {RouteFactory} from "./routefactory";
 import {StaticLoader} from "./staticloader";
 import {NoomiHttp} from "./noomihttp";
+import { AopFactory } from "./aopfactory";
 class noomi{
     constructor(port){
         const mdlPath = require('path');
-        console.log(process.cwd())
         this.init(mdlPath.join(process.cwd(),'config'));
         const http = require("http");
         const url = require("url");
@@ -47,9 +47,6 @@ class noomi{
         if(iniJson.hasOwnProperty('contextpath')){
             let ctxPath = iniJson['contextpath'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                // path.resolve('config',ctxPath);
-                // let p = basePath + '/' + ctxPath;
-                // p = p.replace(/\/\//g,'/');
                 this.loadCtx(path.resolve('config',ctxPath),iniJson['modulepath']);
             }
         }
@@ -58,13 +55,17 @@ class noomi{
         if(iniJson.hasOwnProperty('routepath')){
             let rPath = iniJson['routepath'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                // let p = basePath + '/' + rPath;
-                // p = p.replace(/\/\//g,'/');
                 this.loadRoute(path.resolve('config',rPath));
             }
         }
 
         //aop初始化
+        if(iniJson.hasOwnProperty('aoppath')){
+            let rPath = iniJson['aoppath'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                this.loadAop(path.resolve('config',rPath));
+            }
+        }
     }
 
     /**
@@ -81,6 +82,10 @@ class noomi{
      */
     loadRoute(path:string){
         RouteFactory.parseFile(path);
+    }
+
+    loadAop(path:string){
+        AopFactory.parseFile(path);
     }
 }
 

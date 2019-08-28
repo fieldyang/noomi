@@ -1,37 +1,38 @@
 {
     "files":[],
+    
+    "pointcuts":[{
+        "id":"pointcut1",
+        "expressions":["UserQuery.get*"]
+    },{
+        "id":"pointcut2",
+        "expressions":["*.edit*"]
+    }],
+
     "aspects":[
         {
             "class":"",
-            "points":[{
-                "id":"getpoint",
-                "expression":"UserQuery.get*"
-            },{
-                "id":"editpoint",
-                "expression":"*.edit*"
-            }],
-
             "aops":[
                 {
-                    "pointid":"testpoint",
+                    "pointcut_id":"testpoint",
                     "type":"before",
                     "method":"beforeMethod"
                 },{
-                    "pointid":"getpoint",
+                    "pointcut_id":"getpoint",
                     "type":"after",
                     "method":"afterMethod"
                 },{
-                    "pointid":"getpoint",
+                    "pointcut_id":"getpoint",
                     "type":"return",
                     "method":"returnMethod"
                 },{
-                    "pointid":"getpoint",
+                    "pointcut_id":"getpoint",
                     "type":"throw",
                     "method":"throwMethod"
                 },{
-                    "pointid":"editpoint",
-                    "type":"round",
-                    "method":"roundMethod"
+                    "pointcut_id":"editpoint",
+                    "type":"around",
+                    "method":"aroundMethod"
                 }
             ]
         }

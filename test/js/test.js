@@ -15,5 +15,17 @@
 //         console.log(mime.getType(path));
 //     }
 // });
-const tclass = require('./tclass');
-new tclass.tclass().sayHello();
+// const tclass = require('./tclass');
+// new tclass.tclass().sayHello();
+
+let map = new Map();
+map.set(1,"aaa");
+map.set(2,"bbb");
+map.set(3,"ccc");
+map.set(4,"ddd");
+for(let o of map.values()){
+    console.log(o);
+}
+// for(let ite=map.values();ite.hasNext();){
+//     console.log(ite.next().value);
+// }

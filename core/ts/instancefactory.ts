@@ -1,3 +1,5 @@
+import { AopFactory} from "./aopfactory";
+
 /**
  * 实例工厂
  */
@@ -20,14 +22,10 @@ class InstanceFactory{
      * @param cfg 实例配置
      */
     static addInstance(cfg:InstanceCfg){
-        // if(this.factory.has(cfg.name)){
-        //     throw "该实例名已存在";
-        // }
-        // let path = this.mdlBasePath + "/" + cfg.path;
-        // //替换//为/
-        // path = path.replace(/\/\//g,'/');
+        if(this.factory.has(cfg.name)){
+            throw "该实例名已存在";
+        }
         const path = require('path');
-        // console.log(process.cwd())
         let mdl = require(path.resolve(this.mdlBasePath,cfg.path));
         //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
         if(typeof mdl === 'object'){
@@ -55,19 +53,66 @@ class InstanceFactory{
     /**
      * 执行方法
      * @param className     类名 
-     * @param method        方法名
+     * @param methodName    方法名
+     * @param params        参数
      */
-    static exec(className:string,method:string):any{
+    static exec(className:string,methodName:string,params:any):any{
         //获取实例
         let instance = this.factory.get(className);
-        if(!instance || !instance[method]){
+        if(!instance || !instance[methodName]){
             throw "实例或方法不存在！";
         }
-
-        //前置aop检查
         
+        //aop获取
+        let aop:any;
+        if(AopFactory){
+            aop = AopFactory.getAops(className,methodName);
+        }
+        
+        return new Promise((resolve,reject)=>{
+            let result:any;
+            //正常执行结束标志
+            let finish:boolean = false;
+            try{
+                if(aop !== undefined){
+                    //前置执行
+                    aop.before.forEach(item=>{
+                        this.exec(item.class,item.method,params);
+                    });
+                }
+                //调用方法
+                result = instance[methodName](params);
+                finish = true;
+                //return aop执行
+                if(aop !== undefined){
+                    //返回执行
+                    aop.return.forEach(item=>{
+                        this.exec(item.class,item.method,params);
+                    });
+                }
+            }catch(e){
+                //异常aop执行
+                if(aop !== undefined){
+                    aop.throw.forEach(item=>{
+                        this.exec(item.class,item.method,params);
+                    });
+                }
+                result = e;
+            }
 
-        //后置aop检查
+            //after aop执行
+            if(aop){
+                aop.after.forEach(item=>{
+                    this.exec(item.class,item.method,params);
+                });
+            }
+            
+            if(finish){ //正常执行结束
+                resolve(result);
+            }else{      //异常结束
+                reject(result);
+            }
+        });
     }
 
     /**
