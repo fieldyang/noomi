@@ -1,20 +1,12 @@
 import { DateHandler } from "../common/datehandler";
 import { Inject } from "../../../../core/ts/decorator";
-
-// function Inject(className:string){
-//     console.log(className);
-//     return className;
-// }
-/**
- * 测试用户
- */
-class UserQuery{
+class UserService{
     
-    @Inject("DateHandler")
+    @Inject("dateHandler")
     dateHandler:DateHandler;
 
     constructor(params:Object){
-        // console.log(params);
+        
     }
     /**
      * 获取用户信息
@@ -33,4 +25,4 @@ class UserQuery{
     }
 }
 
-export {UserQuery};
+export {UserService};

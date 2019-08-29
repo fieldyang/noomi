@@ -3,36 +3,33 @@
     
     "pointcuts":[{
         "id":"pointcut1",
-        "expressions":["UserQuery.get*"]
-    },{
-        "id":"pointcut2",
-        "expressions":["*.edit*"]
+        "expressions":["userAction\\..+"]
     }],
 
     "aspects":[
         {
-            "class":"",
+            "instance":"logAdvice",
             "aops":[
                 {
-                    "pointcut_id":"testpoint",
+                    "pointcut_id":"pointcut1",
                     "type":"before",
-                    "method":"beforeMethod"
+                    "method":"before"
                 },{
-                    "pointcut_id":"getpoint",
+                    "pointcut_id":"pointcut1",
                     "type":"after",
-                    "method":"afterMethod"
+                    "method":"after"
                 },{
-                    "pointcut_id":"getpoint",
+                    "pointcut_id":"pointcut1",
                     "type":"return",
-                    "method":"returnMethod"
+                    "method":"afterReturn"
                 },{
-                    "pointcut_id":"getpoint",
+                    "pointcut_id":"pointcut1",
                     "type":"throw",
-                    "method":"throwMethod"
+                    "method":"throw"
                 },{
-                    "pointcut_id":"editpoint",
+                    "pointcut_id":"pointcut1",
                     "type":"around",
-                    "method":"aroundMethod"
+                    "method":"around"
                 }
             ]
         }

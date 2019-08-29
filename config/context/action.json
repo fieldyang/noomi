@@ -1,0 +1,11 @@
+{
+    "instances":[
+        {
+            "name":"userAction", 	
+            "className":"UserAction",
+            "path":"action/useraction",
+            "singleton":false, 
+            "params":[]
+        }
+    ]
+}

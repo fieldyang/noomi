@@ -15,17 +15,19 @@
 //         console.log(mime.getType(path));
 //     }
 // });
-// const tclass = require('./tclass');
-// new tclass.tclass().sayHello();
+const tclass = require('./tclass');
+// console.log(tclass.tclass);
+console.log(tclass.tclass);
 
-let map = new Map();
-map.set(1,"aaa");
-map.set(2,"bbb");
-map.set(3,"ccc");
-map.set(4,"ddd");
-for(let o of map.values()){
-    console.log(o);
-}
+// let t = tclass.tclass.prototype.constructor.apply(null,['hello']);
+let t = new tclass.tclass('aaaa');
+let t1 = t.constructor;
+
+console.log(t1);
+// t.sayHello();
+// t.constructor.apply(t,['hello1']);
+// t.sayHello();
+
 // for(let ite=map.values();ite.hasNext();){
 //     console.log(ite.next().value);
 // }

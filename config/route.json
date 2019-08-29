@@ -4,7 +4,7 @@
     "routes":[              
         {
             "path":"userq_*",
-            "className":"UserQuery",
+            "instanceName":"userAction",
             "method":""         
         }
     ]

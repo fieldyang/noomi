@@ -9,9 +9,20 @@ interface Argument{
 }
 interface InstanceCfg{
     name:string;            //实例名
-    path:string;
+    path:string;            //模块路径（相对noomi.ini配置的modulepath）
+    singleton:boolean;      //单例模式
     className:string;       //类名
-    args:Array<Argument>;   //参数列表
+    args:Array<any>;        //参数列表
+}
+
+/**
+ * 实例对象
+ */
+interface InstanceObj{
+    instance:object;            //实例对象
+    class:any;                  //类引用
+    singleton:boolean;          //单例标志
+    params:Array<any>;          //构造器参数
 }
 
 class InstanceFactory{
@@ -35,73 +46,94 @@ class InstanceFactory{
         if(typeof mdl !== 'function'){
             throw "模块必须为class";
         }
-        this.factory.set(cfg.className,new mdl(cfg.args)); 
+        //默认true
+        let singleton = cfg.singleton!==undefined?cfg.singleton:true;
+        
+        let insObj=<InstanceObj>{};
+
+        insObj.class = mdl;
+        insObj.singleton = singleton;
+
+        if(singleton){   //单例，需要实例化
+            insObj.instance = new mdl(cfg.args);
+        }else{                  //非单例，不需要实例化
+            insObj.params = cfg.args;
+        }
+        this.factory.set(cfg.name,insObj); 
     }
 
     /**
      * 获取实例
-     * @param name 类名  
+     * @param name  实例名
+     * @return      实例化的对象  
      */
     static getInstance(name:string){
-        let fs = require("fs");
         if(!this.factory.has(name)){
             throw "实例不存在";
         }
-        return this.factory.get(name);
+        let ins:InstanceObj = this.factory.get(name);
+        if(!ins){
+            return null;
+        }
+        if(ins.singleton){
+            return ins.instance;
+        }else{
+            let mdl = ins.class;
+            return new mdl(ins.params);
+        }
     }
 
     /**
      * 执行方法
-     * @param className     类名 
+     * @param instanceName  实例名 
      * @param methodName    方法名
      * @param params        参数
      */
-    static exec(className:string,methodName:string,params:any):any{
+    static exec(instanceName:string,methodName:string,params:any):any{
         //获取实例
-        let instance = this.factory.get(className);
+        let instance = this.getInstance(instanceName);
         if(!instance || !instance[methodName]){
             throw "实例或方法不存在！";
         }
         
-        //aop获取
-        let aop:any;
-        if(AopFactory){
-            aop = AopFactory.getAops(className,methodName);
-        }
-        
         return new Promise((resolve,reject)=>{
+            //aop获取
+            let aop:any;
+            if(AopFactory){
+                aop = AopFactory.getAops(instanceName,methodName);
+            }
             let result:any;
             //正常执行结束标志
             let finish:boolean = false;
             try{
-                if(aop !== undefined){
+                if(aop !== null){
                     //前置执行
                     aop.before.forEach(item=>{
-                        this.exec(item.class,item.method,params);
+                        this.exec(item.instance,item.method,params);
                     });
                 }
                 //调用方法
                 result = instance[methodName](params);
                 finish = true;
                 //return aop执行
-                if(aop !== undefined){
+                if(aop !== null){
                     //返回执行
                     aop.return.forEach(item=>{
-                        this.exec(item.class,item.method,params);
+                        this.exec(item.instance,item.method,params);
                     });
                 }
             }catch(e){
                 //异常aop执行
-                if(aop !== undefined){
+                if(aop !== null){
                     aop.throw.forEach(item=>{
-                        this.exec(item.class,item.method,params);
+                        this.exec(item.instance,item.method,params);
                     });
                 }
                 result = e;
             }
 
             //after aop执行
-            if(aop){
+            if(aop !== null){
                 aop.after.forEach(item=>{
                     this.exec(item.class,item.method,params);
                 });

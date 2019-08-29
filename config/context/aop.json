@@ -1,0 +1,9 @@
+{
+    "instances":[
+        {
+            "name":"logAdvice", 	
+            "className":"LogAdvice",
+            "path":"advice/logadvice"
+        }
+    ]
+}

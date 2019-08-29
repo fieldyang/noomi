@@ -5,7 +5,7 @@ import {InstanceFactory} from "./instancefactory";
 interface RouteCfg{
     path:string;
     reg:RegExp;
-    className:string;
+    instanceName:string;
     method:string;
 }
 class RouteFactory{
@@ -22,7 +22,7 @@ class RouteFactory{
         this.routes.push({
             path:path,
             reg:new RegExp(path1),
-            className:clazz.trim(),
+            instanceName:clazz.trim(),
             method:method.trim()
         });
     }
@@ -48,33 +48,34 @@ class RouteFactory{
                     //*通配符方法
                     method = path.substr(index);
                 }
-                //看是否存在对应的类和方法，如果存在，置找到标志
-                //从工厂找到实例
-                instance = InstanceFactory.getInstance(item.className);
-                if(instance === undefined){
-                    throw "未找到实例，请检查实例配置文件";
-                }
-                if(instance[method] !== undefined && typeof instance[method] === 'function'){
-                    //设置找到标志
-                    isMatch = true;
-                }
-                break;
+                return InstanceFactory.exec(item.instanceName,method,params);
+                // //看是否存在对应的类和方法，如果存在，置找到标志
+                // //从工厂找到实例
+                // instance = InstanceFactory.getInstance(item.className);
+                // if(instance === undefined){
+                //     throw "未找到实例，请检查实例配置文件";
+                // }
+                // if(instance[method] !== undefined && typeof instance[method] === 'function'){
+                //     //设置找到标志
+                //     isMatch = true;
+                // }
+                // break;
             }
         }
         //未找到，跳转到404，可能处理404，再考虑
-        if(!isMatch){
-            return null;
-        }else{
-            return new Promise((resolve,reject)=>{
-                try{
-                    //调用方法
-                    let re = instance[method](params);
-                    resolve(re);
-                }catch(e){
-                    reject(e);
-                }
-            });
-        }
+        // if(!isMatch){
+        //     return null;
+        // }else{
+        //     return new Promise((resolve,reject)=>{
+        //         try{
+        //             //调用方法
+        //             let re = instance[method](params);
+        //             resolve(re);
+        //         }catch(e){
+        //             reject(e);
+        //         }
+        //     });
+        // }
     }
 
     /**
@@ -111,7 +112,7 @@ class RouteFactory{
                 let p = ns + '/' + item.path;
                 //变'//'为'/'
                 p = p.replace(/\/\//g,'/');
-                this.addRoute(p,item.className,item.method);
+                this.addRoute(p,item.instanceName,item.method);
             });
         }
     }

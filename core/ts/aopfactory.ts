@@ -13,15 +13,15 @@ interface Aop{
     type:string;
     //切面对应的方法
     method:string;
-    //切面对应的类名
-    class:string; 
+    //切面对应的实例名
+    instance:string; 
 }
 
 /**
  * 切面
  */
 interface AopAspect{
-    class:string;
+    instance:string;
     //切点
     pointcuts:Array<AopPointcut>;
     //连接点
@@ -35,11 +35,11 @@ class AopPointcut{
     id:string;
     //表达式数组（正则表达式）
     expressions:Array<RegExp> = [];
-    aops:Array<Aop>;
+    aops:Array<Aop> = [];
 
     constructor(id:string,expressions:Array<string>){
         this.id = id;
-        if(expressions && expressions.length > 0){
+        if(!expressions || expressions.length === 0){
             throw "pointcut的expressions参数配置错误";
         }
         expressions.forEach((item)=>{
@@ -52,13 +52,13 @@ class AopPointcut{
     }
     /**
      * 匹配方法是否满足表达式
-     * @param className     类名，可选
+     * @param instanceName  实例名
      * @param methodName    待检测方法 
      * @return              true/false
      */
-    match(className:string,methodName:string):boolean{
+    match(instanceName:string,methodName:string):boolean{
         for(let i=0;i<this.expressions.length;i++){
-            if(this.expressions[i].test(className + '.' + methodName)){
+            if(this.expressions[i].test(instanceName + '.' + methodName)){
                 return true;
             }
         }
@@ -83,8 +83,8 @@ class AopFactory{
      * 添加切面
      */
     static addAspect(cfg:AopAspect){
-        if(this.aspects.has(cfg.class)){
-            throw "该class已经在切面中存在"; 
+        if(this.aspects.has(cfg.instance)){
+            throw "该advice已经在切面中存在"; 
         }
         //连接点
         if(cfg.aops && cfg.aops.length>0){
@@ -92,13 +92,13 @@ class AopFactory{
                 if(!this.pointcuts.has(item.pointcut_id)){
                     throw "pointcut不存在";
                 }
-                //设置类名
-                item.class = cfg.class;
+                //设置实例名
+                item.instance = cfg.instance;
                 //添加到pointcut的aop数组(是否需要重复检测，待考虑)
-                this.pointcuts.get(item.pointcut_id).addJoint(item);
+                this.pointcuts.get(item.pointcut_id).addAop(item);
             });
         }
-        this.aspects.set(cfg.class,cfg);
+        this.aspects.set(cfg.instance,cfg);
     }
 
     /**
@@ -149,18 +149,24 @@ class AopFactory{
                 this.addPointcut(item.id,item.expressions);
             });
         }
+
+        if(json.aspects && json.aspects.length > 0){
+            json.aspects.forEach((item:AopAspect)=>{
+                this.addAspect(item);
+            });
+        }
     }
 
     /**
      * 获取切点
-     * @param className     类名 
+     * @param instanceName  实例名 
      * @param methodName    方法名
      */
-    static getPointcut(className:string,methodName:string):AopPointcut{
+    static getPointcut(instanceName:string,methodName:string):AopPointcut{
         // 遍历iterator
         let ite = this.pointcuts.values();
         for(let p of ite){
-            if(p.match(className,methodName)){
+            if(p.match(instanceName,methodName)){
                 return p; 
             }
         }
@@ -169,17 +175,17 @@ class AopFactory{
 
     /**
      * 执行方法
-     * @param className     类名
+     * @param instanceName  实例名
      * @param methodName    方法名
      * @return              {
-     *                          before:[{class:切面类,method:切面方法},...]
-     *                          after:[{class:切面类,method:切面方法},...]
-     *                          return:[{class:切面类,method:切面方法},...]
-     *                          throw:[{class:切面类,method:切面方法},...]
+     *                          before:[{instance:切面实例,method:切面方法},...]
+     *                          after:[{instance:切面实例,method:切面方法},...]
+     *                          return:[{instance:切面实例,method:切面方法},...]
+     *                          throw:[{instance:切面实例,method:切面方法},...]
      *                      }
      */
-    static getAops(className:string,methodName:string):object{
-        let pointcut = this.getPointcut(className,methodName);
+    static getAops(instanceName:string,methodName:string):object{
+        let pointcut = this.getPointcut(instanceName,methodName);
         if(pointcut === null){
             return null;
         }
@@ -193,35 +199,35 @@ class AopFactory{
             switch(aop.type){
                 case 'before':
                     beforeArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
                     return;
                 case 'after':
                     afterArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
                     return;
                 case 'around':
                     beforeArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
                     afterArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
                     return;
                 case 'return':
                     returnArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
                     return;
                 case 'throw':
                     throwArr.push({
-                        class:aop.class,
+                        instance:aop.instance,
                         method:aop.method
                     });
             }
