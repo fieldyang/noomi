@@ -1,7 +1,6 @@
 import { DateHandler } from "../common/datehandler";
 import { Inject } from "../../../../core/ts/decorator";
 class UserService{
-    
     @Inject("dateHandler")
     dateHandler:DateHandler;
 
@@ -11,9 +10,8 @@ class UserService{
     /**
      * 获取用户信息
      */
-    
-    
     getInfo(){
+        
         return {
             success:true,
             result:{

@@ -4,7 +4,7 @@
             "name":"userAction", 	
             "className":"UserAction",
             "path":"action/useraction",
-            "singleton":false, 
+            "singleton":false,
             "params":[]
         }
     ]

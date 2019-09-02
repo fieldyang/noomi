@@ -12,7 +12,7 @@ interface InstanceCfg{
     path:string;            //模块路径（相对noomi.ini配置的modulepath）
     singleton:boolean;      //单例模式
     className:string;       //类名
-    args:Array<any>;        //参数列表
+    params:Array<any>;      //参数列表
 }
 
 /**
@@ -43,22 +43,24 @@ class InstanceFactory{
             mdl = mdl[cfg.className];
         }
         // class
-        if(typeof mdl !== 'function'){
+        if(mdl.constructor !== Function){
             throw "模块必须为class";
         }
+       
         //默认true
         let singleton = cfg.singleton!==undefined?cfg.singleton:true;
         
-        let insObj=<InstanceObj>{};
-
-        insObj.class = mdl;
-        insObj.singleton = singleton;
+        let insObj=<InstanceObj>{
+            class:mdl,
+            singleton:singleton
+        };
 
         if(singleton){   //单例，需要实例化
-            insObj.instance = new mdl(cfg.args);
+            insObj.instance = new mdl(cfg.params);
         }else{                  //非单例，不需要实例化
-            insObj.params = cfg.args;
+            insObj.params = cfg.params;
         }
+
         this.factory.set(cfg.name,insObj); 
     }
 
@@ -84,15 +86,28 @@ class InstanceFactory{
     }
 
     /**
-     * 执行方法
-     * @param instanceName  实例名 
-     * @param methodName    方法名
-     * @param params        参数
+     * 获取instance object
+     * @param name instance name
      */
-    static exec(instanceName:string,methodName:string,params:any):any{
+    static getInstanceObj(name:string):InstanceObj{
+        if(!this.factory.has(name)){
+            throw "实例不存在";
+        }
+        return this.factory.get(name);
+    }
+
+    /**
+     * 执行方法
+     * @param config {}
+     *      @param func          方法名
+     *      @param instanceName  实例名 
+     *      @param methodName    方法名
+     *      @param params        参数
+     */
+    static exec(config:any):any{
         //获取实例
-        let instance = this.getInstance(instanceName);
-        if(!instance || !instance[methodName]){
+        let instance = this.getInstance(config.instanceName);
+        if(!instance || !instance[config.methodName]){
             throw "实例或方法不存在！";
         }
         
@@ -100,33 +115,52 @@ class InstanceFactory{
             //aop获取
             let aop:any;
             if(AopFactory){
-                aop = AopFactory.getAops(instanceName,methodName);
+                aop = AopFactory.getAops(config.instanceName,config.methodName);
             }
             let result:any;
             //正常执行结束标志
             let finish:boolean = false;
+            
             try{
                 if(aop !== null){
                     //前置执行
                     aop.before.forEach(item=>{
-                        this.exec(item.instance,item.method,params);
+                        this.exec({
+                            instanceName:item.instance,
+                            methodName:item.method,
+                            params:config.params
+                        });
                     });
                 }
+                
                 //调用方法
-                result = instance[methodName](params);
+                if(config.func){
+                    result = config.func.apply(instance,config.params);
+                }else{
+                    result = instance[config.methodName].apply(instance,config.params);
+                }
+                
                 finish = true;
                 //return aop执行
                 if(aop !== null){
                     //返回执行
                     aop.return.forEach(item=>{
-                        this.exec(item.instance,item.method,params);
+                        this.exec({
+                            instanceName:item.instance,
+                            methodName:item.method,
+                            params:config.params
+                        });
                     });
                 }
             }catch(e){
                 //异常aop执行
                 if(aop !== null){
                     aop.throw.forEach(item=>{
-                        this.exec(item.instance,item.method,params);
+                        this.exec({
+                            instanceName:item.instance,
+                            methodName:item.method,
+                            params:config.params
+                        });
                     });
                 }
                 result = e;
@@ -135,10 +169,13 @@ class InstanceFactory{
             //after aop执行
             if(aop !== null){
                 aop.after.forEach(item=>{
-                    this.exec(item.class,item.method,params);
+                    this.exec({
+                        instanceName:item.instance,
+                        methodName:item.method,
+                        params:config.params
+                    });
                 });
             }
-            
             if(finish){ //正常执行结束
                 resolve(result);
             }else{      //异常结束
@@ -179,6 +216,13 @@ class InstanceFactory{
                 this.addInstance(item);
             });
         }
+    }
+
+    /**
+     * 获取instance工厂
+     */
+    static getFactory(){
+        return this.factory;
     }
 }
 

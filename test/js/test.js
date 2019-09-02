@@ -15,15 +15,15 @@
 //         console.log(mime.getType(path));
 //     }
 // });
-const tclass = require('./tclass');
+// const tclass = require('./tclass');
+// // console.log(tclass.tclass);
 // console.log(tclass.tclass);
-console.log(tclass.tclass);
 
-// let t = tclass.tclass.prototype.constructor.apply(null,['hello']);
-let t = new tclass.tclass('aaaa');
-let t1 = t.constructor;
+// // let t = tclass.tclass.prototype.constructor.apply(null,['hello']);
+// let t = new tclass.tclass('aaaa');
+// let t1 = t.constructor;
 
-console.log(t1);
+// console.log(t1);
 // t.sayHello();
 // t.constructor.apply(t,['hello1']);
 // t.sayHello();
@@ -31,3 +31,16 @@ console.log(t1);
 // for(let ite=map.values();ite.hasNext();){
 //     console.log(ite.next().value);
 // }
+
+class a{
+    constructor(){
+        this.msg = 'hello';
+    }
+    f1(){
+        console.log(this.msg);
+    }
+}
+
+let a1 = new a();
+console.log(Reflect.ownKeys(a1.__proto__));
+

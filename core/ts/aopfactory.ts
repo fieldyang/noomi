@@ -1,3 +1,5 @@
+import { InstanceFactory } from "./instancefactory";
+import { AopProxy } from "./aopproxy";
 
 /**
  * AOP 工厂
@@ -47,7 +49,31 @@ class AopPointcut{
                 throw "pointcut的expressions参数配置错误";
             }
             // 转字符串为正则表达式并加入到数组
-            this.expressions.push(new RegExp(item));
+            let reg = new RegExp(item);
+            this.expressions.push(reg);
+
+            //遍历instance factory设置aop代理
+            let insFac = InstanceFactory.getFactory();
+            for(let insName of insFac.keys()){
+                //先检测instanceName
+                if(reg.test(insName+'./')){
+                    let instance = InstanceFactory.getInstance(insName);
+                    if(instance){
+                        Object.getOwnPropertyNames(instance.__proto__).forEach(key=>{
+                            //给方法设置代理，constructor 不需要代理
+                            if(key === 'constructor' || typeof(instance[key]) !== 'function'){
+                                return;
+                            }
+
+                            //实例名+方法符合aop正则表达式
+                            if(reg.test(insName + '.' + key)){
+                                instance[key] = AopProxy.invoke(insName,key,instance[key]);
+                            }
+                        });
+                    }
+                }
+            }
+            
         });
     }
     /**

@@ -48,7 +48,11 @@ class RouteFactory{
                     //*通配符方法
                     method = path.substr(index);
                 }
-                return InstanceFactory.exec(item.instanceName,method,params);
+                return InstanceFactory.exec({
+                    instanceName:item.instanceName,
+                    methodName:method,
+                    params:params
+                });
                 // //看是否存在对应的类和方法，如果存在，置找到标志
                 // //从工厂找到实例
                 // instance = InstanceFactory.getInstance(item.className);
