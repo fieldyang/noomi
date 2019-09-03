@@ -67,7 +67,7 @@ class AopPointcut{
 
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
-                                instance[key] = AopProxy.invoke(insName,key,instance[key]);
+                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
                             }
                         });
                     }

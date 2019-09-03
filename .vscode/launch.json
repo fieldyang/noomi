@@ -9,7 +9,6 @@
             "request": "launch",
             "name": "Launch Program",
             "program":"${file}",
-            // "program": "${workspaceFolder}/test/app/app.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "sourceMaps": true,
 

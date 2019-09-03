@@ -32,15 +32,23 @@
 //     console.log(ite.next().value);
 // }
 
-class a{
-    constructor(){
-        this.msg = 'hello';
-    }
-    f1(){
-        console.log(this.msg);
-    }
-}
+let pro = new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+        console.log(1);
+        resolve(2);
+    },100);
+}).then((txt)=>{
+    console.log(txt);
+    return Promise.resolve(txt);
+}).then(()=>{
+    console.log('last');
+});
 
-let a1 = new a();
-console.log(Reflect.ownKeys(a1.__proto__));
+pro.then(function(txt){
+    console.log('resolve');
+    console.log(txt);
+},function(){
+    console.log('reject');
+});
+
 

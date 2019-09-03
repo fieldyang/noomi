@@ -16,11 +16,16 @@ class noomi{
             const params = querystring.parse(paramstr);
             let re = RouteFactory.handleRoute(path,params);
             if(re){
-                re.then((result)=>{
+                re.then((result)=>{ //正常返回
                     NoomiHttp.writeDataToClient(res,{
                         data:result,
                         charset:'utf8'
                     });        
+                },(err)=>{  //异常返回
+                    NoomiHttp.writeDataToClient(res,{
+                        data:{success:false,msg:err},
+                        charset:'utf8'
+                    });
                 });
             }else{ //静态资源判断
                 //判断是否在static包含目录中

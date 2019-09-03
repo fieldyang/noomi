@@ -99,87 +99,34 @@ class InstanceFactory{
     /**
      * 执行方法
      * @param config {}
-     *      @param func          方法名
-     *      @param instanceName  实例名 
-     *      @param methodName    方法名
-     *      @param params        参数
+     * @param instanceName  实例名 
+     * @param methodName    方法名
+     * @param params        参数
      */
-    static exec(config:any):any{
-        //获取实例
-        let instance = this.getInstance(config.instanceName);
-        if(!instance || !instance[config.methodName]){
+    
+    static exec(instanceName:string,methodName:string,params:Array<any>):any{
+        let instance = this.getInstance(instanceName);
+        if(!instance || !instance[methodName]){
             throw "实例或方法不存在！";
         }
         
         return new Promise((resolve,reject)=>{
-            //aop获取
-            let aop:any;
-            if(AopFactory){
-                aop = AopFactory.getAops(config.instanceName,config.methodName);
-            }
-            let result:any;
-            //正常执行结束标志
-            let finish:boolean = false;
-            
+            let result;
             try{
-                if(aop !== null){
-                    //前置执行
-                    aop.before.forEach(item=>{
-                        this.exec({
-                            instanceName:item.instance,
-                            methodName:item.method,
-                            params:config.params
-                        });
+                result = instance[methodName].apply(instance,params);
+                if(result instanceof Promise){
+                    result.catch(err=>{
+                        reject(err.message);
+                    }).then(result=>{
+                        resolve(result);
+                    },result=>{
+                        reject(result);
                     });
-                }
-                
-                //调用方法
-                if(config.func){
-                    result = config.func.apply(instance,config.params);
                 }else{
-                    result = instance[config.methodName].apply(instance,config.params);
-                }
-                
-                finish = true;
-                //return aop执行
-                if(aop !== null){
-                    //返回执行
-                    aop.return.forEach(item=>{
-                        this.exec({
-                            instanceName:item.instance,
-                            methodName:item.method,
-                            params:config.params
-                        });
-                    });
+                    resolve(result);
                 }
             }catch(e){
-                //异常aop执行
-                if(aop !== null){
-                    aop.throw.forEach(item=>{
-                        this.exec({
-                            instanceName:item.instance,
-                            methodName:item.method,
-                            params:config.params
-                        });
-                    });
-                }
-                result = e;
-            }
-
-            //after aop执行
-            if(aop !== null){
-                aop.after.forEach(item=>{
-                    this.exec({
-                        instanceName:item.instance,
-                        methodName:item.method,
-                        params:config.params
-                    });
-                });
-            }
-            if(finish){ //正常执行结束
-                resolve(result);
-            }else{      //异常结束
-                reject(result);
+                reject(e.message);
             }
         });
     }

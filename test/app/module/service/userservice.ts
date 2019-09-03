@@ -11,7 +11,6 @@ class UserService{
      * 获取用户信息
      */
     getInfo(){
-        
         return {
             success:true,
             result:{

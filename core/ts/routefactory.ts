@@ -48,22 +48,8 @@ class RouteFactory{
                     //*通配符方法
                     method = path.substr(index);
                 }
-                return InstanceFactory.exec({
-                    instanceName:item.instanceName,
-                    methodName:method,
-                    params:params
-                });
-                // //看是否存在对应的类和方法，如果存在，置找到标志
-                // //从工厂找到实例
-                // instance = InstanceFactory.getInstance(item.className);
-                // if(instance === undefined){
-                //     throw "未找到实例，请检查实例配置文件";
-                // }
-                // if(instance[method] !== undefined && typeof instance[method] === 'function'){
-                //     //设置找到标志
-                //     isMatch = true;
-                // }
-                // break;
+
+                return InstanceFactory.exec(item.instanceName,method,[params]);
             }
         }
         //未找到，跳转到404，可能处理404，再考虑
