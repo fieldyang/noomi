@@ -2,8 +2,10 @@
  * http 服务
  */
 interface WriteCfg{
-    data:any;
-    charset:string;       
+    data:any;               //数据
+    charset:string;         //字符集
+    type:string;            //数据类型
+    statusCode:number;      //http 异常码
 }
 class NoomiHttp{
     
@@ -12,6 +14,7 @@ class NoomiHttp{
      * @param response  response 对象
      * @param data      待写数据 
      * @param charset   字符集
+     * @param type      数据类型
      */
     static writeDataToClient(response:any,config:WriteCfg):void{
         let data:any = config.data;
@@ -19,7 +22,8 @@ class NoomiHttp{
             data = JSON.stringify(data);
         }
         let charset = config.charset || 'utf8';
-        response.writeHead(200, { 'Content-Type': 'text/html',
+        let status = config.statusCode || 200;
+        response.writeHead(status, { 'Content-Type': config.type,
                 'Content-Length':Buffer.byteLength(data)});
         response.write(data,charset);
         response.end();
@@ -28,22 +32,14 @@ class NoomiHttp{
     /**
      * 回写文件到浏览器端
      * @param response      ServerResponse
-     * @param path          文件路径 
+     * @param file          文件 
      */
-    static writeFileToClient(response:any,path:string){
-        const mime = require('mime');
-        const fs = require('fs');
-        fs.readFile(path,'binary',(err,file)=>{
-            if(err){
-                console.log('not found')
-            }else{
-                response.writeHead(200,{
-                    'Content-type':mime.getType(path)
-                });
-                response.write(file,'binary');
-                response.end();
-            }
+    static writeFileToClient(response:any,file:any,type:string){
+        response.writeHead(200,{
+            'Content-type':type
         });
+        response.write(file,'binary');
+        response.end();
     }
 }
 
