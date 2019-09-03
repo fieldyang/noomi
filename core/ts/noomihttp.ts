@@ -2,10 +2,10 @@
  * http 服务
  */
 interface WriteCfg{
-    data:any;               //数据
-    charset:string;         //字符集
-    type:string;            //数据类型
-    statusCode:number;      //http 异常码
+    data?:any;               //数据
+    charset?:string;         //字符集
+    type?:string;            //数据类型
+    statusCode?:number;      //http 异常码
 }
 class NoomiHttp{
     
@@ -17,13 +17,14 @@ class NoomiHttp{
      * @param type      数据类型
      */
     static writeDataToClient(response:any,config:WriteCfg):void{
-        let data:any = config.data;
+        let data:any = config.data || '';
         if(typeof data === 'object'){
             data = JSON.stringify(data);
         }
         let charset = config.charset || 'utf8';
         let status = config.statusCode || 200;
-        response.writeHead(status, { 'Content-Type': config.type,
+        let type = config.type || 'text/html';
+        response.writeHead(status, { 'Content-Type': type,
                 'Content-Length':Buffer.byteLength(data)});
         response.write(data,charset);
         response.end();

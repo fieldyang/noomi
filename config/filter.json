@@ -1,0 +1,14 @@
+{
+    "filters":[
+        {
+            "name":"过滤器名",
+            "instance_name":"实例名"
+        }    
+    ],
+    "mapping":[
+        {
+            "filter_name":"过滤器名",
+            "url_pattern":"url正则式"
+        }
+    ]
+}
