@@ -2,7 +2,7 @@
     "instances":[
         {
             "name":"userService", 	
-            "className":"UserService",
+            "class_name":"UserService",
             "path":"service/userservice",
             "singleton":true, 
             "params":[]

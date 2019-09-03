@@ -2,7 +2,7 @@
     "instances":[
         {
             "name":"logAdvice", 	
-            "className":"LogAdvice",
+            "class_name":"LogAdvice",
             "path":"advice/logadvice"
         }
     ]

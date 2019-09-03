@@ -4,7 +4,7 @@
     "routes":[              
         {
             "path":"userq_*",
-            "instanceName":"userAction",
+            "instance_name":"userAction",
             "method":""         
         }
     ]

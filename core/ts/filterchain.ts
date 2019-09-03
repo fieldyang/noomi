@@ -12,7 +12,8 @@ class FilterChain{
      */
     doFilter(request:any,response:any,path:string){
         if(path.indexOf('/test/test') === -1){
-            NoomiHttp.writeDataToClient({
+            NoomiHttp.writeDataToClient(
+                response,{
                 statusCode:403
             });
         }

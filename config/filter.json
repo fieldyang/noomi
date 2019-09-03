@@ -1,14 +1,14 @@
 {
     "filters":[
         {
-            "name":"过滤器名",
-            "instance_name":"实例名"
+            "name":"nodomFilter",
+            "instance_name":"nodomFilter"
         }    
     ],
     "mapping":[
         {
-            "filter_name":"过滤器名",
-            "url_pattern":"url正则式"
+            "filter_name":"nodomFilter",
+            "url_pattern":"/*"
         }
     ]
 }

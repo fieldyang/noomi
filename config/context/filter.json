@@ -1,0 +1,9 @@
+{
+    "instances":[
+        {
+            "name":"nodomFilter", 	
+            "class_name":"NodomFilter",
+            "path":"filter/nodomfilter"
+        }
+    ]
+}

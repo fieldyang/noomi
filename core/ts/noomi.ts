@@ -127,8 +127,7 @@ class noomi{
     handleFilter(url:string,request:any,response:any):any{
         let arr:Array<string> = FilterFactory.getFilterChain(url);
         if(arr.length === 0){
-            Promise.resolve();
-            return;
+            return Promise.resolve();
         }
         let filters:Array<any> = [];
         //根据过滤器名找到过滤器实例
@@ -140,6 +139,7 @@ class noomi{
         });
 
         //链式执行
+        
         
     }
 

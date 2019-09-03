@@ -52,20 +52,6 @@ class RouteFactory{
                 return InstanceFactory.exec(item.instanceName,method,[params]);
             }
         }
-        //未找到，跳转到404，可能处理404，再考虑
-        // if(!isMatch){
-        //     return null;
-        // }else{
-        //     return new Promise((resolve,reject)=>{
-        //         try{
-        //             //调用方法
-        //             let re = instance[method](params);
-        //             resolve(re);
-        //         }catch(e){
-        //             reject(e);
-        //         }
-        //     });
-        // }
     }
 
     /**
@@ -102,7 +88,7 @@ class RouteFactory{
                 let p = ns + '/' + item.path;
                 //变'//'为'/'
                 p = p.replace(/\/\//g,'/');
-                this.addRoute(p,item.instanceName,item.method);
+                this.addRoute(p,item.instance_name,item.method);
             });
         }
     }

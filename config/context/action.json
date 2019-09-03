@@ -2,7 +2,7 @@
     "instances":[
         {
             "name":"userAction", 	
-            "className":"UserAction",
+            "class_name":"UserAction",
             "path":"action/useraction",
             "singleton":false,
             "params":[]

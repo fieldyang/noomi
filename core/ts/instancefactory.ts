@@ -11,7 +11,7 @@ interface InstanceCfg{
     name:string;            //实例名
     path:string;            //模块路径（相对noomi.ini配置的modulepath）
     singleton:boolean;      //单例模式
-    className:string;       //类名
+    class_name:string;      //类名
     params:Array<any>;      //参数列表
 }
 
@@ -40,7 +40,7 @@ class InstanceFactory{
         let mdl = require(path.resolve(this.mdlBasePath,cfg.path));
         //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
         if(typeof mdl === 'object'){
-            mdl = mdl[cfg.className];
+            mdl = mdl[cfg.class_name];
         }
         // class
         if(mdl.constructor !== Function){
