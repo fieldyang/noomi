@@ -32,23 +32,38 @@
 //     console.log(ite.next().value);
 // }
 
-let pro = new Promise((resolve,reject)=>{
-    setTimeout(()=>{
-        console.log(1);
-        resolve(2);
-    },100);
-}).then((txt)=>{
+/*let pro = new Promise((resolve,reject)=>{
+    throw '就是异常';
+})
+.catch((err)=>{
+    return Promise.reject(err);
+})
+.then((txt)=>{
     console.log(txt);
     return Promise.resolve(txt);
-}).then(()=>{
+},(err)=>{
+    console.log('reject',err);
+});*/
+/*.then(()=>{
     console.log('last');
+});*/
+
+// pro.then(function(txt){
+//     console.log('resolve');
+//     console.log(txt);
+// },function(){
+//     console.log('reject');
+// });
+new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+        console.log(1);
+        resolve();
+    },500);
+}).then(()=>{
+    setTimeout(()=>{
+        console.log(2);
+    },400);
+}).then(()=>{
+    console.log(3);
+    
 });
-
-pro.then(function(txt){
-    console.log('resolve');
-    console.log(txt);
-},function(){
-    console.log('reject');
-});
-
-

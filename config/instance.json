@@ -3,7 +3,8 @@
 		"context/common.json",
 		"context/aop.json",
 		"context/service.json",
-		"context/action.json"
+		"context/action.json",
+		"context/filter.json"
 	]
 	
 }

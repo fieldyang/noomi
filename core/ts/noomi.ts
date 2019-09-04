@@ -3,8 +3,8 @@ import {RouteFactory} from "./routefactory";
 import {StaticResource} from "./staticresource";
 import {NoomiHttp} from "./noomihttp";
 import { AopFactory } from "./aopfactory";
-import { rejects } from "assert";
 import { FilterFactory } from "./filterfactory";
+import { PageFactory } from "./pagefactory";
 class noomi{
     constructor(port){
         const mdlPath = require('path');
@@ -16,17 +16,9 @@ class noomi{
             let path = url.parse(req.url).pathname;
             const paramstr = url.parse(req.url).query;
             const params = querystring.parse(paramstr);
-            this.handleFilter(path,req,res).then(
-                //过滤器链正常结束
-                (result)=>{  
-                    this.resVisit(res,path,params);
-                },
-                //非正常结束
-                (err)=>{
-
-                }
-            )
-            
+            if(this.handleFilter(path,req,res)){  //过滤器执行
+                this.resVisit(res,path,params);
+            }
         }).listen(port);
     }
 
@@ -60,7 +52,7 @@ class noomi{
         if(iniJson.hasOwnProperty('filter_path')){
             let rPath = iniJson['filter_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadAop(path.resolve('config',rPath));
+                this.loadFilter(path.resolve('config',rPath));
             }
         }
 
@@ -78,6 +70,11 @@ class noomi{
             if(rPath !== null && (rPath = rPath.trim())!==''){
                 this.loadAop(path.resolve('config',rPath));
             }
+        }
+
+        //errorPage
+        if(iniJson.hasOwnProperty('error_page')){
+            this.setErrorPages(iniJson['error_page']);
         }
     }
 
@@ -114,6 +111,17 @@ class noomi{
     }
 
     /**
+     * 设置异常提示页面
+     * @param pages page配置（json数组）
+     */
+    setErrorPages(pages:Array<any>){
+        if(pages && pages.length>0){
+            pages.forEach((item)=>{
+                PageFactory.addErrorPage(item.code,item.location);
+            });
+        }
+    }
+    /**
      * 设置禁止访问路径（静态资源）
      * @param dirPath 
      */
@@ -124,23 +132,8 @@ class noomi{
     /**
      * 过滤器处理
      */
-    handleFilter(url:string,request:any,response:any):any{
-        let arr:Array<string> = FilterFactory.getFilterChain(url);
-        if(arr.length === 0){
-            return Promise.resolve();
-        }
-        let filters:Array<any> = [];
-        //根据过滤器名找到过滤器实例
-        arr.forEach(item=>{
-            let filter = InstanceFactory.getInstance(item);
-            if(filter !== null){
-                filters.push(filter);
-            }
-        });
-
-        //链式执行
-        
-        
+    handleFilter(url:string,request:any,response:any):boolean{
+        return FilterFactory.doChain(url,request,response);
     }
 
     /**
@@ -154,17 +147,11 @@ class noomi{
         if(re){
             re.then((result)=>{ //正常返回
                 NoomiHttp.writeDataToClient(res,{
-                    data:result,
-                    charset:'utf8',
-                    statusCode:200,
-                    type:'text/html'
+                    data:result
                 });        
             },(err)=>{  //异常返回
                 NoomiHttp.writeDataToClient(res,{
-                    data:{success:false,msg:err},
-                    charset:'utf8',
-                    statusCode:200,
-                    type:'text/html'
+                    data:{success:false,msg:err}
                 });
             });
         }else{ //静态资源判断
@@ -172,22 +159,21 @@ class noomi{
                 StaticResource.load(path,resolve,reject);
             }).catch((err)=>{
                 return Promise.reject(err);
-                
             }).then((re:any)=>{
-                // NoomiHttp.writeFileToClient(res,re.file,re.type);
                 NoomiHttp.writeDataToClient(res,{
                     data:re.file,
                     type:re.type,
-                    charset:'utf8',
-                    statusCode:200
                 });
             },(errCode)=>{
-                NoomiHttp.writeDataToClient(res,{
-                    data:'',
-                    charset:'utf8',
-                    type:'text/html',
-                    statusCode:errCode
-                });
+                //存在异常页，直接跳转，否则回传404
+                let page = PageFactory.getErrorPage(errCode);
+                if(page){
+                    NoomiHttp.redirect(res,page);
+                }else{
+                    NoomiHttp.writeDataToClient(res,{
+                        statusCode:errCode
+                    });
+                }
             });
         }
     }

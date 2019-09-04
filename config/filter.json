@@ -3,11 +3,20 @@
         {
             "name":"nodomFilter",
             "instance_name":"nodomFilter"
+        },
+        {
+            "name":"pathFilter",
+            "instance_name":"pathFilter"
         }    
     ],
-    "mapping":[
+    "mappings":[
+       
         {
             "filter_name":"nodomFilter",
+            "url_pattern":"/*"
+        },
+        {
+            "filter_name":"pathFilter",
             "url_pattern":"/*"
         }
     ]

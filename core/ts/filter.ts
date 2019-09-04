@@ -1,5 +1,5 @@
 interface Filter{
-    doFilter:Function;
+    do:Function;
 }
 
 export {Filter}

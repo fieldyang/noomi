@@ -1,3 +1,5 @@
+import { InstanceFactory } from "./instancefactory";
+import { Linker } from "./linker";
 
 interface FilterConfig{
     name:string;
@@ -71,6 +73,11 @@ class FilterFactory{
                 this.addFilter(item.name,item.instance_name);
             });
         }
+        if(json.mappings && json.mappings.length>0){
+            json.mappings.forEach((item:MappingJson)=>{
+                this.addMapping(item.filter_name,item.url_pattern);
+            });
+        }
     }
     /**
      * 获取过滤器链
@@ -85,6 +92,34 @@ class FilterFactory{
             }
         });
         return arr;
+    }
+
+    /**
+     * 执行过滤器链
+     * @param url 
+     * @param request 
+     * @param response 
+     */
+    static doChain(url:string,request:any,response:any):boolean{
+        let arr:Array<string> = FilterFactory.getFilterChain(url);
+        if(arr.length === 0){
+            return true;
+        }
+        let methods:Array<Function> = [];
+        //根据过滤器名找到过滤器实例
+        arr.forEach(item=>{
+            let filter = InstanceFactory.getInstance(item);
+            if(filter !== null && typeof filter.do === 'function'){
+                methods.push(filter.do);
+            }
+        });
+
+        for(let foo of methods){
+            if(!foo(request,response)){
+                return false;
+            }
+        }
+        return true;
     }
 }
 

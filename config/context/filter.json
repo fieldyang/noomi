@@ -4,6 +4,11 @@
             "name":"nodomFilter", 	
             "class_name":"NodomFilter",
             "path":"filter/nodomfilter"
+        },
+        {
+            "name":"pathFilter", 	
+            "class_name":"PathFilter",
+            "path":"filter/pathfilter"
         }
     ]
 }

@@ -21,7 +21,7 @@ class NoomiHttp{
         if(typeof data === 'object'){
             data = JSON.stringify(data);
         }
-        let charset = config.charset || 'utf8';
+        let charset = config.charset || 'gbk';
         let status = config.statusCode || 200;
         let type = config.type || 'text/html';
         response.writeHead(status, { 'Content-Type': type,
@@ -40,6 +40,22 @@ class NoomiHttp{
             'Content-type':type
         });
         response.write(file,'binary');
+        response.end();
+    }
+
+    /**
+     * 重定向
+     * @param response      
+     * @param page          跳转路径 
+     */
+    static redirect(response:any,page:string){
+        response.writeHead(
+            302,
+            {
+                'Location':page,
+                'Content-Type':'text/html'
+            }
+        );
         response.end();
     }
 }
