@@ -109,8 +109,8 @@ class InstanceFactory{
         if(!instance || !instance[methodName]){
             throw "实例或方法不存在！";
         }
-        
-        return new Promise((resolve,reject)=>{
+        return instance[methodName].apply(instance,params);
+        /*return new Promise((resolve,reject)=>{
             let result;
             try{
                 result = instance[methodName].apply(instance,params);
@@ -128,7 +128,7 @@ class InstanceFactory{
             }catch(e){
                 reject(e.message);
             }
-        });
+        });*/
     }
 
     /**

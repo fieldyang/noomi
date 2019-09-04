@@ -34,8 +34,6 @@ class RouteFactory{
      */
     static handleRoute(path:string,params:object){
         path = path.trim();
-        let isMatch:boolean = false;
-        let instance:object = null;
         let method:string = "";
         for(let i=0;i<this.routes.length;i++){
             let item = this.routes[i];
@@ -45,11 +43,22 @@ class RouteFactory{
                 let index = item.path.indexOf("*");
                 //通配符处理
                 if(index !== -1){
-                    //*通配符方法
+                    //通配符方法
                     method = path.substr(index);
                 }
-
-                return InstanceFactory.exec(item.instanceName,method,[params]);
+                let instance = InstanceFactory.getInstance(item.instanceName);
+                if(instance){
+                    if(instance.setModel && typeof instance.setModel === 'function'){
+                        instance.setModel(params);
+                    }
+                    if(instance[method] && typeof instance[method]==='function'){
+                        return instance[method]();
+                    }else{
+                        throw "1001";
+                    }
+                }else{
+                    throw "1000";
+                }
             }
         }
     }

@@ -10,14 +10,11 @@ class UserService{
     /**
      * 获取用户信息
      */
-    getInfo(){
+    getInfo(data:any){
         return {
-            success:true,
-            result:{
-                userId:1,
-                userName:'yang',
-                date:this.dateHandler.tickerToDTString((new Date()).valueOf())
-            }
+            userId:data.id,
+            userName:data.name,
+            date:this.dateHandler.tickerToDTString((new Date()).valueOf())
         }
     }
 }

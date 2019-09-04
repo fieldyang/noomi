@@ -13,7 +13,10 @@ class AopProxy{
      */
     static invoke(instanceName,methodName,func,instance){
         return function(params){
-            params = params||[];
+            if(params){
+                params = [params];
+            }
+            
             //aop获取
             let aop:any;
             if(AopFactory){
@@ -29,9 +32,9 @@ class AopProxy{
                 });
             }
             
-            return new Promise((resolve,reject)=>{
-                let finish = true;
-                let result;
+            // return new Promise((resolve,reject)=>{
+            //     let finish = true;
+            //     let result;
                 try{
                     result = func.apply(instance,params);
                     //return aop执行
@@ -61,12 +64,17 @@ class AopProxy{
                     }
                 }
 
-                if(finish){
-                    resolve(result);
-                }else{
-                    reject(result);
-                }
-            });
+                return result;
+                // if(finish){
+                //     return result;
+                // }
+
+            //     if(finish){
+            //         resolve(result);
+            //     }else{
+            //         reject(result);
+            //     }
+            // });
         }
     }
 }

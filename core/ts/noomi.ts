@@ -143,18 +143,24 @@ class noomi{
      * @param params    参数
      */
     resVisit(res:any,path:string,params:object){
-        let re = RouteFactory.handleRoute(path,params);
-        if(re){
-            re.then((result)=>{ //正常返回
-                NoomiHttp.writeDataToClient(res,{
-                    data:result
-                });        
-            },(err)=>{  //异常返回
-                NoomiHttp.writeDataToClient(res,{
-                    data:{success:false,msg:err}
-                });
+        let routeFlag = true;
+        //先进行路由处理
+        try{
+            let re = RouteFactory.handleRoute(path,params);
+            NoomiHttp.writeDataToClient(res,{
+                data:re
             });
-        }else{ //静态资源判断
+        }catch(e){
+            if(e === '1000' || e === '1002'){  //实例或方法不存在
+                routeFlag = false;
+            }else{
+                NoomiHttp.writeDataToClient(res,{
+                    data:e
+                });
+            }
+        }
+        //路由处理失败,或许是静态资源
+        if(!routeFlag){
             new Promise((resolve,reject)=>{
                 StaticResource.load(path,resolve,reject);
             }).catch((err)=>{

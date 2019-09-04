@@ -21,11 +21,15 @@ class NoomiHttp{
         if(typeof data === 'object'){
             data = JSON.stringify(data);
         }
-        let charset = config.charset || 'gbk';
+        let charset = config.charset || 'utf8';
         let status = config.statusCode || 200;
         let type = config.type || 'text/html';
-        response.writeHead(status, { 'Content-Type': type,
-                'Content-Length':Buffer.byteLength(data)});
+        response.writeHead(status, 
+            { 
+                'Content-Type': type + ';charset=' + charset,
+                'Content-Length':Buffer.byteLength(data)
+            }
+        );
         response.write(data,charset);
         response.end();
     }
