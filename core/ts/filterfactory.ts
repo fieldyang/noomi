@@ -68,12 +68,12 @@ class FilterFactory{
             throw "实例文件配置错误"!
         }
 
-        if(json.filters && json.filters.length>0){
+        if(Array.isArray(json.filters)){
             json.filters.forEach((item:FilterJson)=>{
                 this.addFilter(item.name,item.instance_name);
             });
         }
-        if(json.mappings && json.mappings.length>0){
+        if(Array.isArray(json.mappings)){
             json.mappings.forEach((item:MappingJson)=>{
                 this.addMapping(item.filter_name,item.url_pattern);
             });

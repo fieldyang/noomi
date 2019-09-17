@@ -55,13 +55,13 @@ class InstanceFactory{
             singleton:singleton
         };
 
-        if(singleton){   //单例，需要实例化
+        if(singleton){      //单例，需要实例化
+            //参数怎么传递
             insObj.instance = new mdl(cfg.params);
-        }else{                  //非单例，不需要实例化
+        }else{              //非单例，不需要实例化
             insObj.params = cfg.params;
         }
-
-        this.factory.set(cfg.name,insObj); 
+        this.factory.set(cfg.name,insObj);
     }
 
     /**
@@ -71,7 +71,7 @@ class InstanceFactory{
      */
     static getInstance(name:string){
         if(!this.factory.has(name)){
-            throw "实例不存在";
+            throw "1000";
         }
         let ins:InstanceObj = this.factory.get(name);
         if(!ins){
@@ -90,45 +90,30 @@ class InstanceFactory{
      * @param name instance name
      */
     static getInstanceObj(name:string):InstanceObj{
-        if(!this.factory.has(name)){
-            throw "实例不存在";
-        }
         return this.factory.get(name);
     }
 
     /**
      * 执行方法
-     * @param config {}
      * @param instanceName  实例名 
      * @param methodName    方法名
-     * @param params        参数
+     * @param params        参数数组
+     * @param instance      实例(与instanceName二选一)
+     * @param func          方法(与methodName二选一)
      */
     
-    static exec(instanceName:string,methodName:string,params:Array<any>):any{
-        let instance = this.getInstance(instanceName);
-        if(!instance || !instance[methodName]){
-            throw "实例或方法不存在！";
+    static exec(instanceName:string,methodName:string,params:Array<any>,instance?:any,func?:any){
+        instance = instance || this.getInstance(instanceName);
+        //实例不存在
+        if(!instance){
+            throw "1000";
         }
-        return instance[methodName].apply(instance,params);
-        /*return new Promise((resolve,reject)=>{
-            let result;
-            try{
-                result = instance[methodName].apply(instance,params);
-                if(result instanceof Promise){
-                    result.catch(err=>{
-                        reject(err.message);
-                    }).then(result=>{
-                        resolve(result);
-                    },result=>{
-                        reject(result);
-                    });
-                }else{
-                    resolve(result);
-                }
-            }catch(e){
-                reject(e.message);
-            }
-        });*/
+        func = func || instance[methodName];
+        //方法不存在
+        if(!func){
+            throw "1001";
+        }
+        return func.apply(instance,params); 
     }
 
     /**
@@ -152,13 +137,13 @@ class InstanceFactory{
             throw "实例文件配置错误"!
         }
 
-        if(json.files !== undefined && json.files.length>0){
+        if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
                 this.parseFile(pathTool.resolve(pathTool.dirname(path),item),this.mdlBasePath);
             });
         }
 
-        if(json.instances && json.instances.length>0){
+        if(Array.isArray(json.instances)){
             json.instances.forEach((item)=>{
                 this.addInstance(item);
             });

@@ -20,7 +20,7 @@ class Linker{
 				return Promise.resolve();
 			}else{
 				return new Promise((resolve,reject)=>{
-					if(pa && pa.length>0){
+					if(Array.isArray(pa) && pa.length>0){
 						fa[i](pa[i],resolve,reject);
 					}else{
 						fa[i](resolve,reject);

@@ -2,19 +2,21 @@
  * http 服务
  */
 interface WriteCfg{
-    data?:any;               //数据
-    charset?:string;         //字符集
-    type?:string;            //数据类型
-    statusCode?:number;      //http 异常码
+    data?:any;              //数据
+    charset?:string;        //字符集
+    type?:string;           //数据类型
+    statusCode?:number;     //http 异常码
+    crossDomain?:boolean;   //是否跨域
 }
 class NoomiHttp{
     
     /**
      * 回写到浏览器端
-     * @param response  response 对象
-     * @param data      待写数据 
-     * @param charset   字符集
-     * @param type      数据类型
+     * @param response      response 对象
+     * @param data          待写数据 
+     * @param charset       字符集
+     * @param type          数据类型
+     * @param crossDomain   跨域
      */
     static writeDataToClient(response:any,config:WriteCfg):void{
         let data:any = config.data || '';
@@ -24,6 +26,13 @@ class NoomiHttp{
         let charset = config.charset || 'utf8';
         let status = config.statusCode || 200;
         let type = config.type || 'text/html';
+
+        //跨域
+        // if(config.crossDomain){
+        //     response.setHeader('Access-Control-Allow-Origin', '*');
+        //     response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        // }
+
         response.writeHead(status, 
             { 
                 'Content-Type': type + ';charset=' + charset,

@@ -1,22 +1,22 @@
 class LogAdvice{
-    before(args){
-        console.log("前置通知");
+    before(){
+        console.log("前置通知",arguments);
     }
 
-    after(args){
-        console.log("后置通知");
+    after(){
+        console.log("后置通知",arguments);
     }
 
-    around(args){
-        console.log("环绕通知");
+    around(){
+        console.log("环绕通知",arguments);
     }
 
-    throw(args){
-        console.log("异常通知");
+    throw(){
+        console.log("异常通知",arguments);
     }
 
     afterReturn(args){
-        console.log("返回通知");
+        console.log("返回通知",arguments);
     }
 }
 

@@ -46,19 +46,22 @@ class RouteFactory{
                     //通配符方法
                     method = path.substr(index);
                 }
-                let instance = InstanceFactory.getInstance(item.instanceName);
-                if(instance){
-                    if(instance.setModel && typeof instance.setModel === 'function'){
-                        instance.setModel(params);
-                    }
-                    if(instance[method] && typeof instance[method]==='function'){
-                        return instance[method]();
-                    }else{
-                        throw "1001";
-                    }
-                }else{
-                    throw "1000";
-                }
+                return InstanceFactory.exec(item.instanceName,method,[params]);
+                // let instance = InstanceFactory.getInstance(item.instanceName);
+                // if(instance){
+                //     //设置数据模型
+                //     // if(typeof instance.setModel === 'function'){
+                //     //     instance.setModel(params);
+                //     // }
+                //     // if(instance[method]==='function'){
+                        
+                //         // return instance[method](params);
+                //     }else{
+                //         throw "1001";
+                //     }
+                // }else{
+                //     throw "1000";
+                // }
             }
         }
     }
@@ -86,13 +89,13 @@ class RouteFactory{
             throw e;
         }
 
-        if(json.files !== undefined && json.files.length>0){
+        if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
                 this.parseFile(pathTool.resolve(pathTool.dirname(path), item),ns);
             });
         }
 
-        if(json.routes && json.routes.length>0){
+        if(Array.isArray(json.routes)){
             json.routes.forEach((item)=>{
                 let p = ns + '/' + item.path;
                 //变'//'为'/'

@@ -2,7 +2,7 @@ import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
 
 /**
- * Aop 代理类工厂
+ * Aop 代理类
  */
 class AopProxy{
     /**
@@ -10,13 +10,24 @@ class AopProxy{
      * @param instanceName  实例名
      * @param methodName    方法名
      * @param func          执行函数  
+     * @param instance      实例
      */
     static invoke(instanceName,methodName,func,instance){
-        return function(params){
+        const util = require('util');
+        if(util.types.isAsyncFunction(func)){
+            return async (params)=>{
+                return foo(params);
+            };
+        }else{
+            return foo;
+        }
+        
+        function foo(params){
             if(params){
                 params = [params];
             }
             
+            let aopParams = [instanceName,methodName].concat(params);
             //aop获取
             let aop:any;
             if(AopFactory){
@@ -28,53 +39,38 @@ class AopProxy{
             //before aop执行
             if(aop !== null){
                 aop.before.forEach(item=>{
-                    InstanceFactory.exec(item.instance,item.method,params);
+                    InstanceFactory.exec(item.instance,item.method,aopParams);
                 });
             }
-            
-            // return new Promise((resolve,reject)=>{
-            //     let finish = true;
-            //     let result;
-                try{
-                    result = func.apply(instance,params);
-                    //return aop执行
-                    if(aop !== null){
-                        aop.return.forEach(item=>{
-                            InstanceFactory.exec(item.instance,item.method,params);
-                        });
-                    }
-                    
-                }catch(e){
-                    //异常aop执行
-                    if(aop !== null){
-                        aop.throw.forEach(item=>{
-                            InstanceFactory.exec(item.instance,item.method,params);
-                        });
-                    }
-                    finish = false;
-                    result = e;
-                }
-
-                //after aop执行
+            try{
+                
+                result = InstanceFactory.exec(null,null,params,instance,func);
+                //return aop执行
                 if(aop !== null){
-                    if(aop !== null){
-                        aop.after.forEach(item=>{
-                            InstanceFactory.exec(item.instance,item.method,params);
-                        });
-                    }
+                    aop.return.forEach(item=>{
+                        InstanceFactory.exec(item.instance,item.method,aopParams);
+                    });
                 }
+            }catch(e){
+                //异常aop执行
+                if(aop !== null){
+                    aop.throw.forEach(item=>{
+                        InstanceFactory.exec(item.instance,item.method,aopParams);
+                    });
+                }
+                finish = false;
+                result = e;
+            }
 
-                return result;
-                // if(finish){
-                //     return result;
-                // }
-
-            //     if(finish){
-            //         resolve(result);
-            //     }else{
-            //         reject(result);
-            //     }
-            // });
+            //after aop执行
+            if(aop !== null){
+                if(aop !== null){
+                    aop.after.forEach(item=>{
+                        InstanceFactory.exec(item.instance,item.method,aopParams);
+                    });
+                }
+            }
+            return result;
         }
     }
 }

@@ -1,5 +1,6 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
+import { UserService } from "../../test/app/module/service/userservice";
 
 /**
  * AOP 工厂
@@ -41,7 +42,7 @@ class AopPointcut{
 
     constructor(id:string,expressions:Array<string>){
         this.id = id;
-        if(!expressions || expressions.length === 0){
+        if(!Array.isArray(expressions) || expressions.length === 0){
             throw "pointcut的expressions参数配置错误";
         }
         expressions.forEach((item)=>{
@@ -51,9 +52,12 @@ class AopPointcut{
             // 转字符串为正则表达式并加入到数组
             let reg = new RegExp(item);
             this.expressions.push(reg);
-
+            
             //遍历instance factory设置aop代理
             let insFac = InstanceFactory.getFactory();
+            const util = require('util');
+            
+
             for(let insName of insFac.keys()){
                 //先检测instanceName
                 if(reg.test(insName+'./')){
@@ -64,10 +68,16 @@ class AopPointcut{
                             if(key === 'constructor' || typeof(instance[key]) !== 'function'){
                                 return;
                             }
-
+                            
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
                                 instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                                //异步方法判断
+                                // if(util.types.isAsyncFunction(instance[key])){
+                                //     instance[key] = async ()=> AopProxy.invoke(insName,key,instance[key],instance);
+                                // }else{
+                                //     instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                                // }
                             }
                         });
                     }
@@ -113,7 +123,7 @@ class AopFactory{
             throw "该advice已经在切面中存在"; 
         }
         //连接点
-        if(cfg.aops && cfg.aops.length>0){
+        if(Array.isArray(cfg.aops)){
             cfg.aops.forEach((item)=>{
                 if(!this.pointcuts.has(item.pointcut_id)){
                     throw "pointcut不存在";
@@ -170,13 +180,13 @@ class AopFactory{
             throw "实例文件配置错误"!
         }
 
-        if(json.pointcuts && json.pointcuts.length>0){
+        if(Array.isArray(json.pointcuts)){
             json.pointcuts.forEach((item:PointcutJson)=>{
                 this.addPointcut(item.id,item.expressions);
             });
         }
 
-        if(json.aspects && json.aspects.length > 0){
+        if(Array.isArray(json.aspects)){
             json.aspects.forEach((item:AopAspect)=>{
                 this.addAspect(item);
             });

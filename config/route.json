@@ -6,6 +6,11 @@
             "path":"userq_*",
             "instance_name":"userAction",
             "method":""         
+        },
+        {
+            "path":"upload_*",
+            "instance_name":"uploadAction",
+            "method":""       
         }
     ]
 }

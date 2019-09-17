@@ -1,21 +1,33 @@
 import { DateHandler } from "../common/datehandler";
-import { Inject } from "../../../../core/ts/decorator";
+import { Inject} from "../../../../core/ts/decorator";
+
 class UserService{
     @Inject("dateHandler")
     dateHandler:DateHandler;
 
-    constructor(params:Object){
-        
-    }
     /**
      * 获取用户信息
      */
     getInfo(data:any){
-        return {
+        let d = {
             userId:data.id,
             userName:data.name,
             date:this.dateHandler.tickerToDTString((new Date()).valueOf())
         }
+        return d;
+    }
+
+    public getFile():Promise<any>{
+        const fs = require('fs');
+        const path = require('path');
+        return new Promise((resolve,reject)=>{
+            let p:string = path.resolve(__dirname,'../filter/pathfilter.js');
+            fs.readFile(p, {flag:'r',encoding:'utf8'},(err, data) => {
+                if (err) 
+                    reject(err);
+                resolve(data);
+            });
+        }); 
     }
 }
 

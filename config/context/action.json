@@ -6,6 +6,13 @@
             "path":"action/useraction",
             "singleton":false,
             "params":[]
+        },
+        {
+            "name":"uploadAction", 	
+            "class_name":"UploadAction",
+            "path":"action/uploadaction",
+            "singleton":false,
+            "params":[]
         }
     ]
 }
