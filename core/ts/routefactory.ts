@@ -32,7 +32,7 @@ class RouteFactory{
      * @param path      路径
      * @param params    调用参数
      */
-    static handleRoute(path:string,params:object){
+    static handleRoute(path:string,params:object,req:any,res:any){
         path = path.trim();
         let method:string = "";
         for(let i=0;i<this.routes.length;i++){
@@ -46,7 +46,7 @@ class RouteFactory{
                     //通配符方法
                     method = path.substr(index);
                 }
-                return InstanceFactory.exec(item.instanceName,method,[params]);
+                return InstanceFactory.exec(item.instanceName,method,[req,res,params]);
                 // let instance = InstanceFactory.getInstance(item.instanceName);
                 // if(instance){
                 //     //设置数据模型

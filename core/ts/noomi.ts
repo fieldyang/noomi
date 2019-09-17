@@ -5,7 +5,6 @@ import {NoomiHttp} from "./noomihttp";
 import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
-import { UserService } from "../../test/app/module/service/userservice";
 import { SessionFactory } from "./sessionfactory";
 class noomi{
     constructor(port){
@@ -22,7 +21,7 @@ class noomi{
             //过滤器执行
             if(this.handleFilter(path,req,res)){  
                 this.handleUpload(req,params);
-                this.resVisit(res,path,params);
+                this.resVisit(req,res,path,params);
             }
         }).listen(port);
     }
@@ -262,16 +261,17 @@ class noomi{
     }
     /**
      * 资源访问
+     * @param req       request
      * @param res       response 
      * @param path      url路径
      * @param params    参数
      */
-    resVisit(res:any,path:string,params:object){
+    resVisit(req:any,res:any,path:string,params:object){
         let routeFlag = false;
         //先进行路由处理
         try{
             const util = require('util');
-            let re = RouteFactory.handleRoute(path,params);
+            let re = RouteFactory.handleRoute(path,params,req,res);
             if(re !== undefined){
                 routeFlag = true;
                 if(util.types.isPromise(re)){ //是否是promise对象
