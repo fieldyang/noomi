@@ -7,23 +7,26 @@ import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
 import { SessionFactory } from "./sessionfactory";
 import { UploadTool } from "./uploadtool";
+import { Http2ServerRequest } from "http2";
+import { HttpRequest } from "./httprequest";
 class noomi{
     constructor(port){
         const mdlPath = require('path');
         this.init(mdlPath.join(process.cwd(),'config'));
         const http = require("http");
         const url = require("url");
-        const querystring = require("querystring");
         http.createServer((req,res)=>{
             let path = url.parse(req.url).pathname;
-            const paramstr = url.parse(req.url).query;
-            const params = querystring.parse(paramstr);
-            // console.log(req.body);
-            //过滤器执行
-            if(this.handleFilter(path,req,res)){  
-                this.handleUpload(req,params);
-                this.resVisit(req,res,path,params);
-            }
+            let request = new HttpRequest(req);
+            request.init(req).then((params)=>{
+                //过滤器执行
+                this.handleFilter(path,request,res).then((r)=>{
+                    if(r){
+                        this.resVisit(req,res,path,params);
+                    }
+                });
+                
+            });  
         }).listen(port);
     }
 
@@ -167,7 +170,7 @@ class noomi{
     /**
      * 过滤器处理
      */
-    handleFilter(url:string,request:any,response:any):boolean{
+    handleFilter(url:string,request:any,response:any):Promise<boolean>{
         return FilterFactory.doChain(url,request,response);
     }
 

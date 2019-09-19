@@ -188,29 +188,25 @@ class t2{
     }
 }
 
-const util = require('util');
-// console.log(t2.prototype);
-// let t21 = new t2();
-let t21 = {};
-t21.__proto__ = t2.prototype;
-t21.constructor.call(1,2);
-// t21.__proto__.constructor.call(this,1,2);
-console.log(t21);
-// let foo2 = t21.test;
-// //异步方法判断
-// console.log(util.types.isAsyncFunction(foo2));
 
-// let re = t1.test();
-// re.then((txt)=>{
-//     console.log(txt);
-// },(e)=>{
-//     console.log(e);
-// })
-console.log(2);
+function f1(data){
+    return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+            data++;
+            resolve(data);
+        },200);
+    });
+    
+    
+}
 
-// console.log(re instanceof Promise);
+async function f2(){
+    
+    let r = await f1(1);
+    console.log(r);
+}
 
-
+console.log(f2());
 
 
 

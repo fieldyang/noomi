@@ -11,7 +11,6 @@ class NodomFilter{
             console.log('nodom filter',path);
         }
         
-        
         return true;
     }
 }

@@ -9,6 +9,11 @@
             "name":"pathFilter", 	
             "class_name":"PathFilter",
             "path":"filter/pathfilter"
+        },
+        {
+            "name":"uploadFilter",
+            "class_name":"UploadFilter",
+            "path":"filter/uploadfilter"
         }
     ]
 }

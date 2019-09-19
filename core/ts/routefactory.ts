@@ -21,7 +21,7 @@ class RouteFactory{
         let path1 = path.replace(/\*/g,".*");
         this.routes.push({
             path:path,
-            reg:new RegExp(path1),
+            reg:new RegExp('^' + path1 + '$'),
             instanceName:clazz.trim(),
             method:method.trim()
         });

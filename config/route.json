@@ -8,9 +8,9 @@
             "method":""         
         },
         {
-            "path":"upload_*",
+            "path":"upload",
             "instance_name":"uploadAction",
-            "method":""       
+            "method":"upload"      
         }
     ]
 }

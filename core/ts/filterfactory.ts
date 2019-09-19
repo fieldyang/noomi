@@ -1,5 +1,4 @@
 import { InstanceFactory } from "./instancefactory";
-import { Linker } from "./linker";
 
 interface FilterConfig{
     name:string;
@@ -100,12 +99,13 @@ class FilterFactory{
      * @param request 
      * @param response 
      */
-    static doChain(url:string,request:any,response:any):boolean{
+    static async doChain(url:string,request:any,response:any):Promise<boolean>{
         let arr:Array<string> = FilterFactory.getFilterChain(url);
         if(arr.length === 0){
             return true;
         }
         let methods:Array<Function> = [];
+        
         //根据过滤器名找到过滤器实例
         arr.forEach(item=>{
             let filter = InstanceFactory.getInstance(item);
@@ -114,8 +114,8 @@ class FilterFactory{
             }
         });
 
-        for(let foo of methods){
-            if(!foo(request,response)){
+        for(let i=0;i<methods.length;i++){
+            if(!await methods[i](request,response)){
                 return false;
             }
         }

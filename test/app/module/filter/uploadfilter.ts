@@ -1,4 +1,4 @@
-import { UploadTool } from "../uploadtool";
+import { UploadTool } from "../../../../core/ts/uploadtool";
 
 /**
  * 文件上传过滤器

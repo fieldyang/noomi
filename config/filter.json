@@ -7,6 +7,10 @@
         {
             "name":"pathFilter",
             "instance_name":"pathFilter"
+        },
+        {
+            "name":"uploadFilter",
+            "instance_name":"uploadFilter"
         }    
     ],
     "mappings":[
@@ -18,6 +22,10 @@
         {
             "filter_name":"pathFilter",
             "url_pattern":"/*"
+        },
+        {
+            "filter_name":"uploadFilter",
+            "url_pattern":"/upload"
         }
     ]
 }
