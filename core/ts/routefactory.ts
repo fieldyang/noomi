@@ -46,22 +46,33 @@ class RouteFactory{
                     //通配符方法
                     method = path.substr(index);
                 }
-                return InstanceFactory.exec(item.instanceName,method,[req,res,params]);
-                // let instance = InstanceFactory.getInstance(item.instanceName);
-                // if(instance){
-                //     //设置数据模型
-                //     // if(typeof instance.setModel === 'function'){
-                //     //     instance.setModel(params);
-                //     // }
-                //     // if(instance[method]==='function'){
-                        
-                //         // return instance[method](params);
-                //     }else{
-                //         throw "1001";
-                //     }
-                // }else{
-                //     throw "1000";
-                // }
+                // return InstanceFactory.exec(item.instanceName,method,[req,res,params]);
+                let instance = InstanceFactory.getInstance(item.instanceName);
+                if(!instance || typeof instance[method] !== 'function'){
+                    throw "404";
+                }
+                
+                //设置数据模型
+                if(typeof instance.setModel === 'function'){
+                    instance.setModel(params);
+                }
+                //设置request
+                if(typeof instance.setRequest === 'function'){
+                    instance.setRequest(req);
+                }
+
+                //设置response
+                if(typeof instance.setResponse === 'function'){
+                    instance.setResponse(res);
+                }
+                let re;
+                try{
+                    re = instance[method](params);
+                }catch(e){
+                    re = e;
+                }
+                return re;
+                
             }
         }
     }

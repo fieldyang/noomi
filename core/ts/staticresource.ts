@@ -26,7 +26,7 @@ class StaticResource{
             const mime = require('mime');
             const pathMdl = require('path');
             let filePath = pathMdl.join(process.cwd(),path);
-            fs.readFile(filePath,'binary',(err,file)=>{
+            fs.readFile(filePath,'utf8',(err,file)=>{
                 if(err){
                     reject(404);
                 }else{

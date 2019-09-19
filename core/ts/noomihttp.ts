@@ -27,18 +27,19 @@ class NoomiHttp{
         let status = config.statusCode || 200;
         let type = config.type || 'text/html';
 
+        let headers:object = {};
         //跨域
-        // if(config.crossDomain){
-        //     response.setHeader('Access-Control-Allow-Origin', '*');
-        //     response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        // }
+        if(config.crossDomain){
+            headers['Access-Control-Allow-Origin'] = '*';
+            headers['Access-Control-Allow-Headers'] = 'Content-Type';
+        }
 
-        response.writeHead(status, 
-            { 
-                'Content-Type': type + ';charset=' + charset,
-                'Content-Length':Buffer.byteLength(data)
-            }
-        );
+        //contenttype 和 字符集
+        headers['Content-Type'] = type + ';charset=' + charset;
+        //数据长度
+        headers['Content-Length'] = Buffer.byteLength(data);
+
+        response.writeHead(status, headers);
         response.write(data,charset);
         response.end();
     }

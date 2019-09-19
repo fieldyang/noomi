@@ -6,6 +6,7 @@ import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
 import { SessionFactory } from "./sessionfactory";
+import { UploadTool } from "./uploadtool";
 class noomi{
     constructor(port){
         const mdlPath = require('path');
@@ -42,8 +43,15 @@ class noomi{
             throw e;
         }
 
+        //系统参数初始化
+        if(iniJson.hasOwnProperty('sys_cfg')){
+            UploadTool.init(iniJson['sys_cfg']);
+        }
+
         //模块路径加入staticresource的禁止访问路径,/开头
         let mdlPath:string = iniJson['module_path'];
+
+        //添加模块路径为静态资源禁止访问路径
         StaticResource.addPath(mdlPath.charAt(0) === '/'?mdlPath:'/' + mdlPath);
         
         //session工厂初始化
@@ -138,8 +146,13 @@ class noomi{
      */
     setErrorPages(pages:Array<any>){
         if(Array.isArray(pages)){
+            const fs = require('fs');
+            const path = require('path');
             pages.forEach((item)=>{
-                PageFactory.addErrorPage(item.code,item.location);
+                //需要判断文件是否存在
+                if(fs.existsSync(path.join(process.cwd(),item.location))){
+                    PageFactory.addErrorPage(item.code,item.location);
+                }
             });
         }
     }
@@ -164,35 +177,46 @@ class noomi{
      */
     handleUpload(req:any,res:any){
         const type = req.headers['content-type'];
-        if(type && type.includes('multipart/form-data')){
+        if(type && !type.includes('multipart/form-data'))
+        {
+            return;
+        }
             let chunks = [];
             let num = 0;
             let body = '';
+            console.time('upload');
             req.on("data",function(chunk){
                 chunks.push(chunk);
                 num+=chunk.length;
             });
             req.on("end",()=>{
+                console.timeEnd('upload');
+                
+                let st2 = new Date().getTime();
                 
                 const fs = require('fs');
                 const path = require('path');
+                console.time('buffer concat');
                 //最终流的内容本体
-                // let buffer=Buffer.concat(chunks,num);
-                
+                let buffer=Buffer.concat(chunks,num);
+                console.timeEnd('buffer concat');
+                console.time('writefile');
                 fs.writeFileSync(path.resolve(process.cwd(),'./log.out'),chunks,{encoding:'utf8',flag:'w'});
+                console.timeEnd('writefile');
                 // //新建数组接收出去\r\n的数据下标
-                // let rems=[];
+                let rems=[];
+                console.time('handlebuffer');
+                //根据\r\n分离数据和报头
+                for (let i = 0; i < buffer.length; i++) {
+                    let v=buffer[i];
+                    let v2=buffer[i+1];
+                    // 10代表\n 13代表\r
+                    if (v==13&&v2==10) {
+                        rems.push(i);
+                    }
+                }
+                console.timeEnd('handlebuffer');
                 
-                // //根据\r\n分离数据和报头
-                // for (let i = 0; i < buffer.length; i++) {
-                //     let v=buffer[i];
-                //     let v2=buffer[i+1];
-                //     // 10代表\n 13代表\r
-                //     if (v==13&&v2==10) {
-                //         rems.push(i);
-                //     }
-                // }
-
                 //获取上传图片信息
             //     let picmsg_1 = buffer.slice(rems[0]+2,rems[1]).toString();
             //     console.log(picmsg_1);
@@ -257,7 +281,7 @@ class noomi{
             //         res.send({ data: data, code: 0, msg: 'ok' })
             //     });
             // });
-        }
+        
     }
     /**
      * 资源访问
@@ -300,7 +324,7 @@ class noomi{
                 });
             }
         }
-        //路由处理失败,或许是静态资源
+        //路由处理失败,静态资源判断
         if(!routeFlag){
             new Promise((resolve,reject)=>{
                 StaticResource.load(path,resolve,reject);
