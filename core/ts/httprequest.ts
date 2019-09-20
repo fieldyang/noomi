@@ -1,5 +1,6 @@
 import { IncomingMessage } from "http";
 import { resolve } from "path";
+import { UploadTool } from "./uploadtool";
 
 class HttpRequest extends IncomingMessage{
     req:IncomingMessage;
@@ -90,82 +91,66 @@ class HttpRequest extends IncomingMessage{
      * @param req   request
      * @return      Promise {inputname:value,....}
      */
-    initFormData(req:IncomingMessage):Promise<any>{
+    async initFormData(req:IncomingMessage):Promise<any>{
+        const MAXBUFFER:number = 50000000;            //最大form缓冲去大小
         if(this.getHeader('method') !== 'POST'){
             Promise.resolve();
         }
-        //不能大于10M
-        if(parseInt(this.getHeader('content-length')) > 10000000){
-            throw "上传内容大小超出限制";
+        //不能大于max size
+        let contentLen:number = parseInt(this.getHeader('content-length'));
+        if(contentLen > UploadTool.maxSize){
+            return Promise.reject( "上传内容大小超出限制");
         }
 
+
         return new Promise((resolve,reject)=>{
-            let chunks:Array<Buffer> = [];
+            const type = this.getHeader('content-type');
+            //是否上传标志（根据浏览器form元素配置，也可能没上传文件）
+            let saveToFile:boolean = contentLen > MAXBUFFER;
+            const fsMdl = require('fs');
+            const pathMdl = require('path');
+            const uuidMdl = require('uuid');
+            
+            //文件路径
+            let filePath:string;
+            let fileHandler:number;
+            let chunks:Array<Buffer>;
+            
+            if(saveToFile){
+                filePath = pathMdl.resolve(process.cwd(),UploadTool.tmpDir,uuidMdl.v1());
+                fileHandler = fsMdl.openSync(filePath,'a');
+            }else{
+                chunks = new Array();
+            }
+            
+            
+            
             let num:number = 0;
             //数据项分割位置
             let dispositions:Array<number> = [];
             //行结束位置
             let rowEnds:Array<number> = [];
+            let index = 0;
+            const fs = require('fs');
+            const path = require('path');
             
             req.on("data",chunk=>{
-                chunks.push(chunk);
-                num += chunk.length;
-                let ind = -1;
-                //字段分隔符
-                let reg:RegExp = /Content-Disposition/g;
-                let re:RegExpExecArray;
-                while((re=reg.exec(chunk)) !== null){
-                    dispositions.push(re.index);
-                }
-                
-                //换行符
-                for(let i=0;i<chunk.length-1;i++){
-                    if (chunk[i]==13&&chunk[i+1]==10) {
-                        rowEnds.push(i);
-                    }
+                //文件存储
+                if(saveToFile){
+                    fsMdl.writeSync(fileHandler,chunk);
+                }else{
+                    chunks.push(chunk);
+                    num += chunk.length;
                 }
             });
             //数据传输结束
-            req.on("end",()=>{
-                let returnObj:any = new Object();;
-                //从缓存文件
-                let buffer=Buffer.concat(chunks,num);
-                let jIndex:number = 0;      //rowEnds 的开始对比序号
-                console.log(buffer.toString());    
-                for(let i=0;i<dispositions.length;i++){
-                    let st:number = dispositions[i];
-                    let dataKey:string;         //键
-                    for(let j=jIndex;j<rowEnds.length;j++){
-                        //分隔符行
-                        if(rowEnds[j] > st+10){
-                            let tmpStr:string = buffer.toString('utf8',st,rowEnds[j]);
-                            let arr:Array<string> = tmpStr.split(';');
-                            //数据项
-                            dataKey = arr[1].substr(arr[1].indexOf('=')).trim();
-                            dataKey = dataKey.substring(2,dataKey.length-1);
-                            let value:any;
-                            if(arr.length === 2){  //文件判断
-                                value = buffer.toString('utf8',rowEnds[j+1],rowEnds[j+2]).trim();
-                                //值转换为数组
-                                if(returnObj.hasOwnProperty(dataKey)){
-                                    //新建数组
-                                    if(!Array.isArray(returnObj[dataKey])){
-                                        returnObj[dataKey] = [returnObj[dataKey]];
-                                    }
-                                    //新值入数组
-                                    returnObj[dataKey].push(value);
-                                }else{
-                                    returnObj[dataKey] = value;
-                                }
-                                jIndex = j+2;
-                            }
-                            break;
-                        }
-                    }
-                }
-                resolve(returnObj);
-            });
+            req.on('end',()=>{
+                if(saveToFile){
 
+                }else{
+                    UploadTool.handleBuffer(Buffer.concat(chunks,num));
+                }
+            });
             req.on('error',err=>{
 
             });

@@ -108,7 +108,111 @@ class UploadTool{
     }
     
 
+    /**
+     * 处理buffer
+     * @param buffer 
+     */
+    static handleBuffer(buffer:Buffer):any{
+        let reg:RegExp = /\nContent-Disposition/g;
+        let reg1:RegExp = /\r\n/g;
+        // let buffStr = buffer.toString('binary');
+        let re:RegExpExecArray;
+        let dataKey:string;
+        let returnObj:any = {};
+        let disponsitions:Array<number> = [];
+        let rowEnds:Array<number> = [];
+        let dispStr = '\nContent-Disposition';
+        let ind = 0;
+        while((ind=buffer.indexOf(dispStr,ind)) !== -1){
+            disponsitions.push(ind);
+            ind += dispStr.length+1;
+        }
+        
+        for(let ii=0;ii<disponsitions.length;ii++){
+            let st = disponsitions[ii]+1;
+            let len = ii<disponsitions.length-1?disponsitions[ii+1]:buffer.length - 1;
+            ind = buffer.indexOf('\r\n',st+10)
+            //第一行分隔符
+            let firstStr:string = buffer.toString('utf8',st,ind);  
+            let arr:Array<string> = firstStr.split(';');  
+            //数据项
+            dataKey = arr[1].substr(arr[1].indexOf('=')).trim();
+            dataKey = dataKey.substring(2,dataKey.length);
+            let value:any;
+            //第二行，文件Content-type开头，字段为空
+            st = ind+2;
+            ind = buffer.indexOf('\r\n',st);
+
+            let secondStr:string = buffer.toString('utf8',st,ind);
+            //第三行，文件为空，字段为value
+            st = ind+2;
+            ind = buffer.indexOf('\r\n',st);
+            let thirdStr:string = buffer.toString('utf8',st,ind);
+            if(arr.length === 2){  //普通字段
+                value = thirdStr.trim();
+            }else if(arr.length === 3){ //文件
+                value = {};
+                let a1 = arr[2].split('=');
+                let fn = a1[1].trim();
+                //文件名
+                if(fn.length>2){
+                    const fsMdl = require('fs');
+                    const pathMdl = require('path');
+                    const uuidMdl = require('uuid');
+                    
+                    value.fileName = fn.substring(1,fn.length);
+                    //文件类型
+                    value.fileType = secondStr.substr(secondStr.indexOf(':')).trim();
+                    //文件路径
+                    let filePath:string = pathMdl.resolve(process.cwd(),UploadTool.tmpDir,uuidMdl.v1().replace(/\-/g,''));
+                    value.path = filePath;
+                    st = ind+2;
+                    let endFile = 0;
+                    let et = ii<disponsitions.length-1?disponsitions[ii+1]-2:buffer.length-1;
+                    //找文件结尾
+                    for(let j=et;j>0;j--){
+                        //找到 -----WebKitFormBoundary2xEhUBhl9D9VdlVv 前一行
+                        if(this.judgeRowEnd(buffer,j)){
+                            endFile = j;
+                            break;
+                        }
+                    }
+                    //写文件，图片文件用二进制保存
+                    fsMdl.writeFileSync(filePath,buffer.slice(st,endFile),'binary');
+                }
+            }
+            
+            //值转换为数组
+            if(returnObj.hasOwnProperty(dataKey)){
+                //新建数组
+                if(!Array.isArray(returnObj[dataKey])){
+                    returnObj[dataKey] = [returnObj[dataKey]];
+                }
+                //新值入数组
+                returnObj[dataKey].push(value);
+            }else{
+                returnObj[dataKey] = value;
+            }
+        }
+        return returnObj;
+    }
+
     
+    static handleFile(path:string):any{
+
+    }
+
+    /**
+     * 判断换行符
+     * @param str       字符串
+     * @param index     索引号
+     */
+    /*static judgeRowEnd(str:string,index:number):boolean{
+        return str.charAt(index) === '\r' && str.charAt(index+1) === '\n'; 
+    }*/
+    static judgeRowEnd(buff:Buffer,index:number):boolean{
+        return buff[index] === 13 && buff[index + 1] === 10; 
+    }
 }
 
 export {UploadTool}
