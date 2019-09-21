@@ -102,8 +102,9 @@ class HttpRequest extends IncomingMessage{
             return Promise.reject( "上传内容大小超出限制");
         }
 
+        return UploadTool.handleStream(req);
 
-        return new Promise((resolve,reject)=>{
+        /*return new Promise((resolve,reject)=>{
             const type = this.getHeader('content-type');
             //是否上传标志（根据浏览器form元素配置，也可能没上传文件）
             let saveToFile:boolean = contentLen > MAXBUFFER;
@@ -134,10 +135,10 @@ class HttpRequest extends IncomingMessage{
             const fs = require('fs');
             const path = require('path');
             
-            req.on("data",chunk=>{
+            req.on("data",async chunk=>{
                 //文件存储
                 if(saveToFile){
-                    fsMdl.writeSync(fileHandler,chunk);
+                    await FileTool.writeFile(fileHandler,chunk,'binary');
                 }else{
                     chunks.push(chunk);
                     num += chunk.length;
@@ -154,9 +155,11 @@ class HttpRequest extends IncomingMessage{
             req.on('error',err=>{
 
             });
-        });
+        });*/
         
     }
+
+    
 }
 
 export{HttpRequest};

@@ -2,6 +2,8 @@ import { IncomingMessage } from "http";
 import { fileURLToPath } from "url";
 import { SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION } from "constants";
 import { HttpRequest } from "./httprequest";
+import { Stream } from "stream";
+import { FileTool } from "./filetool";
 
 /**
  * 上传工具
@@ -107,17 +109,117 @@ class UploadTool{
         });
     }
     
+    static handleStream(stream:Stream):Promise<any>{
+        const readLine = require('readline');
+        const fsMdl = require('fs');
+        const pathMdl = require('path');
+        const uuidMdl = require('uuid');
+        const encoding = require('encoding');
+        const rl = readLine.createInterface({
+            input:stream,
+            crlfDelay:Infinity
+        });
+        
+        let dispLineNo = 0; //字段分割行号，共三行
+        let isFile = false;         //是否文件字段
+        let dataKey;
+        let value;
+        let dispLine;
+        let startField = false;
+        let returnObj = {};
+        let fileHandler;
+        
+        return new Promise((res,rej)=>{
+            rl.on('line',handleLine);
+
+            rl.on('close',()=>{
+                console.log(returnObj);
+                res(returnObj);    
+            });
+
+        });    
+        
+        async function handleLine(line){
+            //第一行，设置分割线
+            if(!dispLine){
+                dispLine = line;
+                startField = true;
+                dispLineNo = 1;
+                return;
+            }
+            if(dispLine === line || dispLine + '--' === line){  //新字段或结束
+                if(returnObj.hasOwnProperty(dataKey)){
+                    //新建数组
+                    if(!Array.isArray(returnObj[dataKey])){
+                        returnObj[dataKey] = [returnObj[dataKey]];
+                    }
+                    //新值入数组
+                    returnObj[dataKey].push(value);
+                }else{
+                    returnObj[dataKey] = value;
+                }
+                startField = true;
+                dispLineNo = 1;
+                isFile = false;
+                value = '';
+                return;
+            }
+
+            if(startField){
+                //第一行
+                switch(dispLineNo){
+                    case 1:  //第一行
+                        dispLineNo = 2;
+                        let arr = line.split(';');  
+                        //数据项
+                        dataKey = arr[1].substr(arr[1].indexOf('=')).trim();
+                        dataKey = dataKey.substring(2,dataKey.length-1);
+                        if(arr.length === 3){  //文件
+                            let a1 = arr[2].split('=');
+                            let fn = a1[1].trim();
+                            let fn1 = fn.substring(1,fn.length-1);
+                            let fn2 = uuidMdl.v1().replace(/\-/g,'') + fn1.substr(fn1.lastIndexOf('.'));
+                            let filePath = pathMdl.resolve(process.cwd(),'upload/tmp',fn2);
+                            value = {
+                                fileName:fn1,
+                                path:filePath
+                            };
+                            fileHandler = fsMdl.openSync(filePath,'a');
+                            isFile = true;  
+                        }
+                        return;
+                    case 2: //第二行（空或者文件类型）
+                        if(isFile){  //文件字段
+                            value.fileType = line.substr(line.indexOf(':')).trim();
+                        }
+                        dispLineNo = 3;
+                        return;
+                    case 3: //第三行（字段值或者空）
+                        if(!isFile){
+                            value = line; 
+                        }
+                        startField = false;
+                        return;
+                }
+            } else{
+                line = "\r\n" + line;
+                if(isFile){  //写文件
+                    await FileTool.writeFile(fileHandler,line.toString('ascii'),'binary');
+                }else{  //普通字段（textarea可能有换行符）
+                    value += line;
+                }
+            }   
+
+            
+        }
+    }
 
     /**
      * 处理buffer
      * @param buffer 
      */
-    static handleBuffer(buffer:Buffer):any{
-        let reg:RegExp = /\nContent-Disposition/g;
-        let reg1:RegExp = /\r\n/g;
-        // let buffStr = buffer.toString('binary');
+    static async handleBuffer(buffer:Buffer):Promise<any>{
         let re:RegExpExecArray;
-        let dataKey:string;
         let returnObj:any = {};
         let disponsitions:Array<number> = [];
         let rowEnds:Array<number> = [];
@@ -135,6 +237,7 @@ class UploadTool{
             //第一行分隔符
             let firstStr:string = buffer.toString('utf8',st,ind);  
             let arr:Array<string> = firstStr.split(';');  
+            let dataKey:string;
             //数据项
             dataKey = arr[1].substr(arr[1].indexOf('=')).trim();
             dataKey = dataKey.substring(2,dataKey.length);
@@ -178,7 +281,7 @@ class UploadTool{
                         }
                     }
                     //写文件，图片文件用二进制保存
-                    fsMdl.writeFileSync(filePath,buffer.slice(st,endFile),'binary');
+                    await FileTool.writeFile(filePath,buffer.slice(st,endFile),'binary');
                 }
             }
             
@@ -198,21 +301,17 @@ class UploadTool{
     }
 
     
-    static handleFile(path:string):any{
-
-    }
 
     /**
      * 判断换行符
      * @param str       字符串
      * @param index     索引号
      */
-    /*static judgeRowEnd(str:string,index:number):boolean{
-        return str.charAt(index) === '\r' && str.charAt(index+1) === '\n'; 
-    }*/
     static judgeRowEnd(buff:Buffer,index:number):boolean{
         return buff[index] === 13 && buff[index + 1] === 10; 
     }
+
+    
 }
 
 export {UploadTool}

@@ -206,10 +206,130 @@ async function f2(){
     console.log(r);
 }
 
-console.log(f2());
+// console.log(f2());
+
+async function readTest(path){
+    const readLine = require('readline');
+    const fs = require('fs');
+
+    const stream = fs.createReadStream(path);
+
+    const rl = readLine.createInterface({
+        input:stream,
+        crlfDelay:Infinity
+    });
+    
+    const fsMdl = require('fs');
+    const pathMdl = require('path');
+    const uuidMdl = require('uuid');
+
+    let dispLineNo = 0; //字段分割行号，共三行
+    let isFile = false;         //是否文件字段
+    let dataKey;
+    let value;
+    let dispLine;
+    let startField = false;
+    let returnObj = {};
+    let fileHandler;
+    
+    return new Promise((res,rej)=>{
+        rl.on('line',handleLine);
+
+        rl.on('close',()=>{
+            console.log(returnObj);
+            res(returnObj);    
+        });
+
+    });    
+    
+    async function handleLine(line){
+         //第一行，设置分割线
+         if(!dispLine){
+            dispLine = line;
+            startField = true;
+            dispLineNo = 1;
+            return;
+        }
+        if(dispLine === line || dispLine + '--' === line){  //新字段或结束
+            if(returnObj.hasOwnProperty(dataKey)){
+                //新建数组
+                if(!Array.isArray(returnObj[dataKey])){
+                    returnObj[dataKey] = [returnObj[dataKey]];
+                }
+                //新值入数组
+                returnObj[dataKey].push(value);
+            }else{
+                returnObj[dataKey] = value;
+            }
+            startField = true;
+            dispLineNo = 1;
+            isFile = false;
+            value = '';
+
+            // if(dispLine + '--' === line){ //结束
+            //     rl.close();
+            // }
+            return;
+        }
 
 
+        if(startField){
+            //第一行
+            switch(dispLineNo){
+                case 1:  //第一行
+                    dispLineNo = 2;
+                    let arr = line.split(';');  
+                    //数据项
+                    dataKey = arr[1].substr(arr[1].indexOf('=')).trim();
+                    dataKey = dataKey.substring(2,dataKey.length-1);
+                    if(arr.length === 3){  //文件
+                        let a1 = arr[2].split('=');
+                        let fn = a1[1].trim();
+                        let fn1 = fn.substring(1,fn.length-1);
+                        let fn2 = uuidMdl.v1().replace(/\-/g,'') + fn1.substr(fn1.lastIndexOf('.'));
+                        filePath = pathMdl.resolve(process.cwd(),'upload/tmp',fn2);
+                        value = {
+                            fileName:fn1,
+                            path:filePath
+                        };
+                        fileHandler = fsMdl.openSync(filePath,'a');
+                        isFile = true;  
+                    }
+                    return;
+                case 2: //第二行（空或者文件类型）
+                    if(isFile){  //文件字段
+                        value.fileType = line.substr(line.indexOf(':')).trim();
+                    }
+                    dispLineNo = 3;
+                    return;
+                case 3: //第三行（字段值或者空）
+                    if(!isFile){
+                        value = line; 
+                    }
+                    startField = false;
+                    return;
+            }
+        }    
 
+        if(isFile){  //写文件
+            await write(fsMdl,fileHandler,line);
+        }else{  //普通字段（textarea可能有换行符）
+            value += line;
+        }
+    }
+}
+
+function write(fsMdl,fileHandler,data){
+    return new Promise((res,rej)=>{
+        fs.write(fileHandler,data,'binary',()=>{
+            res();
+        });
+    });
+}
+
+readTest('log-edge.out').then((re)=>{
+    console.log(re);
+})
 
 
 
