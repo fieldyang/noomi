@@ -2,6 +2,8 @@
  * route 管理
  */
 import {InstanceFactory} from "./instancefactory";
+import { HttpRequest } from "./httprequest";
+import { ServerResponse } from "http";
 interface RouteCfg{
     path:string;
     reg:RegExp;
@@ -28,53 +30,69 @@ class RouteFactory{
     }
 
     /**
-     * 处理路径
-     * @param path      路径
-     * @param params    调用参数
+     * 根据路径获取路由
+     * @param path      url path
+     * @return          {instance:**,method:**}
      */
-    static handleRoute(path:string,params:object,req:any,res:any){
-        path = path.trim();
-        let method:string = "";
+    static getRoute(path:string):any{
         for(let i=0;i<this.routes.length;i++){
             let item = this.routes[i];
             //路径测试通过
             if(item.reg.test(path)){
-                method = item.method;
+                let method = item.method;
                 let index = item.path.indexOf("*");
                 //通配符处理
                 if(index !== -1){
                     //通配符方法
                     method = path.substr(index);
                 }
-                // return InstanceFactory.exec(item.instanceName,method,[req,res,params]);
                 let instance = InstanceFactory.getInstance(item.instanceName);
-                if(!instance || typeof instance[method] !== 'function'){
-                    throw "404";
-                }
-                
-                //设置数据模型
-                if(typeof instance.setModel === 'function'){
-                    instance.setModel(params);
-                }
-                //设置request
-                if(typeof instance.setRequest === 'function'){
-                    instance.setRequest(req);
-                }
-
-                //设置response
-                if(typeof instance.setResponse === 'function'){
-                    instance.setResponse(res);
-                }
-                let re;
-                try{
-                    re = instance[method](params);
-                }catch(e){
-                    re = e;
-                }
-                return re;
-                
+                //
+                if(instance && method && typeof instance[method] === 'function'){
+                    return {instance:instance,method:method};
+                }    
+                break;
             }
         }
+        return null;
+    }
+    
+    /**
+     * 处理路径
+     * @param pathOrRoute   路径或路由参数
+     * @param params        调用参数
+     * @param req           httprequest
+     * @param res           response
+     */
+    static handleRoute(pathOrRoute:any,params:object,req:HttpRequest,res:ServerResponse){
+        let route;
+        if(typeof pathOrRoute === 'string'){
+            route = this.getRoute(pathOrRoute);
+        }else{
+            route = pathOrRoute;
+        }
+        
+        //设置request
+        if(typeof route.instance.setRequest === 'function'){
+            route.instance.setRequest(req);
+        }
+
+        //设置response
+        if(typeof route.instance.setResponse === 'function'){
+            route.instance.setResponse(res);
+        }
+
+        //设置response
+        if(typeof route.instance.setModel === 'function'){
+            route.instance.setModel(params);
+        }
+        let re;
+        try{
+            re = route.instance[route.method](params);
+        }catch(e){
+            re = e;
+        }
+        return re;
     }
 
     /**

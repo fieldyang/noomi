@@ -11,7 +11,7 @@ class UploadFilter{
         {
             return true;
         }
-        await UploadTool.upload(request);
+        // await UploadTool.upload(request);
         return true;
     }
 }

@@ -1,6 +1,7 @@
 import { IncomingMessage } from "http";
 import { resolve } from "path";
 import { UploadTool } from "./uploadtool";
+import { WriteStream } from "tty";
 
 class HttpRequest extends IncomingMessage{
     req:IncomingMessage;
@@ -96,70 +97,9 @@ class HttpRequest extends IncomingMessage{
         if(this.getHeader('method') !== 'POST'){
             Promise.resolve();
         }
-        //不能大于max size
-        let contentLen:number = parseInt(this.getHeader('content-length'));
-        if(contentLen > UploadTool.maxSize){
-            return Promise.reject( "上传内容大小超出限制");
-        }
-
-        return UploadTool.handleStream(req);
-
-        /*return new Promise((resolve,reject)=>{
-            const type = this.getHeader('content-type');
-            //是否上传标志（根据浏览器form元素配置，也可能没上传文件）
-            let saveToFile:boolean = contentLen > MAXBUFFER;
-            const fsMdl = require('fs');
-            const pathMdl = require('path');
-            const uuidMdl = require('uuid');
-            
-            //文件路径
-            let filePath:string;
-            let fileHandler:number;
-            let chunks:Array<Buffer>;
-            
-            if(saveToFile){
-                filePath = pathMdl.resolve(process.cwd(),UploadTool.tmpDir,uuidMdl.v1());
-                fileHandler = fsMdl.openSync(filePath,'a');
-            }else{
-                chunks = new Array();
-            }
-            
-            
-            
-            let num:number = 0;
-            //数据项分割位置
-            let dispositions:Array<number> = [];
-            //行结束位置
-            let rowEnds:Array<number> = [];
-            let index = 0;
-            const fs = require('fs');
-            const path = require('path');
-            
-            req.on("data",async chunk=>{
-                //文件存储
-                if(saveToFile){
-                    await FileTool.writeFile(fileHandler,chunk,'binary');
-                }else{
-                    chunks.push(chunk);
-                    num += chunk.length;
-                }
-            });
-            //数据传输结束
-            req.on('end',()=>{
-                if(saveToFile){
-
-                }else{
-                    UploadTool.handleBuffer(Buffer.concat(chunks,num));
-                }
-            });
-            req.on('error',err=>{
-
-            });
-        });*/
         
-    }
-
-    
+        return UploadTool.formHandle(req);
+    } 
 }
 
 export{HttpRequest};

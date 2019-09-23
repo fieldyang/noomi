@@ -22,7 +22,7 @@ class AopProxy{
             return foo;
         }
         
-        function foo(params){
+        async function foo(params){
             if(params){
                 params = [params];
             }
@@ -38,25 +38,24 @@ class AopProxy{
             let finish:boolean = false;
             //before aop执行
             if(aop !== null){
-                aop.before.forEach(item=>{
-                    InstanceFactory.exec(item.instance,item.method,aopParams);
-                });
+                for(let item of aop.before){
+                    await InstanceFactory.exec(item.instance,item.method,aopParams);
+                }
             }
             try{
-                
-                result = InstanceFactory.exec(null,null,params,instance,func);
+                result = await InstanceFactory.exec(null,null,params,instance,func);
                 //return aop执行
                 if(aop !== null){
-                    aop.return.forEach(item=>{
-                        InstanceFactory.exec(item.instance,item.method,aopParams);
-                    });
+                    for(let item of aop.return){
+                        await InstanceFactory.exec(item.instance,item.method,aopParams);
+                    }
                 }
             }catch(e){
                 //异常aop执行
                 if(aop !== null){
-                    aop.throw.forEach(item=>{
+                    for(let item of aop.throw){
                         InstanceFactory.exec(item.instance,item.method,aopParams);
-                    });
+                    }
                 }
                 finish = false;
                 result = e;
@@ -65,9 +64,9 @@ class AopProxy{
             //after aop执行
             if(aop !== null){
                 if(aop !== null){
-                    aop.after.forEach(item=>{
+                    for(let item of aop.after){
                         InstanceFactory.exec(item.instance,item.method,aopParams);
-                    });
+                    }
                 }
             }
             return result;

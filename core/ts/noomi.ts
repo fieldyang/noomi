@@ -18,16 +18,9 @@ class noomi{
         http.createServer((req,res)=>{
             let path = url.parse(req.url).pathname;
             let request = new HttpRequest(req);
-            // this.handleUpload(req,res);
-            request.init(req).then((params)=>{
-                //过滤器执行
-                this.handleFilter(path,request,res).then((r)=>{
-                    if(r){
-                        this.resVisit(req,res,path,params);
-                    }
-                });
-                
-            });  
+            this.resVisit(request,res,path);
+            
+              
         }).listen(port);
     }
 
@@ -175,49 +168,30 @@ class noomi{
         return FilterFactory.doChain(url,request,response);
     }
 
+    
     /**
      * 资源访问
      * @param req       request
      * @param res       response 
      * @param path      url路径
-     * @param params    参数
      */
-    resVisit(req:any,res:any,path:string,params:object){
-        let routeFlag = false;
-        //先进行路由处理
-        try{
-            const util = require('util');
-            let re = RouteFactory.handleRoute(path,params,req,res);
-            if(re !== undefined){
-                routeFlag = true;
-                if(util.types.isPromise(re)){ //是否是promise对象
-                    re.then((txt)=>{
-                        NoomiHttp.writeDataToClient(res,{
-                            data:txt
-                        });
-                    },(err)=>{
-                        NoomiHttp.writeDataToClient(res,{
-                            data:err
-                        });    
-                    });
-                }else{
-                    NoomiHttp.writeDataToClient(res,{
-                        data:re
-                    });
-                }
-            }
-            
-        }catch(e){
-            if(e === '1000' || e === '1001'){  //实例或方法不存在
-                routeFlag = false;
-            }else{
-                NoomiHttp.writeDataToClient(res,{
-                    data:e
+    resVisit(request:HttpRequest,res:any,path:string){
+        //获得路由，可能没有，则归属于静态资源
+        let route = RouteFactory.getRoute(path);
+        //路由资源
+        if(route !== null){
+            //参数
+            request.init(request.req).then((params)=>{
+                //过滤器执行
+                //过滤器
+                this.handleFilter(path,request,res).then((r)=>{
+                    if(r){
+                        //路由调用
+                        RouteFactory.handleRoute(route,params,request,res);
+                    }
                 });
-            }
-        }
-        //路由处理失败,静态资源判断
-        if(!routeFlag){
+            });    
+        }else{ //静态资源
             new Promise((resolve,reject)=>{
                 StaticResource.load(path,resolve,reject);
             }).catch((err)=>{
