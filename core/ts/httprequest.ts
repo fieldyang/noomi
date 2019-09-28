@@ -74,17 +74,7 @@ class HttpRequest extends IncomingMessage{
     }
 
     initQueryString(){
-        const urlMdl = require("url");
-        let paramStr = urlMdl.parse(this.headers['url']).query;
-        if(paramStr === null){
-            return;
-        }
-        paramStr.split('&').forEach(item=>{
-            let arr = item.split('=');
-            if(arr.length === 2){
-                this.parameters[arr[0]] = arr[1];
-            }
-        });
+        this.parameters = require('querystring').parse(require("url").parse(this.headers['url']).query);
     }
     
     /**

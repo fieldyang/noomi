@@ -1,0 +1,10 @@
+{
+    "login_url":"/noomi_login",
+    "database":{
+        "db":"mysql",
+        "url":"dburl",
+        "user":"",
+        "pwd":"",
+        "schema":""
+    }
+}

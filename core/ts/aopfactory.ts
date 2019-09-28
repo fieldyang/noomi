@@ -72,18 +72,11 @@ class AopPointcut{
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
                                 instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
-                                //异步方法判断
-                                // if(util.types.isAsyncFunction(instance[key])){
-                                //     instance[key] = async ()=> AopProxy.invoke(insName,key,instance[key],instance);
-                                // }else{
-                                //     instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
-                                // }
                             }
                         });
                     }
                 }
             }
-            
         });
     }
     /**

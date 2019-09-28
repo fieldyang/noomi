@@ -5,12 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+        div{
+            transition:all 2s ease ;
+            width:300px;
+            height:30px;
+            overflow:hidden;
+        }
+    </style>
 </head>
 <body>
-    <form action="http://localhost:3000/postuser">
-        <input type='text' name='userid' />
-        <input type='text' name='username' />
-        <input type="submit" value="提交"/>
-    </form>
+    <div>hello world!</div>
+    <input type='text' oninput='input(this)'/>
+    <button onclick='hide()'>隐藏</button>
+
 </body>
+    <script>
+    function hide(){
+        let div = document.querySelector('div');
+        div.style.width = '0px';
+        div.style.height = '0px';
+    }
+
+    function input(t){
+        console.log(t.value);
+    }
+</script>
 </html>

@@ -7,21 +7,19 @@ import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
 import { SessionFactory } from "./sessionfactory";
 import { UploadTool } from "./uploadtool";
-import { Http2ServerRequest } from "http2";
 import { HttpRequest } from "./httprequest";
+import { Server } from "net";
 class noomi{
-    constructor(port){
-        const mdlPath = require('path');
-        this.init(mdlPath.join(process.cwd(),'config'));
-        const http = require("http");
-        const url = require("url");
-        http.createServer((req,res)=>{
-            let path = url.parse(req.url).pathname;
-            let request = new HttpRequest(req);
-            this.resVisit(request,res,path);
-            
-              
-        }).listen(port);
+    port:number=3000;
+    server:Server;
+    constructor(port:number,pre?:Function){
+        if(pre && pre instanceof Function){
+            pre.call(this);
+        }
+        if(typeof port === 'number'){
+            this.port = port;
+        }
+        this.init('config');
     }
 
     /**
@@ -34,15 +32,15 @@ class noomi{
         const path = require('path');
 
         try{
-            let iniStr = fs.readFileSync(path.resolve('config','noomi.ini'),'utf-8');
+            let iniStr = fs.readFileSync(path.resolve(basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
             throw e;
         }
 
         //系统参数初始化
-        if(iniJson.hasOwnProperty('sys_cfg')){
-            UploadTool.init(iniJson['sys_cfg']);
+        if(iniJson.hasOwnProperty('upload')){
+            UploadTool.init(iniJson['upload']);
         }
 
         //模块路径加入staticresource的禁止访问路径,/开头
@@ -61,7 +59,7 @@ class noomi{
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['context_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                this.loadCtx(path.resolve('config',ctxPath),iniJson['module_path']);
+                this.loadCtx(path.resolve(basePath,ctxPath),iniJson['module_path']);
             }
             console.log('实例工厂初始化完成！');
         }
@@ -72,7 +70,7 @@ class noomi{
             console.log('过滤器初始化...');
             let rPath = iniJson['filter_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadFilter(path.resolve('config',rPath));
+                this.loadFilter(path.resolve(basePath,rPath));
             }
             console.log('过滤器初始化完成！');
         }
@@ -82,7 +80,7 @@ class noomi{
             console.log('路由工厂初始化...');
             let rPath = iniJson['route_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadRoute(path.resolve('config',rPath));
+                this.loadRoute(path.resolve(basePath,rPath));
             }
             console.log('路由工厂初始化完成！');
         }
@@ -92,17 +90,31 @@ class noomi{
             console.log('aop初始化...');
             let rPath = iniJson['aop_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadAop(path.resolve('config',rPath));
+                this.loadAop(path.resolve(basePath,rPath));
             }
             console.log('aop初始化完成！');
+        }
+
+        //security初始化
+        if(iniJson.hasOwnProperty('security')){
+            console.log('security初始化...');
+
         }
 
         //errorPage
         if(iniJson.hasOwnProperty('error_page')){
             this.setErrorPages(iniJson['error_page']);
         }
+        
+        const http = require("http");
+        const url = require("url");
+        this.server = http.createServer((req,res)=>{
+            let path = url.parse(req.url).pathname;
+            let request = new HttpRequest(req);
+            this.resVisit(request,res,path);
+        }).listen(this.port);
 
-        console.log('服务启动成功！！！');
+        console.log(`服务启动成功，端口${this.port}已监听！！！`);
     }
 
     /**
@@ -147,7 +159,7 @@ class noomi{
             const path = require('path');
             pages.forEach((item)=>{
                 //需要判断文件是否存在
-                if(fs.existsSync(path.join(process.cwd(),item.location))){
+                if(fs.existsSync(path.resolve(process.cwd(),item.location))){
                     PageFactory.addErrorPage(item.code,item.location);
                 }
             });
@@ -213,6 +225,13 @@ class noomi{
                 }
             });
         }
+    }
+
+    /**
+     * 添加应用初始化之前执行的方法
+     */
+    addPreInit(foo:Function){
+        foo.call(this);
     }
 }
 

@@ -1,6 +1,5 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
-
 /**
  * Aop 代理类
  */
@@ -14,56 +13,82 @@ class AopProxy{
      */
     static invoke(instanceName,methodName,func,instance){
         const util = require('util');
-        if(util.types.isAsyncFunction(func)){
-            return async (params)=>{
-                return foo(params);
-            };
-        }else{
-            return foo;
-        }
-        
-        async function foo(params){
+        return params=>{
             if(params){
                 params = [params];
             }
             
-            let aopParams = [instanceName,methodName].concat(params);
+            let aopParams:Array<any> = [{
+                instanceName:instanceName,
+                methodName:methodName,
+                params:params  
+            }];
             //aop获取
             let aop:any;
             if(AopFactory){
                 aop = AopFactory.getAops(instanceName,methodName);
             }
+            
             let result:any;
-            //正常执行结束标志
-            let finish:boolean = false;
+            
             //before aop执行
             if(aop !== null){
                 for(let item of aop.before){
-                    await InstanceFactory.exec(item.instance,item.method,aopParams);
+                    InstanceFactory.exec(item.instance,item.method,aopParams);
                 }
             }
             try{
-                result = await InstanceFactory.exec(null,null,params,instance,func);
-                //return aop执行
-                if(aop !== null){
-                    for(let item of aop.return){
-                        await InstanceFactory.exec(item.instance,item.method,aopParams);
+                result = InstanceFactory.exec(null,null,params,instance,func);
+                if(util.types.isPromise(result)){  //返回promise调用
+                    result.then(re=>{
+                        //带入参数
+                        aopParams[0].returnValue = re;
+                        //return aop执行
+                        if(aop !== null){
+                            for(let item of aop.return){
+                                InstanceFactory.exec(item.instance,item.method,aopParams);
+                            }
+                        }        
+                    }).catch((e)=>{
+                        //throw aop执行
+                        aopParams[0].throwValue = e;
+                        if(aop !== null){
+                            for(let item of aop.throw){
+                                InstanceFactory.exec(item.instance,item.method,aopParams);
+                            }
+                        }
+                        result = Promise.reject(e);
+                    });
+                }else{  //普通调用
+                    //带入参数
+                    aopParams[0].returnValue = result;
+                    //return aop执行
+                    if(aop !== null){
+                        for(let item of aop.return){
+                            InstanceFactory.exec(item.instance,item.method,aopParams);
+                        }
                     }
                 }
             }catch(e){
+                aopParams[0].throwValue = e;
                 //异常aop执行
                 if(aop !== null){
                     for(let item of aop.throw){
                         InstanceFactory.exec(item.instance,item.method,aopParams);
                     }
                 }
-                finish = false;
                 result = e;
             }
 
-            //after aop执行
-            if(aop !== null){
-                if(aop !== null){
+            // after aop 调用
+            if(aop !== null && aop.after.length>0){
+                if(util.types.isPromise(result)){  //返回promise
+                    result.then(re=>{
+                        for(let item of aop.after){
+                            InstanceFactory.exec(item.instance,item.method,aopParams);
+                        }
+                    });
+                }else{
                     for(let item of aop.after){
                         InstanceFactory.exec(item.instance,item.method,aopParams);
                     }

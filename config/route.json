@@ -1,14 +1,54 @@
 {
-    "namespace":"/",        
+    "namespace":"",        
     "files":[],             
     "routes":[              
         {
-            "path":"userq_*",
+            "path":"/getuserinfo",
             "instance_name":"userAction",
-            "method":""         
-        },
-        {
-            "path":"upload",
+            "method":"getinfo",
+            "results":[
+                {
+                    "value":1,
+                    "type":"redirect",
+                    "url":"/showuserinfo",
+                    "params":["userName"]
+                },{
+                    "value":2,
+                    "type":"chain",
+                    "url":"/last",
+                    "params":["type"]
+                },{
+                    "type":"json"
+                }
+            ]         
+        },{
+            "path":"/showuserinfo",
+            "instance_name":"userAction",
+            "method":"showinfo",
+            "results":[
+                {
+                    "value":1,
+                    "type":"redirect",
+                    "url":"/last?type=1"
+
+                },{
+                    "type":"json"
+                }
+            ]
+        },{
+            "path":"/last",
+            "instance_name":"userAction",
+            "method":"last",
+            "results":[
+                {
+                    "value":1,
+                    "type":"redirect",
+                    "url":"/pages/test/test1.html"
+                },
+                {"type":"json"}
+            ]
+        },{
+            "path":"/upload",
             "instance_name":"uploadAction",
             "method":"upload"      
         }
