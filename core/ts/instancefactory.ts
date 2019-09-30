@@ -37,7 +37,7 @@ class InstanceFactory{
             throw "该实例名已存在";
         }
         const path = require('path');
-        let mdl = require(path.resolve(this.mdlBasePath,cfg.path));
+        let mdl = require(path.join(process.cwd(),this.mdlBasePath,cfg.path));
         //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
         if(typeof mdl === 'object'){
             mdl = mdl[cfg.class_name];
@@ -129,7 +129,7 @@ class InstanceFactory{
         const fs = require("fs");
         this.mdlBasePath = mdlPath || './';
         //读取文件
-        let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
+        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
         try{
             json = JSON.parse(jsonStr);
@@ -139,7 +139,7 @@ class InstanceFactory{
 
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(pathTool.resolve(pathTool.dirname(path),item),this.mdlBasePath);
+                this.parseFile(pathTool.join(pathTool.dirname(path),item),this.mdlBasePath);
             });
         }
 

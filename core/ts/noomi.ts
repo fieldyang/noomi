@@ -32,7 +32,7 @@ class noomi{
         const path = require('path');
 
         try{
-            let iniStr = fs.readFileSync(path.resolve(basePath,'noomi.ini'),'utf-8');
+            let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
             throw e;
@@ -59,7 +59,7 @@ class noomi{
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['context_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                this.loadCtx(path.resolve(basePath,ctxPath),iniJson['module_path']);
+                this.loadCtx(path.join(basePath,ctxPath),iniJson['module_path']);
             }
             console.log('实例工厂初始化完成！');
         }
@@ -70,7 +70,7 @@ class noomi{
             console.log('过滤器初始化...');
             let rPath = iniJson['filter_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadFilter(path.resolve(basePath,rPath));
+                this.loadFilter(path.join(basePath,rPath));
             }
             console.log('过滤器初始化完成！');
         }
@@ -80,7 +80,7 @@ class noomi{
             console.log('路由工厂初始化...');
             let rPath = iniJson['route_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadRoute(path.resolve(basePath,rPath));
+                this.loadRoute(path.join(basePath,rPath));
             }
             console.log('路由工厂初始化完成！');
         }
@@ -90,7 +90,7 @@ class noomi{
             console.log('aop初始化...');
             let rPath = iniJson['aop_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadAop(path.resolve(basePath,rPath));
+                this.loadAop(path.join(basePath,rPath));
             }
             console.log('aop初始化完成！');
         }
@@ -159,7 +159,7 @@ class noomi{
             const path = require('path');
             pages.forEach((item)=>{
                 //需要判断文件是否存在
-                if(fs.existsSync(path.resolve(process.cwd(),item.location))){
+                if(fs.existsSync(path.join(process.cwd(),item.location))){
                     PageFactory.addErrorPage(item.code,item.location);
                 }
             });

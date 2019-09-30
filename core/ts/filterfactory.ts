@@ -57,9 +57,9 @@ class FilterFactory{
         }
 
         const fs = require("fs");
-        
+        const pathTool = require('path');
         //读取文件
-        let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
+        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:DataJson = null;
         try{
             json = JSON.parse(jsonStr);

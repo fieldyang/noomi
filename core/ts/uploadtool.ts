@@ -5,7 +5,7 @@ import { WriteStream } from "tty";
  * 上传工具
  */
 class UploadTool{
-    static tmpDir:string = 'upload/tmp';        //临时上传路径
+    static tmpDir:string = '/upload/tmp';        //临时上传路径
     static maxSize:number = 0;                  //最大上传文件大小
     
     static init(cfg:any){
@@ -155,7 +155,7 @@ class UploadTool{
                             let fn = a1[1].trim();
                             let fn1 = fn.substring(1,fn.length-1);
                             let fn2 = uuidMdl.v1().replace(/\-/g,'') + fn1.substr(fn1.lastIndexOf('.'));
-                            let filePath = pathMdl.resolve(process.cwd(),'upload/tmp',fn2);
+                            let filePath = pathMdl.join(process.cwd(),UploadTool.tmpDir,fn2);
                             value = {
                                 fileName:fn1,
                                 path:filePath

@@ -23,7 +23,7 @@ class HttpRequest extends IncomingMessage{
             if(obj){
                 Object.getOwnPropertyNames(obj).forEach(key=>{
                     //已存在该key，需要做成数组
-                    if(this.parameters.hasOwnProperty(key)){
+                    if(this.parameters[key]){
                         if(!Array.isArray(this.parameters[key])){
                             this.parameters[key] = [this.parameters[key]];
                         }

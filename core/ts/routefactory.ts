@@ -17,7 +17,7 @@ interface RouteCfg{
  * route 结果
  */
 interface RouteResult{
-    type?:string;           //类型 redirect重定向，chain路由链（不改变第一个url），json ajax json数据，默认json
+    type?:string;           //类型 redirect重定向，chain路由链（和redirect不同，url不变），json ajax json数据，默认json
     value?:any;             //返回值
     url?:string;            //路径，type 为redirect 和 url时，必须设置
     params?:Array<string>   //参数名数组
@@ -248,34 +248,37 @@ class RouteFactory{
      */
     static parseFile(path:string,ns?:string){
         interface RouteJSON{
-            files:Array<string>;        //引入文件
-            routes:Array<any>;       //实例配置数组
+            namespace:string;       //命名空间
+            files:Array<string>;    //引入文件
+            routes:Array<any>;      //实例配置数组
         }
-        //设置默认命名空间
-        ns = ns||'';
         const pathTool = require('path');
         const fs = require("fs");
         //读取文件
-        let jsonStr:string = fs.readFileSync(new URL("file://" + path),'utf-8');
+        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:RouteJSON = null;
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
             throw e;
         }
-
-        if(Array.isArray(json.files)){
-            json.files.forEach((item)=>{
-                this.parseFile(pathTool.resolve(pathTool.dirname(path), item),ns);
+        let ns1 = json.namespace? json.namespace.trim():'';
+        //设置命名空间，如果是子文件，需要连接上级文件
+        ns = ns?pathTool.jon(ns,ns1):ns1;
+        
+        //处理本级路由
+        if(Array.isArray(json.routes)){
+            json.routes.forEach((item)=>{
+                //增加namespce前缀
+                let p = pathTool.join(ns,item.path);
+                this.addRoute(p,item.instance_name,item.method,item.results);
             });
         }
 
-        if(Array.isArray(json.routes)){
-            json.routes.forEach((item)=>{
-                let p = ns + item.path;
-                //变'//'为'/'
-                p = p.replace(/\/\//g,'/');
-                this.addRoute(p,item.instance_name,item.method,item.results);
+        //处理子路径路由
+        if(Array.isArray(json.files)){
+            json.files.forEach((item)=>{
+                this.parseFile(pathTool.join(pathTool.dirname(path), item),ns);
             });
         }
     }

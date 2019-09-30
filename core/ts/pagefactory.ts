@@ -10,7 +10,7 @@ class PageFactory{
      * @param url       页面地址
      */
     static addErrorPage(code:number,url:string){
-        this.errorPages.set(code,'/' + url);
+        this.errorPages.set(code,url);
     }   
 
     /**
