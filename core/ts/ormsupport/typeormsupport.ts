@@ -1,11 +1,30 @@
-import { Connection,ConnectionManager,getConnection} from "typeorm";
+import { Connection,createConnection,ConnectionManager,getConnection} from "typeorm";
+
 
 class TypeormSupport implements OrmSupport{
     connection:Connection;
     connManager:ConnectionManager; //连接管理器
     constructor(cfg:any){
         this.connManager = new ConnectionManager();
-        this.connManager.create(cfg);
+        this.connManager.create({
+            "type":"mysql",
+            "host":"localhost",
+            "port":3306,
+            "username":"root",
+            "password":"field",
+            "database":"codement",
+            "entities": [
+                "build/test/app/module/dao/pojo/*.js"
+            ],
+            "logging":true,
+            // "logger":"all",
+            "extra":{
+                "connectionLimit":10
+            }
+        });
+        // createConnection(cfg).then(conn=>{
+        //     console.log(conn);
+        // });
     }
 
     async getConnection(name){

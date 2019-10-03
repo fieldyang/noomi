@@ -1,3 +1,9 @@
+import { OrmFactory } from "./ormfactory";
+import { Resource } from "../../test/app/module/dao/pojo/resource";
+import { ResourceAuthority } from "../../test/app/module/dao/pojo/resourceauthority";
+import { GroupAuthority } from "../../test/app/module/dao/pojo/groupauthority";
+import { Brackets } from "typeorm";
+
 /**
  * 安全工厂
  */
@@ -6,6 +12,8 @@ interface ResourceObj{
     auths:Array<number>;       //组id列表
 }
 class SecurityFactory{
+    static dbOptions:any;
+    static securityPages:Map<string,string> = new Map();
     //资源列表
     static resources:Map<number,ResourceObj> = new Map();
     //用户
@@ -17,43 +25,136 @@ class SecurityFactory{
      * 加载数据，需要用户自己改写
      * @return  promise
      */
-    static loadData():Promise<any>{
-        return Promise.resolve();
+    static async loadData():Promise<any>{
+        let datas = {
+            resources:[],
+            resourceAuthorities:[],
+            groupAuthorities:[]
+        };
+   
+        let conn = await OrmFactory.getConnection();
+        //资源
+        let resArr:Array<Resource> = await conn.manager.find(Resource);
+        let res:Resource;
+        for(res of resArr){
+            datas.resources.push({
+                resourceId:res.resourceId,
+                url:res.url
+            });
+        }
+
+        //资源权限
+        const raArr:Array<ResourceAuthority> = await conn.manager.find(ResourceAuthority);
+        let ra:ResourceAuthority = null;
+        for(ra of raArr){
+            datas.resourceAuthorities.push({
+                resourceId:ra.resource.resourceId,
+                authorityId:ra.authority.authorityId
+            });
+        }
+
+        //组权限
+        let gaArr:Array<GroupAuthority> = await conn.manager.find(GroupAuthority);
+        let ga:GroupAuthority;
+        for(ga of gaArr){
+            datas.groupAuthorities.push({
+                groupId:ga.group.groupId,
+                authorityId:ga.authority.authorityId
+            });
+        }
+        
+        return datas;
+        
     }
     /**
      * 初始化配置
      * 
      */
     static init(){
+        let conn:any;
+        let tresource:string = "t_resource";
+        let tgroupauth:string="t_group_authority";
+        let tresourceauth:string = "t_resource_authority";
+        let authId:string = "authority_id";
+        let groupId:string = "group_id";
+        let resourceId:string = "resource_id";
+        let resourceUrl:string = "url";
+        if(this.dbOptions.tables){
+            tresource = this.dbOptions.tables['resource'] || tresource;
+            tgroupauth = this.dbOptions.tables['groupAuthority'] || tgroupauth;
+            tresourceauth = this.dbOptions.tables['resourceAuthority'] || tresourceauth; 
+        }
+
+        if(this.dbOptions.columns){
+            authId = this.dbOptions.columns['authorityId'] || authId;
+            groupId = this.dbOptions.columns['groupId'] || groupId;
+            resourceId = this.dbOptions.columns['resourceId'] || resourceId;
+            resourceUrl = this.dbOptions.columns['resourceUrl'] || resourceUrl;
+        }
+
+        let ids = {
+            tgroupauth:tgroupauth,
+            tresource:tresource,
+            tresourceauth:tresourceauth,
+            authId:authId,
+            groupId:groupId,
+            resourceId:resourceId,
+            resourceUrl:resourceUrl
+        }
+        switch(this.dbOptions.production){
+            case "mysql":
+                handleMysql.call(this,this.dbOptions,ids);
+                break;
+            case "mssql":
+
+            break;
+            case "oracle":
+
+            break;
+        }
+
         /**
-         * @param datas {
-         *        ras   resource authority 数组 [{resourceId:资源id,authId:权限id}]
-         *        gas   group authority 数组 [{groupId:组id,authId:权限id}]  
-         * }
-         */ 
-        this.loadData().then((datas)=>{
-            //资源权限
-            let raMap:Map<number,Array<number>> = new Map();
+         * 处理mysql
+         * @param cfg 
+         */
+        function handleMysql(cfg:any,ids:any){
+            const mysql = require('mysql');
+            conn = mysql.createConnection({
+                host: cfg.host,
+                user: cfg.user,
+                password: cfg.pwd,
+                database: cfg.schema
+            });
+            conn.connect();
             //组权限
-            let gaMap:Map<number,Array<number>> = new Map();
-            //初始化resource auth
-            for(let ra of datas.ras){
-            this.addResourceAuth(ra.resourceId,ra.authId);
-            }
+            conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
+            (error,results,fields)=>{
+                for(let r of results){
+                    this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                }
+            });
             
-            //初始化group auth
-            for(let ga of datas.gas){
-                this.addGroupAuth(ga.groupId,ga.authId);
-            }
-        });
+            //资源权限
+            new Promise((resolve,reject)=>{
+                conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
+                (error,results,fields)=>{
+                    resolve(results);
+                });
+            }).then((results:Array<any>)=>{
+                for(let res of results){
+                    this.addResource(res[ids.resourceId],res[ids.resourceUrl]);
+                }
+            })      .then(()=>{
+                conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
+                (error,results,fields)=>{
+                    for(let r of results){
+                        this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
+                    }
+                });
+            });
+        }
     }
 
-    /**
-     * 登录
-     */
-    login(){
-
-    }
     /**
      * 添加用户组
      * @param userId    用户id
@@ -83,10 +184,10 @@ class SecurityFactory{
     }
     /**
      * 添加组权限
-     * @param groupId 
-     * @param authId 
+     * @param groupId   组id
+     * @param authId    权限id
      */
-    static addGroupAuth(groupId:number,authId:number){
+    static addGroupAuthority(groupId:number,authId:number){
         let arr:Array<any> = this.groups.get(groupId);
         if(!arr){
             arr = [];
@@ -99,20 +200,26 @@ class SecurityFactory{
     }
 
     /**
+     * 
+     * @param id    资源id
+     * @param url   资源路径，可以是正则式
+     */
+    static addResource(id:number,url:string){
+        let ro:ResourceObj = {
+            reg:new RegExp('^' + url + '$'),
+            auths:[]
+        };
+        this.resources.set(id,ro);
+    }
+
+    /**
      * 添加资源权限
      * @param resourceId    资源id
      * @param authId        资源id
-     * @param url           资源url（可以是正则式）
      */
-    static addResourceAuth(resourceId:number,authId:number,url?:string){
+    static addResourceAuth(resourceId:number,authId:number){
         let ro:ResourceObj = this.resources.get(resourceId);
-        if(!ro){
-            ro = {reg:null,auths:[]}
-            if(url){
-                ro.reg = new RegExp('^' + url + '$');
-            }
-        }
-        if(ro.auths.includes(authId)){
+        if(!ro || ro.auths.includes(authId)){
             return;
         }
         ro.auths.push(authId);
@@ -156,7 +263,7 @@ class SecurityFactory{
      * @param groupId   组id 
      * @param authId    权限id
      */
-    static deleteGroupAuth(groupId:number,authId:number){
+    static deleteGroupAuthority(groupId:number,authId:number){
         if(!this.groups.has(groupId)){
             return;
         }
@@ -181,7 +288,7 @@ class SecurityFactory{
      * @param resourceId     资源id 
      * @param authId    权限id
      */
-    static deleteResourceAuth(resourceId:number,authId:number){
+    static deleteResourceAuthority(resourceId:number,authId:number){
         if(!this.resources.has(resourceId)){
             return;
         }
@@ -197,7 +304,7 @@ class SecurityFactory{
      * 删除权限
      * @param authId    权限Id
      */
-    static deleteAuth(authId:number){
+    static deleteAuthority(authId:number){
         // 删除资源权限
         for(let res of this.resources){
             let a:Array<number> = res[1].auths;
@@ -272,8 +379,38 @@ class SecurityFactory{
         return false;
     }
 
-    
+    /**
+     * 获取安全配置页面
+     * @param name      配置项名
+     * @return          页面url
+     */
+    static getSecurityPage(name:string){
+        return this.securityPages.get(name);
+    }
 
+    static parseFile(path){
+        const pathTool = require('path');
+        const fs = require("fs");
+        //读取文件
+        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        let json:any = null;
+        try{
+            json = JSON.parse(jsonStr);
+        }catch(e){
+            throw e;
+        }
+
+        if(json.hasOwnProperty('auth_fail_url')){
+            this.securityPages.set('auth_fail_url',json['auth_fail_url']);
+        }
+
+        //数据库解析
+        if(json.hasOwnProperty('dboption')){
+            this.dbOptions = json.dboption;
+        }
+
+        this.init();
+    }
 }
 
 export{SecurityFactory}

@@ -8,9 +8,8 @@
         "password":"field",
         "database":"codement",
         "entities": [
-            "/test/app/module/dao/pojo/*.js"
+            "build/test/app/module/dao/pojo/*.js"
         ],
-        "entityPrefix":"t_",
         "logging":true,
         "logger":"all",
         "extra":{

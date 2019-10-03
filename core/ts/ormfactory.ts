@@ -25,11 +25,29 @@ class OrmFactory{
      * @param name  connection name
      * @return      connection 或 undefined
      */
-    static getConnection(name:string){
+    static getConnection(name?:string){
         switch(this.product){
             case 'typeorm':
                 return this.ormObject.getConnection(name);
         }
+    }
+
+    /**
+     * 文件解析
+     * @param path 
+     */
+    static parseFile(path:string){
+        const fs = require("fs");
+        const pathTool = require('path');
+        //读取文件
+        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        try{
+            let json = JSON.parse(jsonStr);
+            this.init(json);
+        }catch(e){
+            throw "orm文件配置错误!"
+        }
+
     }
 }
 

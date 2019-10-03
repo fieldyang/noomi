@@ -1,3 +1,4 @@
+import { HttpRequest } from "./httprequest";
 
 
 interface SessionCfg{
@@ -12,7 +13,7 @@ class SessionFactory {
     cleanTime: number;
     static sessions:Map<string,Session> = new Map();
     static sessionName:string = "NOOMISESSIONID";   //cookie中的session name
-    static timeOut:number = 30;                     //过期时间(默认30分钟)
+    static timeout:number = 30;                     //过期时间(默认30分钟)
     static MAXCOUNT = 10000000;                     //最大计数器(id) 
     static currentCount = 0;                        //当前技术值(id)
     
@@ -31,7 +32,7 @@ class SessionFactory {
 
         //设置timeout
         if(typeof cfg.timeout === 'number'){
-            this.timeOut = cfg.timeout;
+            this.timeout = cfg.timeout;
         }
     }
 
@@ -71,7 +72,7 @@ class SessionFactory {
         let id = new Date().getTime() + '' + this.currentCount;
         let ses: Session = new Session();
         //设置默认过期时间
-        ses.expires = this.timeOut * 60000; 
+        ses.expires = this.timeout * 60000; 
         this.sessions.set(id, ses);
         console.log("初始过期时间:" + this.sessions.get(id).expires);
        
@@ -83,10 +84,10 @@ class SessionFactory {
      * 获取当前sessionId
      * @param req   request
      */
-    static getSessionId(req: any): string {
+    static getSessionId(req: HttpRequest): string {
         let cookies = {};
         req.headers.cookie && req.headers.cookie.split(';').forEach(parms => {
-            var parts = parms.split('=');
+            let parts = parms.split('=');
             cookies[parts[0].trim()] = (parts[1] || '').trim();
         });
         
@@ -143,4 +144,4 @@ class Session {
         this.data.set(name, value);
     }
 }
-export { SessionFactory };
+export { SessionFactory,Session};

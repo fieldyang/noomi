@@ -1,14 +1,18 @@
-import { IncomingMessage } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { resolve } from "path";
 import { UploadTool } from "./uploadtool";
 import { WriteStream } from "tty";
+import { SessionFactory, Session } from "./sessionfactory";
 
 class HttpRequest extends IncomingMessage{
     req:IncomingMessage;
+    response:ServerResponse;
     parameters:any = new Object();           //参数
-    constructor(req:IncomingMessage){
+    
+    constructor(req:IncomingMessage,res:ServerResponse){
         super(req.socket);
         this.req = req;
+        this.response = res;
     }
 
     init(req:IncomingMessage):Promise<any>{
@@ -42,8 +46,8 @@ class HttpRequest extends IncomingMessage{
      * @param req 
      */
     initHeader(req:IncomingMessage){
-        this.headers['method'] = req.method;
-        this.headers['url'] = req.url;
+        this.method = req.method;
+        this.url = req.url;
         //headers
         Object.getOwnPropertyNames(req.headers).forEach(item=>{
             this.headers[item] = req.headers[item];
@@ -58,8 +62,9 @@ class HttpRequest extends IncomingMessage{
     }
     
     /**
-     * 
-     * @param name 
+     * 设置参数
+     * @param name      参数名
+     * @param value     参数值
      */
     setParameter(name:string,value:string){
         this.parameters[name] = value;
@@ -67,12 +72,16 @@ class HttpRequest extends IncomingMessage{
 
     /**
      * 获取参数
-     * @param name 
+     * @param name      参数名
+     * @return          参数值
      */
     getParameter(name:string):any{
         return this.parameters[name];
     }
 
+    /**
+     * 初始化url查询串
+     */
     initQueryString(){
         this.parameters = require('querystring').parse(require("url").parse(this.headers['url']).query);
     }
@@ -90,6 +99,15 @@ class HttpRequest extends IncomingMessage{
         
         return UploadTool.formHandle(req);
     } 
+
+    /**
+     * 获取session
+     * @param request   httprequest
+     * @return          session
+     */
+    getSession():Session{
+        return SessionFactory.getSession(this,this.response);
+    }
 }
 
 export{HttpRequest};

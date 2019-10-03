@@ -9,6 +9,8 @@ import { SessionFactory } from "./sessionfactory";
 import { UploadTool } from "./uploadtool";
 import { HttpRequest } from "./httprequest";
 import { Server } from "net";
+import { OrmFactory } from "./ormfactory";
+import { SecurityFactory } from "./securityfactory";
 class noomi{
     port:number=3000;
     server:Server;
@@ -95,10 +97,24 @@ class noomi{
             console.log('aop初始化完成！');
         }
 
-        //security初始化
-        if(iniJson.hasOwnProperty('security')){
-            console.log('security初始化...');
+        //orm初始化
+        if(iniJson.hasOwnProperty('orm_path')){
+            console.log('orm初始化...');
+            let rPath = iniJson['orm_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                this.loadOrm(path.join(basePath,rPath));
+            }
+            console.log('orm初始化完成！');
+        }
 
+        //security初始化
+        if(iniJson.hasOwnProperty('security_path')){
+            console.log('security初始化...');
+            let rPath = iniJson['security_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                this.loadSecurity(path.join(basePath,rPath));
+            }
+            console.log('security初始化完成！');
         }
 
         //errorPage
@@ -107,11 +123,8 @@ class noomi{
         }
         
         const http = require("http");
-        const url = require("url");
         this.server = http.createServer((req,res)=>{
-            let path = url.parse(req.url).pathname;
-            let request = new HttpRequest(req);
-            this.resVisit(request,res,path);
+            this.resVisit(new HttpRequest(req,res));
         }).listen(this.port);
 
         console.log(`服务启动成功，端口${this.port}已监听！！！`);
@@ -142,11 +155,27 @@ class noomi{
     }
 
     /**
+     * 加载orm配置文件
+     * @param path  文件路径
+     */
+    loadOrm(path:string){
+        OrmFactory.parseFile(path);
+    }
+
+    /**
      * 过滤器文件加载
      * @param path  文件路径
      */
     loadFilter(path:string){
         FilterFactory.parseFile(path);
+    }
+
+     /**
+     * 加载security配置文件
+     * @param path  文件路径
+     */
+    loadSecurity(path:string){
+        SecurityFactory.parseFile(path);
     }
 
     /**
@@ -183,11 +212,11 @@ class noomi{
     
     /**
      * 资源访问
-     * @param req       request
-     * @param res       response 
+     * @param request   request
      * @param path      url路径
      */
-    resVisit(request:HttpRequest,res:any,path:string){
+    resVisit(request:HttpRequest){
+        let path = require('url').parse(request.url).pathname;
         //获得路由，可能没有，则归属于静态资源
         let route = RouteFactory.getRoute(path);
         //路由资源
@@ -196,10 +225,10 @@ class noomi{
             request.init(request.req).then((params)=>{
                 //过滤器执行
                 //过滤器
-                this.handleFilter(path,request,res).then((r)=>{
+                this.handleFilter(path,request,request.response).then((r)=>{
                     if(r){
                         //路由调用
-                        RouteFactory.handleRoute(route,params,request,res);
+                        RouteFactory.handleRoute(route,params,request,request.response);
                     }
                 });
             });    
@@ -209,7 +238,7 @@ class noomi{
             }).catch((err)=>{
                 return Promise.reject(err);
             }).then((re:any)=>{
-                NoomiHttp.writeDataToClient(res,{
+                NoomiHttp.writeDataToClient(request.response,{
                     data:re.file,
                     type:re.type
                 });
@@ -217,9 +246,9 @@ class noomi{
                 //存在异常页，直接跳转，否则回传404
                 let page = PageFactory.getErrorPage(errCode);
                 if(page){
-                    NoomiHttp.redirect(res,page);
+                    NoomiHttp.redirect(request.response,page);
                 }else{
-                    NoomiHttp.writeDataToClient(res,{
+                    NoomiHttp.writeDataToClient(request.response,{
                         statusCode:errCode
                     });
                 }

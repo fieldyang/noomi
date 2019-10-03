@@ -1,10 +1,22 @@
 {
     "login_url":"/noomi_login",
-    "database":{
-        "db":"mysql",
-        "url":"dburl",
-        "user":"",
-        "pwd":"",
-        "schema":""
-    }
+    "dboption":{
+        "production":"mysql",
+        "host":"localhost",
+        "user":"root",
+        "pwd":"field",
+        "schema":"codement",
+        "tables":{
+            "groupAuthority":"t_group_authority",
+            "resource":"t_resource",
+            "resourceAuthority":"t_resource_authority"
+        },
+        "columns":{
+            "resourceId":"resource_id",
+            "authorityId":"authority_id",
+            "resourceUrl":"url",
+            "groupId":"group_id"
+        }
+    },
+    "auth_fail_url":"/pages/error/403.html"
 }
