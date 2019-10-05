@@ -11,9 +11,9 @@
             "path":"filter/pathfilter"
         },
         {
-            "name":"uploadFilter",
-            "class_name":"UploadFilter",
-            "path":"filter/uploadfilter"
+            "name":"securityFilter",
+            "class_name":"SecurityFilter",
+            "path":"filter/securityfilter"
         }
     ]
 }

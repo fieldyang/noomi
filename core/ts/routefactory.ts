@@ -143,91 +143,107 @@ class RouteFactory{
         let find:boolean = false;
         
         if(results && results.length > 0){
-            for(let r of results){
-                //找到返回值匹配，则不在对比
-                if(data && data == r.value){
-                    find = true;
-                    switch(r.type){
-                        case "redirect": //重定向
-                            let url = r.url;
-                            let pa = [];
-                            //参数属性
-                            if(r.params && Array.isArray(r.params) && r.params.length>0){
-                                for(let pn of r.params){
-                                    let v;
-                                    if(instance[pn] !== undefined){
-                                        v = instance[pn];
-                                    }else if(instance.model && instance.model[pn] !== undefined){
-                                        v = instance.model.pn;
-                                    }
-                                    if(v !== undefined){
-                                        pa.push(pn+'=' + v);
-                                    }
-                                    
-                                }
-                            }
-                            let pas:string = pa.join('&');
-                            if(pas !== ''){
-                                if(url.indexOf('?') === -1){
-                                    url += '?' + pas;
-                                }else{
-                                    url += '&' + pas;
-                                }
-                            }
-                            NoomiHttp.redirect(res,url);
-                            return;
-                        case "chain": //路由器链
-                            let urlMdl = require("url");
-                            let url1 = urlMdl.parse(r.url).pathname;
-                            let params = require('querystring').parse(urlMdl.parse(r.url).query);
-                            
-                            //参数处理
-                            if(r.params && Array.isArray(r.params) && r.params.length>0){
-                                for(let pn of r.params){
-                                    let v;
-                                    if(instance[pn] !== undefined){
-                                        v = instance[pn];
-                                    }else if(instance.model && instance.model[pn] !== undefined){
-                                        v = instance.model[pn];
-                                    }
-                                    if(v !== undefined){
-                                        params[pn] = v;
-                                    }
-                                }
-                            }
-                            const route = this.getRoute(url1);
-                            if(route !== null){
-                                const util = require('util');
-                                //调用
-                                try{
-                                    let re = route.instance[route.method](params);
-                                    if(util.types.isPromise(re)){
-                                        re.then(data=>{
-                                            this.handleResult(res,data,route.instance,route.results);
-                                        }).catch(e=>{
-                                            this.handleException(res,e);
-                                        });
-                                    }else{
-                                        this.handleResult(res,re,route.instance,route.results);
-                                    }
-                                }catch(e){
-                                    this.handleException(res,e);
-                                }
-                            }
-                            return;
-                    }
-                    break;
+            //单个结果，不判断返回值
+            if(results.length === 1){
+                this.handleOneResult(res,results[0],data,instance);
+            }else{
+                let r:RouteResult;
+                for(r of results){
+                    //找到返回值匹配，则不在对比
+                    if(data && data == r.value){
+                        this.handleOneResult(res,r,data,instance);
+                        break;
+                    }    
                 }
-            }    
+            }
+        }else{ //默认回写json
+            this.handleOneResult(res,{},data);
         }
+    }
 
-        //默认回写json
-        if(!find){
-            NoomiHttp.writeDataToClient(res,{
-                data:data,
-                type:'application/json'
-            });
+    /**
+     * 处理一个结果
+     * @param res           response
+     * @param result        route result
+     * @param data          数据
+     * @param instance      实例
+     */
+    private static handleOneResult(res:ServerResponse,result:RouteResult,data:any,instance?:any){
+        switch(result.type){
+            case "redirect": //重定向
+                let url = result.url;
+                let pa = [];
+                //参数属性
+                if(result.params && Array.isArray(result.params) && result.params.length>0){
+                    for(let pn of result.params){
+                        let v;
+                        if(instance[pn] !== undefined){
+                            v = instance[pn];
+                        }else if(instance.model && instance.model[pn] !== undefined){
+                            v = instance.model.pn;
+                        }
+                        if(v !== undefined){
+                            pa.push(pn+'=' + v);
+                        }
+                        
+                    }
+                }
+                let pas:string = pa.join('&');
+                if(pas !== ''){
+                    if(url.indexOf('?') === -1){
+                        url += '?' + pas;
+                    }else{
+                        url += '&' + pas;
+                    }
+                }
+                NoomiHttp.redirect(res,url);
+                return;
+            case "chain": //路由器链
+                let urlMdl = require("url");
+                let url1 = urlMdl.parse(result.url).pathname;
+                let params = require('querystring').parse(urlMdl.parse(result.url).query);
+                
+                //参数处理
+                if(result.params && Array.isArray(result.params) && result.params.length>0){
+                    for(let pn of result.params){
+                        let v;
+                        if(instance[pn] !== undefined){
+                            v = instance[pn];
+                        }else if(instance.model && instance.model[pn] !== undefined){
+                            v = instance.model[pn];
+                        }
+                        if(v !== undefined){
+                            params[pn] = v;
+                        }
+                    }
+                }
+                const route = this.getRoute(url1);
+                if(route !== null){
+                    const util = require('util');
+                    //调用
+                    try{
+                        let re = route.instance[route.method](params);
+                        if(util.types.isPromise(re)){
+                            re.then(data=>{
+                                this.handleResult(res,data,route.instance,route.results);
+                            }).catch(e=>{
+                                this.handleException(res,e);
+                            });
+                        }else{
+                            this.handleResult(res,re,route.instance,route.results);
+                        }
+                    }catch(e){
+                        this.handleException(res,e);
+                    }
+                }
+                return;
+            default: //json
+                NoomiHttp.writeDataToClient(res,{
+                    data:data,
+                    type:'application/json'
+                });
         }
+      
     }
 
     /**

@@ -1,14 +1,15 @@
 import { ClientRequest, ServerResponse } from "http";
+import { HttpRequest } from "./httprequest";
 
 class BaseAction{
     model:any;
-    request:ClientRequest;          //request obj
+    request:HttpRequest;          //request obj
     response:ServerResponse;        //response obj
     setModel(data:any){
         this.model = data;
     }
 
-    setRequest(req:ClientRequest){
+    setRequest(req:HttpRequest){
         this.request = req;
     }
 

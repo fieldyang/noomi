@@ -13,13 +13,15 @@ class HttpRequest extends IncomingMessage{
         super(req.socket);
         this.req = req;
         this.response = res;
+        this.url = req.url;
+        this.method = req.method;
     }
 
     init(req:IncomingMessage):Promise<any>{
         this.initHeader(req);
         this.initQueryString();
         //非 post
-        if(this.getHeader('method') !== 'POST'){
+        if(this.method !== 'POST'){
             return Promise.resolve(this.parameters);
         }
 
@@ -46,12 +48,11 @@ class HttpRequest extends IncomingMessage{
      * @param req 
      */
     initHeader(req:IncomingMessage){
-        this.method = req.method;
-        this.url = req.url;
         //headers
-        Object.getOwnPropertyNames(req.headers).forEach(item=>{
-            this.headers[item] = req.headers[item];
-        });
+        // Object.getOwnPropertyNames(req.headers).forEach(item=>{
+        //     this.headers[item] = req.headers[item];
+        // });
+        this.headers = req.headers;
     }
     /**
      * 获取header信息
@@ -83,7 +84,7 @@ class HttpRequest extends IncomingMessage{
      * 初始化url查询串
      */
     initQueryString(){
-        this.parameters = require('querystring').parse(require("url").parse(this.headers['url']).query);
+        this.parameters = require('querystring').parse(require("url").parse(this.url).query);
     }
     
     /**
@@ -106,7 +107,7 @@ class HttpRequest extends IncomingMessage{
      * @return          session
      */
     getSession():Session{
-        return SessionFactory.getSession(this,this.response);
+        return SessionFactory.getSession(this);
     }
 }
 

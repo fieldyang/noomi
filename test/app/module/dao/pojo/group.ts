@@ -29,14 +29,12 @@ export class Group  extends BaseEntity{
         })
     remarks:string | null;
     
+    @OneToMany(()=>GroupUser, (groupUser: GroupUser)=>groupUser.group,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    groupUsers:GroupUser[];
+
     @OneToMany(()=>GroupAuthority, (groupAuthority: GroupAuthority)=>groupAuthority.group,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     groupAuthorities:GroupAuthority[];
     
-
-   
-    
-    @OneToMany(()=>GroupUser, (groupUser: GroupUser)=>groupUser.group,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    groupUsers:GroupUser[];
     // @ManyToMany(type=>User,user=>user.groups)
     // users:User[];
 

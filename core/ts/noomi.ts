@@ -217,6 +217,9 @@ class noomi{
      */
     resVisit(request:HttpRequest){
         let path = require('url').parse(request.url).pathname;
+        if(path === ''){
+            return;
+        }
         //获得路由，可能没有，则归属于静态资源
         let route = RouteFactory.getRoute(path);
         //路由资源

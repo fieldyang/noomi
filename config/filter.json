@@ -11,6 +11,9 @@
         {
             "name":"uploadFilter",
             "instance_name":"uploadFilter"
+        },{
+            "name":"securityFilter",
+            "instance_name":"securityFilter"
         }    
     ],
     "mappings":[
@@ -24,8 +27,8 @@
             "url_pattern":"/*"
         },
         {
-            "filter_name":"uploadFilter",
-            "url_pattern":"/upload"
+            "filter_name":"securityFilter",
+            "url_pattern":"/*"
         }
     ]
 }

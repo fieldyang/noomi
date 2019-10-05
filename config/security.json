@@ -18,5 +18,6 @@
             "groupId":"group_id"
         }
     },
-    "auth_fail_url":"/pages/error/403.html"
+    "auth_fail_url":"/pages/error/403.html",
+    "login_url":"/pages/login.html"
 }

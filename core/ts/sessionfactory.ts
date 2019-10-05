@@ -1,4 +1,5 @@
 import { HttpRequest } from "./httprequest";
+import { ServerResponse } from "http";
 
 
 interface SessionCfg{
@@ -41,30 +42,28 @@ class SessionFactory {
      * @param req   request
      * @param res   response
      */    
-    static getSession(req: any, res: any) {
+    static getSession(req:HttpRequest) {
         //session存在
         let id:string = this.getSessionId(req);
         if (id) {
             let session: Session = SessionFactory.sessions.get(id);
             //判断是否过期
             if (session.expires < new Date().getTime()) {
-                this.initSession(req, res);
+                this.initSession(req);
             }
             //重置过期时间
             session.expires = new Date().getTime() + 60 * 1000;
-            console.log("更新过期时间: " + session.expires);
             return session;
         } else {
-            return this.initSession(req, res);
+            return this.initSession(req);
         }
     }
 
     /**
      * 初始化session
      * @param req   request
-     * @param res   response
      */
-    static initSession(req: any, res: any) {
+    static initSession(req: HttpRequest) {
         //创建session
         if(++this.currentCount > this.MAXCOUNT){
             this.currentCount = 1;
@@ -74,9 +73,7 @@ class SessionFactory {
         //设置默认过期时间
         ses.expires = this.timeout * 60000; 
         this.sessions.set(id, ses);
-        console.log("初始过期时间:" + this.sessions.get(id).expires);
-       
-        this.setCookie(res, id, ses.expires);
+        this.setCookie(req.response, id, ses.expires);
         return ses;
     }
 
@@ -115,7 +112,7 @@ class SessionFactory {
      * @param id        session id       
      * @param expires   超时时间
      */
-    static setCookie(res: any, id: string, expires: number) {
+    static setCookie(res:ServerResponse, id: string, expires: number) {
         res.setHeader(
             'Set-Cookie', 'NOOMISESSIONID=' + id + ';Expires=' + new Date(expires).toUTCString() + ';'
         );
@@ -133,11 +130,7 @@ class Session {
 
     //获取session
     get(name) {
-        if (this.data.has(name)) {
-            return this.data.get(name);
-        } else {
-            throw '没有找到' + name + '对应的值';
-        }
+        return this.data.get(name);
     }
     //设置session
     set(name, value) {

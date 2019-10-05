@@ -37,7 +37,7 @@ export class User extends BaseEntity{
         })
     enabled:boolean | null;
     
-    @OneToMany(()=>GroupUser, (groupUser: GroupUser)=>groupUser.group,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    @OneToMany(()=>GroupUser, (groupUser: GroupUser)=>groupUser.user,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     groupUsers:GroupUser[];
     // @ManyToMany(type=>Group,group=>group.users)
     // @JoinTable({

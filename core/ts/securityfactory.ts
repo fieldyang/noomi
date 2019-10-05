@@ -2,7 +2,7 @@ import { OrmFactory } from "./ormfactory";
 import { Resource } from "../../test/app/module/dao/pojo/resource";
 import { ResourceAuthority } from "../../test/app/module/dao/pojo/resourceauthority";
 import { GroupAuthority } from "../../test/app/module/dao/pojo/groupauthority";
-import { Brackets } from "typeorm";
+import { HttpRequest } from "./httprequest";
 
 /**
  * 安全工厂
@@ -70,7 +70,7 @@ class SecurityFactory{
      * 初始化配置
      * 
      */
-    static init(){
+    static async init(){
         let conn:any;
         let tresource:string = "t_resource";
         let tgroupauth:string="t_group_authority";
@@ -117,7 +117,7 @@ class SecurityFactory{
          * 处理mysql
          * @param cfg 
          */
-        function handleMysql(cfg:any,ids:any){
+        async function handleMysql(cfg:any,ids:any){
             const mysql = require('mysql');
             conn = mysql.createConnection({
                 host: cfg.host,
@@ -127,31 +127,39 @@ class SecurityFactory{
             });
             conn.connect();
             //组权限
-            conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
-            (error,results,fields)=>{
-                for(let r of results){
-                    this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                }
+            await new Promise((resolve,reject)=>{
+                conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
+                (error,results,fields)=>{
+                    for(let r of results){
+                        this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                    }
+                    resolve();
+                });
             });
-            
-            //资源权限
-            new Promise((resolve,reject)=>{
+
+            //资源
+            await new Promise((resolve,reject)=>{
                 conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
                 (error,results,fields)=>{
-                    resolve(results);
+                    for(let r of results){
+                        this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
+                    }
+                    resolve();
                 });
-            }).then((results:Array<any>)=>{
-                for(let res of results){
-                    this.addResource(res[ids.resourceId],res[ids.resourceUrl]);
-                }
-            })      .then(()=>{
+            });
+
+            //资源权限
+            await new Promise((resolve,reject)=>{
                 conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
                 (error,results,fields)=>{
                     for(let r of results){
                         this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
                     }
+                    resolve();
                 });
             });
+            //关闭连接
+            conn.end();
         }
     }
 
@@ -177,7 +185,11 @@ class SecurityFactory{
      * @param userId    用户id
      * @param groups    组id 数组
      */
-    static addUserGroups(userId:number,groups:Array<number>){
+    static addUserGroups(userId:number,groups:Array<number>,request?:HttpRequest){
+        //保存userId 到session
+        if(request){
+            request.getSession().set('userId',userId);
+        }
         for(let gid of groups){
             this.addUserGroup(userId,gid);
         }
@@ -343,13 +355,33 @@ class SecurityFactory{
      * 鉴权
      * @param url       资源
      * @param user      用户
-     * @return          true通过/false未通过
+     * @return          0通过 1未登录 2无权限
      */
-    static check(url:string,userId:number){
+    static check(url:string,userId:number):number{
+        //获取路径
+        url = require('url').parse(url).pathname;
+        let resAuthArr:Array<number>;
+        for(let item of this.resources){
+            //进行资源匹配
+            if(item[1].reg.test(url)){
+                resAuthArr = item[1].auths;
+                break;
+            }
+        }
+        //资源不存在，则直接返回true
+        if(resAuthArr === undefined || resAuthArr.length === 0){
+            return 0;
+        }
+        
+        //用户未登录
+        if(!userId){
+            return 1;
+        }
         //用户所在组
         let groupIds = this.users.get(userId);
+        //用户无权限
         if(!groupIds){
-            return false;
+            return 2;
         }
         //用户权限
         let authArr = [];
@@ -362,21 +394,16 @@ class SecurityFactory{
             }
         }
         if(authArr.length === 0){
-            return false;
+            return 2;
         }
-        for(let item of this.resources){
-            //进行资源匹配
-            if(item[1].reg.test(url)){
-                //资源权限包含用户组权限
-                for(let au of authArr){
-                    if(item[1].auths.includes(au)){
-                        return true;
-                    }
-                }
-                return false;
+        
+        //资源权限包含用户组权限
+        for(let au of authArr){
+            if(resAuthArr.includes(au)){
+                return 0;
             }
         }
-        return false;
+        return 2;
     }
 
     /**
@@ -399,9 +426,14 @@ class SecurityFactory{
         }catch(e){
             throw e;
         }
-
+        //鉴权失败页面
         if(json.hasOwnProperty('auth_fail_url')){
             this.securityPages.set('auth_fail_url',json['auth_fail_url']);
+        }
+
+        //登录页面
+        if(json.hasOwnProperty('login_url')){
+            this.securityPages.set('login_url',json['login_url']);
         }
 
         //数据库解析

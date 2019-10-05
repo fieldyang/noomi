@@ -38,7 +38,6 @@ class NoomiHttp{
         headers['Content-Type'] = type + ';charset=' + charset;
         //数据长度
         headers['Content-Length'] = Buffer.byteLength(data);
-
         response.writeHead(status, headers);
         response.write(data,charset);
         response.end();
@@ -63,6 +62,7 @@ class NoomiHttp{
      * @param page          跳转路径 
      */
     static redirect(response:any,page:string){
+        
         response.writeHead(
             302,
             {

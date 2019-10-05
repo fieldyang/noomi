@@ -13,6 +13,12 @@
             "path":"action/uploadaction",
             "singleton":false,
             "params":[]
+        },{
+            "name":"loginAction", 	
+            "class_name":"LoginAction",
+            "path":"action/loginaction",
+            "singleton":false,
+            "params":[]
         }
     ]
 }

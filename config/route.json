@@ -51,6 +51,16 @@
             "path":"/upload",
             "instance_name":"uploadAction",
             "method":"upload"      
+        },{
+            "path":"/login",
+            "instance_name":"loginAction",
+            "method":"login",
+            "results":[
+                {
+                    "type":"redirect",
+                    "url":"/pages/loginsuccess.html"
+                }
+            ]
         }
     ]
 }
