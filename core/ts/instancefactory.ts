@@ -9,10 +9,11 @@ interface Argument{
 }
 interface InstanceCfg{
     name:string;            //实例名
-    path:string;            //模块路径（相对noomi.ini配置的modulepath）
-    singleton:boolean;      //单例模式
     class_name:string;      //类名
-    params:Array<any>;      //参数列表
+    path?:string;           //模块路径（相对noomi.ini配置的modulepath），与instance二选一
+    instance?:any;          //实例与path 二选一
+    singleton?:boolean;     //单例模式
+    params?:Array<any>;     //参数列表
 }
 
 /**
@@ -36,31 +37,41 @@ class InstanceFactory{
         if(this.factory.has(cfg.name)){
             throw "该实例名已存在";
         }
-        const path = require('path');
-        let mdl = require(path.join(process.cwd(),this.mdlBasePath,cfg.path));
-        //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
-        if(typeof mdl === 'object'){
-            mdl = mdl[cfg.class_name];
-        }
-        // class
-        if(mdl.constructor !== Function){
-            throw "模块必须为class";
-        }
-       
-        //默认true
-        let singleton = cfg.singleton!==undefined?cfg.singleton:true;
-        
-        let insObj=<InstanceObj>{
-            class:mdl,
-            singleton:singleton
-        };
+        const pathMdl = require('path');
+        let insObj;
+        let path;
+        //从路径加载模块
+        if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
+            let mdl = require(pathMdl.join(process.cwd(),this.mdlBasePath,path));
+            //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
+            if(typeof mdl === 'object'){
+                mdl = mdl[cfg.class_name];
+            }
+            // class
+            if(mdl.constructor !== Function){
+                throw "模块必须为class";
+            }
+            //默认true
+            let singleton = cfg.singleton!==undefined?cfg.singleton:true;
+            
+            insObj={
+                class:mdl,
+                singleton:singleton
+            };
 
-        if(singleton){      //单例，需要实例化
-            //参数怎么传递
-            insObj.instance = new mdl(cfg.params);
-        }else{              //非单例，不需要实例化
-            insObj.params = cfg.params;
+            if(singleton){      //单例，需要实例化
+                //参数怎么传递
+                insObj.instance = new mdl(cfg.params);
+            }else{              //非单例，不需要实例化
+                insObj.params = cfg.params;
+            }
+        }else{ //传入模块，不用创建
+            insObj = {
+                singleton:true,
+                instance:cfg.instance
+            }
         }
+        
         this.factory.set(cfg.name,insObj);
     }
 

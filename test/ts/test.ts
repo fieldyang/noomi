@@ -1,11 +1,10 @@
-import{createConnection, getConnectionManager, getConnection, getRepository} from "typeorm";
+import{createConnection, getConnectionManager, getRepository, getConnection} from "typeorm";
 import { User } from "../app/module/dao/pojo/user";
 import { Group } from "../app/module/dao/pojo/group";
 import { GroupUser } from "../app/module/dao/pojo/groupuser";
 
 (async function(){
     const manager = getConnectionManager();
-
     const conn = manager.create({
         "type":"mysql",
         "host":"localhost",

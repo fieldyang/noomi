@@ -1,7 +1,6 @@
 import {InstanceFactory} from "./instancefactory";
 import {RouteFactory} from "./routefactory";
 import {StaticResource} from "./staticresource";
-import {NoomiHttp} from "./noomihttp";
 import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
@@ -11,6 +10,8 @@ import { HttpRequest } from "./httprequest";
 import { Server } from "net";
 import { OrmFactory } from "./ormfactory";
 import { SecurityFactory } from "./securityfactory";
+import { HttpResponse } from "./httpresponse";
+import { IncomingMessage, ServerResponse } from "http";
 class noomi{
     port:number=3000;
     server:Server;
@@ -123,11 +124,22 @@ class noomi{
         }
         
         const http = require("http");
-        this.server = http.createServer((req,res)=>{
+        this.server = http.createServer((req:IncomingMessage,res:ServerResponse)=>{
             this.resVisit(new HttpRequest(req,res));
-        }).listen(this.port);
-
-        console.log(`服务启动成功，端口${this.port}已监听！！！`);
+        }).listen(this.port,(e)=>{
+            console.log(`服务启动成功，端口${this.port}已监听！！！`);
+        }).on('error',(err)=>{
+            if (err.code === 'EADDRINUSE') {
+                console.log('地址正被使用，重试中...');
+                //1秒后重试
+                setTimeout(() => {
+                  this.server.close();
+                  this.server.listen(this.port);
+                }, 1000);
+            }
+        }).on('clientError', (err, socket) => {
+            socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+        });;
     }
 
     /**
@@ -225,7 +237,7 @@ class noomi{
         //路由资源
         if(route !== null){
             //参数
-            request.init(request.req).then((params)=>{
+            request.init().then((params)=>{
                 //过滤器执行
                 //过滤器
                 this.handleFilter(path,request,request.response).then((r)=>{
@@ -241,7 +253,7 @@ class noomi{
             }).catch((err)=>{
                 return Promise.reject(err);
             }).then((re:any)=>{
-                NoomiHttp.writeDataToClient(request.response,{
+                request.response.writeToClient({
                     data:re.file,
                     type:re.type
                 });
@@ -249,9 +261,9 @@ class noomi{
                 //存在异常页，直接跳转，否则回传404
                 let page = PageFactory.getErrorPage(errCode);
                 if(page){
-                    NoomiHttp.redirect(request.response,page);
+                    request.response.redirect(page);
                 }else{
-                    NoomiHttp.writeDataToClient(request.response,{
+                    request.response.writeToClient({
                         statusCode:errCode
                     });
                 }

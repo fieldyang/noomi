@@ -1,8 +1,7 @@
-import { OrmFactory } from "./ormfactory";
-import { Resource } from "../../test/app/module/dao/pojo/resource";
-import { ResourceAuthority } from "../../test/app/module/dao/pojo/resourceauthority";
-import { GroupAuthority } from "../../test/app/module/dao/pojo/groupauthority";
 import { HttpRequest } from "./httprequest";
+import { InstanceFactory } from "./instancefactory";
+import { SecurityFilter } from "./filter/securityfilter";
+import { Session } from "./sessionfactory";
 
 /**
  * 安全工厂
@@ -12,6 +11,7 @@ interface ResourceObj{
     auths:Array<number>;       //组id列表
 }
 class SecurityFactory{
+    static sessionName:string = 'NOOMI_SECURITY_OBJECT';
     static dbOptions:any;
     static securityPages:Map<string,string> = new Map();
     //资源列表
@@ -22,55 +22,17 @@ class SecurityFactory{
     static groups:Map<number,Array<number>> = new Map();
     
     /**
-     * 加载数据，需要用户自己改写
-     * @return  promise
-     */
-    static async loadData():Promise<any>{
-        let datas = {
-            resources:[],
-            resourceAuthorities:[],
-            groupAuthorities:[]
-        };
-   
-        let conn = await OrmFactory.getConnection();
-        //资源
-        let resArr:Array<Resource> = await conn.manager.find(Resource);
-        let res:Resource;
-        for(res of resArr){
-            datas.resources.push({
-                resourceId:res.resourceId,
-                url:res.url
-            });
-        }
-
-        //资源权限
-        const raArr:Array<ResourceAuthority> = await conn.manager.find(ResourceAuthority);
-        let ra:ResourceAuthority = null;
-        for(ra of raArr){
-            datas.resourceAuthorities.push({
-                resourceId:ra.resource.resourceId,
-                authorityId:ra.authority.authorityId
-            });
-        }
-
-        //组权限
-        let gaArr:Array<GroupAuthority> = await conn.manager.find(GroupAuthority);
-        let ga:GroupAuthority;
-        for(ga of gaArr){
-            datas.groupAuthorities.push({
-                groupId:ga.group.groupId,
-                authorityId:ga.authority.authorityId
-            });
-        }
-        
-        return datas;
-        
-    }
-    /**
      * 初始化配置
      * 
      */
     static async init(){
+        //初始化security filter
+        InstanceFactory.addInstance({
+            name:'securityFilter',           //实例名
+            instance:new SecurityFilter(),
+            class_name:'SecurityFilter'
+        });
+
         let conn:any;
         let tresource:string = "t_resource";
         let tgroupauth:string="t_group_authority";
@@ -170,6 +132,12 @@ class SecurityFactory{
      */
     static addUserGroup(userId:number,groupId:number){
         let arr:Array<any> = this.users.get(userId);
+        if(typeof userId === 'string'){
+            userId = parseInt(userId);
+        }
+        if(typeof groupId === 'string'){
+            groupId = parseInt(groupId);
+        }
         if(!arr){
             arr = [];
             this.users.set(userId,arr);
@@ -186,9 +154,9 @@ class SecurityFactory{
      * @param groups    组id 数组
      */
     static addUserGroups(userId:number,groups:Array<number>,request?:HttpRequest){
-        //保存userId 到session
+        //保存userId 到security session object
         if(request){
-            request.getSession().set('userId',userId);
+            this.setSession(request.getSession(),'userId',userId);
         }
         for(let gid of groups){
             this.addUserGroup(userId,gid);
@@ -354,10 +322,10 @@ class SecurityFactory{
     /**
      * 鉴权
      * @param url       资源
-     * @param user      用户
-     * @return          0通过 1未登录 2无权限
+     * @param session   session
+     * @return          0 通过 1未登录 2无权限
      */
-    static check(url:string,userId:number):number{
+    static check(url:string,session:Session):number{
         //获取路径
         url = require('url').parse(url).pathname;
         let resAuthArr:Array<number>;
@@ -373,10 +341,11 @@ class SecurityFactory{
             return 0;
         }
         
-        //用户未登录
-        if(!userId){
+        let userId = this.getSession(session,'userId');        
+        if(userId === undefined){
             return 1;
         }
+        
         //用户所在组
         let groupIds = this.users.get(userId);
         //用户无权限
@@ -415,6 +384,49 @@ class SecurityFactory{
         return this.securityPages.get(name);
     }
 
+    /**
+     * 设置security session 值
+     * @param session   session
+     * @param key   键
+     * @param value 值
+     */
+    static setSession(session:Session,key:string,value:any){
+        if(!session){
+            return;
+        }
+        let secObj:any = session.get(this.sessionName);
+        //不存在
+        if(secObj === undefined){
+            secObj = {};
+        }
+        secObj[key] = value;
+        session.set(this.sessionName,secObj);
+    }
+
+    /**
+     * 获取security session值
+     * @param session   session
+     * @param key       键
+     */
+    static getSession(session:Session,key:string):any{
+        if(!session){
+            return;
+        }
+        let secObj:any = session.get(this.sessionName);
+        if(secObj){
+            return secObj[key];
+        }
+    }
+
+    /**
+     * 获取登录前页面
+     * @param session   session
+     * @return          page url
+     */
+    static getPreLoginPage(session:Session):string{
+        return this.getSession(session,'prelogin');
+    }
+    
     static parseFile(path){
         const pathTool = require('path');
         const fs = require("fs");

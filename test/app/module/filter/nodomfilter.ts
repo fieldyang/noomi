@@ -1,4 +1,3 @@
-import { NoomiHttp } from "../../../../core/ts/noomihttp";
 
 class NodomFilter{
     do(request,response){

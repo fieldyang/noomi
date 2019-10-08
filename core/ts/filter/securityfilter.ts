@@ -1,22 +1,30 @@
 import { HttpRequest } from "../httprequest";
-import { ServerResponse } from "http";
+import { HttpResponse } from "../httpresponse";
 import { SecurityFactory } from "../securityfactory";
 import { Session } from "../sessionfactory";
-import { NoomiHttp } from "../noomihttp";
-
 
 export class SecurityFilter{
-    do(request:HttpRequest,response:ServerResponse){
+    do(request:HttpRequest,response:HttpResponse){
         let session:Session = request.getSession();
-        let uid = session.get('userId');
-        if(!SecurityFactory.check(request.url,uid)){
-            //跳到鉴权失败页面
-            let page = SecurityFactory.getSecurityPage('auth_fail_url');
-            if(page){
-                NoomiHttp.redirect(request.response,page);
-            }
-            return false;
+        let page:string;
+        let result = SecurityFactory.check(request.url,session);
+        switch(result){
+            case 0:
+                return true;
+            case 1:
+                //未登录
+                page = SecurityFactory.getSecurityPage('login_url');
+                //保存登录前页面
+                SecurityFactory.setSession(session,'prelogin',request.url);
+                break;
+            case 2:
+                // 无权限
+                page = SecurityFactory.getSecurityPage('auth_fail_url');
+                break;
         }
-        return true;
+        if(page){
+            response.redirect(page);
+        }
+        return false;
     }
 }

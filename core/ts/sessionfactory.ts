@@ -1,5 +1,5 @@
 import { HttpRequest } from "./httprequest";
-import { ServerResponse } from "http";
+import { HttpResponse } from "./httpresponse";
 
 
 interface SessionCfg{
@@ -48,7 +48,9 @@ class SessionFactory {
         if (id) {
             let session: Session = SessionFactory.sessions.get(id);
             //判断是否过期
-            if (session.expires < new Date().getTime()) {
+            if (session === undefined){
+                session = this.initSession(req);
+            } else if(session.expires < new Date().getTime()) {
                 this.initSession(req);
             }
             //重置过期时间
@@ -71,7 +73,7 @@ class SessionFactory {
         let id = new Date().getTime() + '' + this.currentCount;
         let ses: Session = new Session();
         //设置默认过期时间
-        ses.expires = this.timeout * 60000; 
+        ses.expires = (new Date()).getTime() + this.timeout * 60000; 
         this.sessions.set(id, ses);
         this.setCookie(req.response, id, ses.expires);
         return ses;
@@ -83,14 +85,12 @@ class SessionFactory {
      */
     static getSessionId(req: HttpRequest): string {
         let cookies = {};
-        req.headers.cookie && req.headers.cookie.split(';').forEach(parms => {
-            let parts = parms.split('=');
+        let cook = req.getHeader('cookie');
+        cook && cook.split(';').forEach(parms => {
+            let parts = parms.split(':');
             cookies[parts[0].trim()] = (parts[1] || '').trim();
         });
-        
-        if (cookies['NOOMISESSIONID']) {
-            return cookies['NOOMISESSIONID'];
-        }
+        return cookies['NOOMISESSIONID'];
     }
 
     /**
@@ -112,10 +112,9 @@ class SessionFactory {
      * @param id        session id       
      * @param expires   超时时间
      */
-    static setCookie(res:ServerResponse, id: string, expires: number) {
-        res.setHeader(
-            'Set-Cookie', 'NOOMISESSIONID=' + id + ';Expires=' + new Date(expires).toUTCString() + ';'
-        );
+    static setCookie(res:HttpResponse, id: string, expires: number) {
+        res.cookie.set('NOOMISESSIONID',id);
+        res.cookie.set('Expires',new Date(expires).toUTCString());
     };
 
 }

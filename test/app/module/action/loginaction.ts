@@ -4,9 +4,9 @@ import { User } from "../dao/pojo/user";
 import { SecurityFactory } from "../../../../core/ts/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
-import { NoomiHttp } from "../../../../core/ts/noomihttp";
 
 export class LoginAction extends BaseAction{
+    toPage:string = '/pages/loginsuccess.html';
     async login(){
         let un = this.model.userName;
         let pwd = this.model.pwd;
@@ -35,17 +35,11 @@ export class LoginAction extends BaseAction{
             }
             //添加到securityfactory
             SecurityFactory.addUserGroups(user.userId,ga,this.request);
-            result = {
-                success:true
-            }
-            
+            this.toPage = SecurityFactory.getPreLoginPage(this.request.getSession());
         }else{
-            result = {
-                success:false,
-                result:{msg:"用户名或密码错误!"}
-            }
+            this.toPage = '/pages/loginfail.html';
         }
-        return result;
+        
         // NoomiHttp.writeDataToClient(this.response,{data:result});
     }
 }

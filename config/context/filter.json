@@ -9,11 +9,6 @@
             "name":"pathFilter", 	
             "class_name":"PathFilter",
             "path":"filter/pathfilter"
-        },
-        {
-            "name":"securityFilter",
-            "class_name":"SecurityFilter",
-            "path":"filter/securityfilter"
         }
     ]
 }

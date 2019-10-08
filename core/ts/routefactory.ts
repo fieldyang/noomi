@@ -3,8 +3,7 @@
  */
 import {InstanceFactory} from "./instancefactory";
 import { HttpRequest } from "./httprequest";
-import { ServerResponse } from "http";
-import { NoomiHttp } from "./noomihttp";
+import { HttpResponse } from "./httpresponse";
 interface RouteCfg{
     path:string;
     reg:RegExp;
@@ -93,7 +92,7 @@ class RouteFactory{
      * @param req           httprequest
      * @param res           response
      */
-    static handleRoute(pathOrRoute:any,params:object,req:HttpRequest,res:ServerResponse){
+    static handleRoute(pathOrRoute:any,params:object,req:HttpRequest,res:HttpResponse){
         let route:Route;
         if(typeof pathOrRoute === 'string'){
             route = this.getRoute(pathOrRoute);
@@ -139,7 +138,7 @@ class RouteFactory{
      * @param instance  路由对应实例
      * @param results   route结果数组    
      */
-    static handleResult(res:ServerResponse,data:any,instance:any,results:Array<RouteResult>){
+    static handleResult(res:HttpResponse,data:any,instance:any,results:Array<RouteResult>){
         let find:boolean = false;
         
         if(results && results.length > 0){
@@ -168,24 +167,18 @@ class RouteFactory{
      * @param data          数据
      * @param instance      实例
      */
-    private static handleOneResult(res:ServerResponse,result:RouteResult,data:any,instance?:any){
+    private static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any){
         switch(result.type){
             case "redirect": //重定向
-                let url = result.url;
+                let url = handleParamUrl(instance,result.url);
                 let pa = [];
                 //参数属性
                 if(result.params && Array.isArray(result.params) && result.params.length>0){
                     for(let pn of result.params){
-                        let v;
-                        if(instance[pn] !== undefined){
-                            v = instance[pn];
-                        }else if(instance.model && instance.model[pn] !== undefined){
-                            v = instance.model.pn;
-                        }
+                        let v = getValue(instance,pn);
                         if(v !== undefined){
                             pa.push(pn+'=' + v);
                         }
-                        
                     }
                 }
                 let pas:string = pa.join('&');
@@ -196,22 +189,18 @@ class RouteFactory{
                         url += '&' + pas;
                     }
                 }
-                NoomiHttp.redirect(res,url);
+                res.redirect(url);
                 return;
             case "chain": //路由器链
                 let urlMdl = require("url");
-                let url1 = urlMdl.parse(result.url).pathname;
-                let params = require('querystring').parse(urlMdl.parse(result.url).query);
+                url = handleParamUrl(instance,result.url);
+                let url1 = urlMdl.parse(url).pathname;
+                let params = require('querystring').parse(urlMdl.parse(url).query);
                 
                 //参数处理
                 if(result.params && Array.isArray(result.params) && result.params.length>0){
                     for(let pn of result.params){
-                        let v;
-                        if(instance[pn] !== undefined){
-                            v = instance[pn];
-                        }else if(instance.model && instance.model[pn] !== undefined){
-                            v = instance.model[pn];
-                        }
+                        let v = getValue(instance,pn);
                         if(v !== undefined){
                             params[pn] = v;
                         }
@@ -238,22 +227,51 @@ class RouteFactory{
                 }
                 return;
             default: //json
-                NoomiHttp.writeDataToClient(res,{
+                res.writeToClient({
                     data:data,
                     type:'application/json'
                 });
         }
-      
+        
+        /**
+         * 处理带参数的url
+         * @param url   源url，以${propName}出现
+         * @return      处理后的url
+         */
+        function handleParamUrl(instance:any,url:string):string{
+            let reg:RegExp = /\$\{.*?\}/g;
+            let r;
+            //处理带参数url
+            while((r=reg.exec(result.url)) !== null){
+                let pn = r[0].substring(2,r[0].length-1);
+                url = url.replace(r[0],getValue(instance,pn));
+            }
+            return url;
+        }
+
+        /**
+         * 获取属性值
+         * @param instance  实例 
+         * @param pn        属性名
+         */
+        function getValue(instance:any,pn:string){
+            if(instance[pn] !== undefined){
+                return instance[pn];
+            }else if(instance.model && instance.model[pn] !== undefined){
+                return instance.model[pn];
+            }
+        }
     }
+
 
     /**
      * 处理异常信息
      * @param res   response
      * @param e     异常
      */
-    static handleException(res:ServerResponse,e:any){
+    static handleException(res:HttpResponse,e:any){
         let msg = e.getMessage() || e;
-        NoomiHttp.writeDataToClient(res,{
+        res.writeToClient({
             data:"<h1>route access error!</h1><h3>Error Message:" + msg + "</h3>"
         });
     }
@@ -280,13 +298,13 @@ class RouteFactory{
         }
         let ns1 = json.namespace? json.namespace.trim():'';
         //设置命名空间，如果是子文件，需要连接上级文件
-        ns = ns?pathTool.jon(ns,ns1):ns1;
+        ns = ns?pathTool.posix.join(ns,ns1):ns1;
         
         //处理本级路由
         if(Array.isArray(json.routes)){
             json.routes.forEach((item)=>{
                 //增加namespce前缀
-                let p = pathTool.join(ns,item.path);
+                let p = pathTool.posix.join(ns,item.path);
                 this.addRoute(p,item.instance_name,item.method,item.results);
             });
         }
