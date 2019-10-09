@@ -4,6 +4,7 @@ import { User } from "../dao/pojo/user";
 import { SecurityFactory } from "../../../../core/ts/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
+import { RedisFactory } from "../../../../core/ts/redisfactory";
 
 export class LoginAction extends BaseAction{
     toPage:string = '/pages/loginsuccess.html';
@@ -18,7 +19,6 @@ export class LoginAction extends BaseAction{
                 .getOne();
         let result;
         if(user){
-            // this.request.getSession().set('userId',user.userId);
             let gus = await conn.getRepository(GroupUser)
                 .createQueryBuilder("gu")
                 .where("gu.user.userId = :id", { id: parseInt(user.userId) })
@@ -35,11 +35,10 @@ export class LoginAction extends BaseAction{
             }
             //添加到securityfactory
             SecurityFactory.addUserGroups(user.userId,ga,this.request);
-            this.toPage = SecurityFactory.getPreLoginPage(this.request.getSession());
+            this.toPage = await SecurityFactory.getPreLoginPage(this.request.getSession());
         }else{
             this.toPage = '/pages/loginfail.html';
         }
-        
         // NoomiHttp.writeDataToClient(this.response,{data:result});
     }
 }

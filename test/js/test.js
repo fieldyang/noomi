@@ -20,10 +20,10 @@
 //     console.log(lst);
 // });
  
-let reg = /\$\{.*?\}/g;
-let r;
-let s = 'haha${xx}_${yy}adfaf';
-
-for(;(r=reg.exec(s))!==null;){
-    console.log(r.index);
-}
+// let reg = /[A-Za-z].*[0-9&~\$\+_]+.*|[0-9].*[\w&~\$\+]+.*/;
+// let r;
+// let s = '2+&';
+// console.log(reg.test(s));
+let p = [1,2,3,4];
+let msg = "current is ${p[1]}";
+console.log(msg);

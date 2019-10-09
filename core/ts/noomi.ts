@@ -12,6 +12,7 @@ import { OrmFactory } from "./ormfactory";
 import { SecurityFactory } from "./securityfactory";
 import { HttpResponse } from "./httpresponse";
 import { IncomingMessage, ServerResponse } from "http";
+import { RedisFactory } from "./redisfactory";
 class noomi{
     port:number=3000;
     server:Server;
@@ -41,6 +42,11 @@ class noomi{
             throw e;
         }
 
+        //session工厂初始化
+        if(iniJson.hasOwnProperty('session')){
+            SessionFactory.init(iniJson['session']);    
+        }
+        
         //系统参数初始化
         if(iniJson.hasOwnProperty('upload')){
             UploadTool.init(iniJson['upload']);
@@ -51,11 +57,6 @@ class noomi{
 
         //添加模块路径为静态资源禁止访问路径
         StaticResource.addPath(mdlPath.charAt(0) === '/'?mdlPath:'/' + mdlPath);
-        
-        //session工厂初始化
-        if(iniJson.hasOwnProperty('session')){
-            SessionFactory.init(iniJson['session']);    
-        }
         
         //上下文初始化
         if(iniJson.hasOwnProperty('context_path')){
@@ -118,6 +119,15 @@ class noomi{
             console.log('security初始化完成！');
         }
 
+        //orm初始化
+        if(iniJson.hasOwnProperty('redis_path')){
+            console.log('redis初始化...');
+            let rPath = iniJson['redis_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                this.loadRedis(path.join(basePath,rPath));
+            }
+            console.log('redis初始化完成！');
+        }
         //errorPage
         if(iniJson.hasOwnProperty('error_page')){
             this.setErrorPages(iniJson['error_page']);
@@ -142,6 +152,7 @@ class noomi{
         });;
     }
 
+    
     /**
      * 加载context
      * @param path 
@@ -188,6 +199,14 @@ class noomi{
      */
     loadSecurity(path:string){
         SecurityFactory.parseFile(path);
+    }
+
+    /**
+     * 加载redis配置文件
+     * @param path  文件路径
+     */
+    loadRedis(path:string){
+        RedisFactory.parseFile(path);
     }
 
     /**

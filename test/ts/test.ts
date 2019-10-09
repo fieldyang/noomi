@@ -1,31 +1,32 @@
-import{createConnection, getConnectionManager, getRepository, getConnection} from "typeorm";
-import { User } from "../app/module/dao/pojo/user";
-import { Group } from "../app/module/dao/pojo/group";
-import { GroupUser } from "../app/module/dao/pojo/groupuser";
+import { RedisFactory } from "../../core/ts/redisfactory";
 
-(async function(){
-    const manager = getConnectionManager();
-    const conn = manager.create({
-        "type":"mysql",
-        "host":"localhost",
-        "port":3306,
-        "username":"root",
-        "password":"field",
-        "database":"codement",
-        "entities": [
-            "build/test/app/module/dao/pojo/*.js"
-        ],
-        "logging":true,
-        // "logger":"all",
-        "extra":{
-            "connectionLimit":10
-        }
-    });
-    if(!conn.isConnected)
-        await conn.connect();
-    // let lst = await conn.manager.find(Group);
-    // let group:Group = await conn.getRepository(Group).findOne(1);
-    let lst = await conn.getRepository(GroupUser).find();
-    
-    console.log(lst);
-}());
+RedisFactory.addClient({
+    name:'default',
+    host:'localhost',
+    port:'3333'
+});
+let client = RedisFactory.getClient('default');
+
+client.del('aaa');
+// client.hmset('xxx', {
+//     age: 2,
+//     sex: 'F',
+//     yyy:{
+//         u:'yang'
+//     }
+//   },(err,obj)=>{
+//     console.log(err);
+// });
+// client.hdel('xxx','yyy');
+// // client.hset('xxx','yyy',{
+// //     u:'lei'
+// // });
+// client.hget('xxx','yyy',(err,value)=>{
+//     console.log(value.u);
+// })
+
+
+// RedisFactory.get('default','aaa','name').then(value=>{
+//     console.log(value);
+// });
+

@@ -325,7 +325,7 @@ class SecurityFactory{
      * @param session   session
      * @return          0 通过 1未登录 2无权限
      */
-    static check(url:string,session:Session):number{
+    static async check(url:string,session:Session):Promise<number>{
         //获取路径
         url = require('url').parse(url).pathname;
         let resAuthArr:Array<number>;
@@ -341,7 +341,7 @@ class SecurityFactory{
             return 0;
         }
         
-        let userId = this.getSession(session,'userId');        
+        let userId = await this.getSession(session,'userId');        
         if(userId === undefined){
             return 1;
         }
@@ -390,17 +390,21 @@ class SecurityFactory{
      * @param key   键
      * @param value 值
      */
-    static setSession(session:Session,key:string,value:any){
+    static async setSession(session:Session,key:string,value:any){
         if(!session){
             return;
         }
-        let secObj:any = session.get(this.sessionName);
+        let secObj:any = await session.get(this.sessionName);
+        
         //不存在
-        if(secObj === undefined){
+        if(!secObj){
             secObj = {};
+        }else{
+            //返回为字符串，需要解析城json
+            secObj = JSON.parse(secObj);
         }
         secObj[key] = value;
-        session.set(this.sessionName,secObj);
+        session.set(this.sessionName,JSON.stringify(secObj));
     }
 
     /**
@@ -408,12 +412,14 @@ class SecurityFactory{
      * @param session   session
      * @param key       键
      */
-    static getSession(session:Session,key:string):any{
+    static async getSession(session:Session,key:string):Promise<any>{
         if(!session){
             return;
         }
-        let secObj:any = session.get(this.sessionName);
+        let secObj:any = await session.get(this.sessionName);
         if(secObj){
+            //session存储为字符串
+            secObj = JSON.parse(secObj);
             return secObj[key];
         }
     }
@@ -423,7 +429,7 @@ class SecurityFactory{
      * @param session   session
      * @return          page url
      */
-    static getPreLoginPage(session:Session):string{
+    static async getPreLoginPage(session:Session):Promise<string>{
         return this.getSession(session,'prelogin');
     }
     
