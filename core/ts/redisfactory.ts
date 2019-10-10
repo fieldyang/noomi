@@ -1,3 +1,5 @@
+import { NoomiError } from "../errorfactory";
+
 interface RedisCfg{
     name?:string,
     host:string,
@@ -51,20 +53,20 @@ class RedisFactory{
     static set(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
         if(client === null){
-            throw 'redis client不存在';
-        }
-        let ex = [];
-        if(item.timeout > 0){
-            ex = ['EX',item.timeout];
+            throw new NoomiError("2601",clientName);
         }
         if(item.subKey){
-            client.hset.apply(client,[item.key,item.subKey,item.value].concat(ex));
+            client.hset(item.key,item.subKey,item.value);
         }else{
             if(typeof item.value === 'object'){//对象用set存储
-                client.hmset.apply(client,[item.key,item.value].concat(ex));
+                client.hmset(item.key,item.value);
             }else{
-                client.set.apply(client,[item.key,item.value].concat(ex));
+                client.set(item.key,item.value);
             }
+        }
+        //设置超时
+        if(item.timeout>0){
+            client.expire(item.key,item.timeout);
         }
     }
 
@@ -74,15 +76,15 @@ class RedisFactory{
      * @param key           键
      * @param subKey        子键
      */
-    static async get(clientName:string,key:string,subKey?:string){
+    static async get(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
         if(client === null){
-            throw 'redis client不存在';
+            throw new NoomiError("2601",clientName);
         }
         let retValue;
-        if(subKey){
+        if(item.subKey){
             retValue = await new Promise((resolve,reject)=>{
-                client.hget(key,subKey,(err,value)=>{
+                client.hget(item.key,item.subKey,(err,value)=>{
                     if(!err){
                         resolve(value);
                     }
@@ -90,12 +92,17 @@ class RedisFactory{
             }); 
         }else{
             retValue = await new Promise((resolve,reject)=>{
-                client.get(key,(err,value)=>{
+                client.get(item.key,(err,value)=>{
                     if(!err){
                         resolve(value);
                     }
                 });  
             });
+        }
+
+        //修改过期时间
+        if(item.timeout && item.timeout>0){
+            client.expire(item.key,item.timeout);
         }
         return retValue;
     }
@@ -108,7 +115,7 @@ class RedisFactory{
     static del(clientName:string,key:string,subKey?:string){
         let client = this.getClient(clientName);
         if(client === null){
-            throw 'redis client不存在';
+            throw new NoomiError("2601",clientName);
         }
         if(subKey!==undefined){
             client.hdel(key,subKey);
@@ -125,12 +132,12 @@ class RedisFactory{
         const pathTool = require('path');
         const fs = require("fs");
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:any = null;
         try{
+            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw e;
+            throw new NoomiError("2600");
         }
         //可以为数组，也可以为单个对象
         if(Array.isArray(json)){

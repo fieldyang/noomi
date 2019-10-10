@@ -6,8 +6,24 @@ RedisFactory.addClient({
     port:'3333'
 });
 let client = RedisFactory.getClient('default');
+client.set('xxx',2);
+// client.hmset('xxx',{
+//     id:1,
+//     name:'bbb'
+// });
 
-client.del('aaa');
+// // client.expire('xxx',5);
+// client.hget('xxx','name',(err,value)=>{
+//     if(err){throw err};
+//     console.log(value)
+// });
+
+// setTimeout(()=>{
+//     client.hget('xxx','name',(err,value)=>{
+//         if(err){throw err};
+//         console.log(value)
+//     });
+// },6000);
 // client.hmset('xxx', {
 //     age: 2,
 //     sex: 'F',

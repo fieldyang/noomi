@@ -1,4 +1,5 @@
 import { AopFactory} from "./aopfactory";
+import { NoomiError } from "../errorfactory";
 
 /**
  * 实例工厂
@@ -35,7 +36,7 @@ class InstanceFactory{
      */
     static addInstance(cfg:InstanceCfg){
         if(this.factory.has(cfg.name)){
-            throw "该实例名已存在";
+            throw new NoomiError("1002",cfg.name);
         }
         const pathMdl = require('path');
         let insObj;
@@ -49,7 +50,7 @@ class InstanceFactory{
             }
             // class
             if(mdl.constructor !== Function){
-                throw "模块必须为class";
+                throw new NoomiError("1003");
             }
             //默认true
             let singleton = cfg.singleton!==undefined?cfg.singleton:true;
@@ -82,7 +83,7 @@ class InstanceFactory{
      */
     static getInstance(name:string){
         if(!this.factory.has(name)){
-            throw "1000";
+            throw new NoomiError("1001",name);
         }
         let ins:InstanceObj = this.factory.get(name);
         if(!ins){
@@ -117,12 +118,12 @@ class InstanceFactory{
         instance = instance || this.getInstance(instanceName);
         //实例不存在
         if(!instance){
-            throw "1000";
+            throw new NoomiError("1001",instanceName);
         }
         func = func || instance[methodName];
         //方法不存在
         if(!func){
-            throw "1001";
+            throw new NoomiError("1010",methodName);
         }
         return func.apply(instance,params); 
     }
@@ -145,7 +146,7 @@ class InstanceFactory{
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw "实例文件配置错误"!
+            throw new NoomiError("1000");
         }
 
         if(Array.isArray(json.files)){

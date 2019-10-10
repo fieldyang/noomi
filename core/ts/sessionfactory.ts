@@ -59,24 +59,40 @@ class SessionFactory {
     static getSession(req:HttpRequest) {
         //session存在
         let id:string = this.getSessionId(req);
-        if (id) {
+        let cTime = new Date().getTime();
+        let expTime = cTime + this.timeout * 60000;
+        let session: Session;
+        //未传入sessionId
+        if(!id){
+            id = this.genSessionId();
+            session = new Session(this.type,id);
+            //存在内存
+            if(this.type === 0){
+                //设置默认过期时间
+                if(this.timeout > 0){
+                    session.expires =  expTime;
+                }
+                this.sessions.set(id, session);
+            }
+        }else{
             if(this.type === 0){
                 let session: Session = SessionFactory.sessions.get(id);
-                //判断是否过期
-                if (session === undefined){
-                    session = this.initSession(req);
-                } else if(session.expires < new Date().getTime()) {
-                    this.initSession(req);
+                //session过期，清空数据
+                if(this.timeout > 0 && session.expires > cTime){
+                    session.clear();
+                    session.expires = expTime;
                 }
-                //重置过期时间
-                session.expires = new Date().getTime() + 60 * 1000;
-                return session;
             }else{
-                return new Session(this.type,id);    
+                session = new Session(this.type,id);
             }
-        } else {
-            return this.initSession(req);
         }
+    
+        //设置cookie sessionid和过期时间
+        let cookie = req.response.cookie;
+        cookie.set(this.sessionName,id);
+        cookie.set('Expires',new Date(expTime).toUTCString());
+
+        return session;
     }
 
     /**
@@ -88,35 +104,9 @@ class SessionFactory {
             this.currentCount = 1;
         }
         return new Date().getTime() + '' + this.currentCount;
-        
     }
 
-    /**
-     * 初始化session
-     * @param req   request
-     */
-    static initSession(req: HttpRequest) {
-        //创建session
-        if(++this.currentCount > this.MAXCOUNT){
-            this.currentCount = 1;
-        }
-        let cTime = new Date().getTime();
-        let id = cTime + '' + this.currentCount;
-        let ses: Session = new Session(this.type,id);
-        
-        //存在内存
-        if(this.type === 0){
-            //设置默认过期时间
-            if(this.timeout > 0){
-                ses.expires = cTime + this.timeout * 60000;
-            }
-            this.sessions.set(id, ses);
-        }
-        
-        this.setCookie(req.response, id, ses.expires);
-        return ses;
-    }
-
+    
     /**
      * 获取当前sessionId
      * @param req   request
@@ -132,29 +122,20 @@ class SessionFactory {
     }
 
     /**
-     * 清理session
+     * 清理过期session(内存中的)
      * @param sessions 
      */
     static cleanUp(){
+        if(this.type !== 0){
+            return;
+        }
         let d = new Date().getTime();
         this.sessions.forEach((session,id)=>{
             if(session.expires<d){
                 this.sessions.delete(id);
             }
-        })
+        });
     }
-
-    /**
-     * 设置Cookie头
-     * @param res       response
-     * @param id        session id       
-     * @param expires   超时时间
-     */
-    static setCookie(res:HttpResponse, id: string, expires: number) {
-        res.cookie.set('NOOMISESSIONID',id);
-        res.cookie.set('Expires',new Date(expires).toUTCString());
-    };
-
 }
 
 /**
@@ -171,15 +152,30 @@ class Session {
         this.id = id;
         this.expires = expires;
     }
+
+    /**
+     * 清空数据
+     */
+    clear(){
+        this.data.clear();
+    }
     /**
      * 获取session值
-     * @param key  键
+     * @param key   键
+     * @return      值或null
      */
     get(key:string) {
         if(SessionFactory.type === 0){
-            return this.data.get(key);
+            if(this.data.has(key)){
+                return this.data.get(key);
+            }
+            return null;
         }else{ //redis
-            return RedisFactory.get(SessionFactory.redis,this.id,key);
+            return RedisFactory.get(SessionFactory.redis,{
+                key:this.id,
+                subKey:key,
+                timeout:SessionFactory.timeout*60
+            });
         }
     }
     /**
@@ -191,14 +187,18 @@ class Session {
         if(value === undefined){
             return;
         }
-        if(SessionFactory.type === 0){
-            this.data.set(key, value.tostring());
+        if(SessionFactory.type === 0){//内存中
+            //转换成string
+            if(typeof value !== 'string'){
+                value = value + '';
+            }
+            this.data.set(key, value);
         }else{  //redis
             RedisFactory.set(SessionFactory.redis,{
                 key:this.id,
                 subKey:key,
                 value:value,
-                timeout:SessionFactory.timeout
+                timeout:SessionFactory.timeout*60  //分钟转为秒
             });
         }
     }

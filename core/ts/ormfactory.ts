@@ -1,4 +1,5 @@
 import { TypeormSupport } from "./ormsupport/typeormsupport";
+import { NoomiError } from "../errorfactory";
 
 /**
  * orm 管理器
@@ -45,7 +46,8 @@ class OrmFactory{
             let json = JSON.parse(jsonStr);
             this.init(json);
         }catch(e){
-            throw "orm文件配置错误!"
+            throw e;
+            // throw new NoomiError("2500");
         }
 
     }

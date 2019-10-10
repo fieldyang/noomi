@@ -13,6 +13,7 @@ import { SecurityFactory } from "./securityfactory";
 import { HttpResponse } from "./httpresponse";
 import { IncomingMessage, ServerResponse } from "http";
 import { RedisFactory } from "./redisfactory";
+import { NoomiError,ErrorFactory } from "../errorfactory";
 class noomi{
     port:number=3000;
     server:Server;
@@ -39,8 +40,16 @@ class noomi{
             let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
-            throw e;
+            throw new NoomiError("1001");
         }
+
+        if(iniJson === null){
+            throw new NoomiError("1001");
+        }
+
+        //异常
+        ErrorFactory.language = iniJson['language'] || 'zh';  //默认中文
+        ErrorFactory.init();
 
         //session工厂初始化
         if(iniJson.hasOwnProperty('session')){

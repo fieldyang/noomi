@@ -2,6 +2,7 @@ import { HttpRequest } from "./httprequest";
 import { InstanceFactory } from "./instancefactory";
 import { SecurityFilter } from "./filter/securityfilter";
 import { Session } from "./sessionfactory";
+import { NoomiError } from "../errorfactory";
 
 /**
  * 安全工厂
@@ -10,6 +11,7 @@ interface ResourceObj{
     reg:RegExp;                //正则表达式
     auths:Array<number>;       //组id列表
 }
+
 class SecurityFactory{
     static sessionName:string = 'NOOMI_SECURITY_OBJECT';
     static dbOptions:any;
@@ -33,7 +35,6 @@ class SecurityFactory{
             class_name:'SecurityFilter'
         });
 
-        let conn:any;
         let tresource:string = "t_resource";
         let tgroupauth:string="t_group_authority";
         let tresourceauth:string = "t_resource_authority";
@@ -63,16 +64,19 @@ class SecurityFactory{
             resourceId:resourceId,
             resourceUrl:resourceUrl
         }
-        switch(this.dbOptions.production){
+        switch(this.dbOptions.product){
             case "mysql":
                 handleMysql.call(this,this.dbOptions,ids);
                 break;
             case "mssql":
-
-            break;
+                handleMssql.call(this,this.dbOptions,ids);
+                break;
             case "oracle":
-
-            break;
+                handleOracle.call(this,this.dbOptions,ids);
+                break;
+            case "mangodb":
+                handleMongo.call(this,this.dbOptions,ids);
+                break;
         }
 
         /**
@@ -80,48 +84,217 @@ class SecurityFactory{
          * @param cfg 
          */
         async function handleMysql(cfg:any,ids:any){
-            const mysql = require('mysql');
-            conn = mysql.createConnection({
+            const db = require('mysql');
+            const port = cfg.port || 3306;
+            let conn = db.createConnection({
                 host: cfg.host,
+                port: port,
                 user: cfg.user,
                 password: cfg.pwd,
                 database: cfg.schema
             });
-            conn.connect();
-            //组权限
-            await new Promise((resolve,reject)=>{
-                conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
-                (error,results,fields)=>{
-                    for(let r of results){
-                        this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                    }
-                    resolve();
+            try{
+                conn.connect();
+                //组权限
+                await new Promise((resolve,reject)=>{
+                    conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
+                    (error,results,fields)=>{
+                        for(let r of results){
+                            this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                        }
+                        resolve();
+                    });
                 });
-            });
 
-            //资源
-            await new Promise((resolve,reject)=>{
-                conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
-                (error,results,fields)=>{
-                    for(let r of results){
-                        this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
-                    }
-                    resolve();
+                //资源
+                await new Promise((resolve,reject)=>{
+                    conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
+                    (error,results,fields)=>{
+                        for(let r of results){
+                            this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
+                        }
+                        resolve();
+                    });
                 });
-            });
 
-            //资源权限
-            await new Promise((resolve,reject)=>{
-                conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
-                (error,results,fields)=>{
-                    for(let r of results){
-                        this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
-                    }
-                    resolve();
+                //资源权限
+                await new Promise((resolve,reject)=>{
+                    conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
+                    (error,results,fields)=>{
+                        for(let r of results){
+                            this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
+                        }
+                        resolve();
+                    });
                 });
+            }catch(e){
+                throw e;
+            }finally{
+                //关闭连接
+                if (conn) {
+                    try {
+                        conn.end();
+                    } catch (err) {
+                        throw err;
+                    }
+                }
+            }
+        }
+
+        /**
+         * 处理mssql
+         * @param cfg 
+         * @param ids 
+         */
+        async function handleMssql(cfg:any,ids:any){
+            const db = require('mssql');
+            const port = cfg.port || 1433;
+            let conn;
+            try{
+                conn = await db.connect({
+                    host: cfg.host,
+                    port: port,
+                    user: cfg.user,
+                    password: cfg.pwd,
+                    database: cfg.schema
+                });
+                
+                //组权限
+                let results = await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                for(let r of results){
+                    this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                }
+                
+                //资源
+                results = await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                for(let r of results){
+                    this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
+                }
+
+                //资源权限
+                results = await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+                for(let r of results){
+                    this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
+                }
+            }catch(e){
+                throw e;
+            }finally{
+                //关闭连接
+                if (conn) {
+                    try {
+                        conn.close();
+                    } catch (err) {
+                        throw err;
+                    }
+                }
+            }
+        }
+
+        /**
+         * 处理oracle
+         * @param cfg 
+         * @param ids 
+         */
+        async function handleOracle(cfg:any,ids:any){
+            const db = require('oracledb');
+            const port = cfg.port || 1521;
+            let conn;
+            try{
+                conn = await db.getConnection({
+                    host: cfg.host,
+                    port: port,
+                    user: cfg.user,
+                    password: cfg.pwd,
+                    database: cfg.schema
+                });
+                
+                //组权限
+                let results = await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                for(let r of results){
+                    this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                }
+                
+                //资源
+                results = await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                for(let r of results){
+                    this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
+                }
+
+                //资源权限
+                results = await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+                for(let r of results){
+                    this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
+                }
+            }catch(e){
+                throw e;
+            }finally{
+                //关闭连接
+                if (conn) {
+                    try {
+                        await conn.close();
+                    } catch (err) {
+                        throw err;
+                    }
+                }
+            }
+        }
+
+        /**
+         * 处理mongo
+         * @param cfg 
+         * @param ids 
+         */
+        async function handleMongo(cfg:any,ids:any){
+            const db = require('mongodb').MongoClient;
+            let dbUrl = 'mongodb://';
+            if(cfg.user && cfg.pwd){
+                dbUrl += cfg.user + ':' + cfg.pwd
+            }
+            dbUrl += cfg.host;
+            if(cfg.port){
+                dbUrl += ':' + cfg.port;
+            }
+            dbUrl += '/' + cfg.database;
+
+            db.connect(dbUrl,async (err,client)=>{
+                if(err){
+                    throw err;
+                }
+                let db1 = client.db(cfg.database);
+                let coll = db1.collection(ids.tgroupauth);
+                await new Promise((resolve,reject)=>{
+                    coll.find({}).toArray((err,results)=>{
+                        for(let r of results){
+                            this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
+                        }
+                        resolve();
+                    });
+                });
+
+                //资源
+                coll = db1.collection(ids.tresource);
+                await new Promise((resolve,reject)=>{
+                    coll.find({}).toArray((err,results)=>{
+                        for(let r of results){
+                            this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
+                        }
+                        resolve();
+                    });
+                });
+
+                //资源权限
+                coll = db1.collection(ids.tresourceauth);
+                await new Promise((resolve,reject)=>{
+                    coll.find({}).toArray((err,results)=>{
+                        for(let r of results){
+                            this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
+                        }
+                        resolve();
+                    });
+                });
+
+                client.close();
             });
-            //关闭连接
-            conn.end();
         }
     }
 
@@ -345,7 +518,9 @@ class SecurityFactory{
         if(userId === undefined){
             return 1;
         }
-        
+        if(typeof userId === 'string'){
+            userId = parseInt(userId);
+        }
         //用户所在组
         let groupIds = this.users.get(userId);
         //用户无权限
@@ -437,12 +612,13 @@ class SecurityFactory{
         const pathTool = require('path');
         const fs = require("fs");
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:any = null;
         try{
+            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
+            
         }catch(e){
-            throw e;
+            throw new NoomiError("2700");
         }
         //鉴权失败页面
         if(json.hasOwnProperty('auth_fail_url')){

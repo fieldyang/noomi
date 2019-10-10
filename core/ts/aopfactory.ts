@@ -1,6 +1,7 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
 import { UserService } from "../../test/app/module/service/userservice";
+import { NoomiError } from "../errorfactory";
 
 /**
  * AOP 工厂
@@ -43,11 +44,11 @@ class AopPointcut{
     constructor(id:string,expressions:Array<string>){
         this.id = id;
         if(!Array.isArray(expressions) || expressions.length === 0){
-            throw "pointcut的expressions参数配置错误";
+            throw new NoomiError("2001");
         }
         expressions.forEach((item)=>{
             if(typeof item !== 'string'){
-                throw "pointcut的expressions参数配置错误";
+                throw new NoomiError("2001");
             }
             // 转字符串为正则表达式并加入到数组
             let reg = new RegExp(item);
@@ -113,13 +114,13 @@ class AopFactory{
      */
     static addAspect(cfg:AopAspect){
         if(this.aspects.has(cfg.instance)){
-            throw "该advice已经在切面中存在"; 
+            throw new NoomiError("2005",cfg.instance); 
         }
         //连接点
         if(Array.isArray(cfg.aops)){
             cfg.aops.forEach((item)=>{
                 if(!this.pointcuts.has(item.pointcut_id)){
-                    throw "pointcut不存在";
+                    throw new NoomiError("2002",item.pointcut_id);
                 }
                 //设置实例名
                 item.instance = cfg.instance;
@@ -138,7 +139,7 @@ class AopFactory{
     static addPointcut(id:string,expressions:Array<string>){
         //切点
         if(this.pointcuts.has(id)){
-            throw "pointcut id重复定义";
+            throw new NoomiError("2003",id);
         }
         this.pointcuts.set(id,new AopPointcut(id,expressions));
 
@@ -170,7 +171,7 @@ class AopFactory{
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw "实例文件配置错误"!
+            throw new NoomiError("2000");
         }
 
         if(Array.isArray(json.pointcuts)){

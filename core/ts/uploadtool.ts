@@ -45,7 +45,7 @@ class UploadTool{
         return new Promise((resolve,reject)=>{
             let lData:Buffer;
             let flag = false;
-            req.on('data',(chunk)=>{
+            req.on('data',(chunk:Buffer)=>{
                 if(!flag){
                     flag = true;
                 }

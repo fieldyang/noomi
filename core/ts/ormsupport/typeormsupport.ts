@@ -17,14 +17,10 @@ class TypeormSupport implements OrmSupport{
                 "build/test/app/module/dao/pojo/*.js"
             ],
             "logging":true,
-            // "logger":"all",
             "extra":{
                 "connectionLimit":10
             }
         });
-        // createConnection(cfg).then(conn=>{
-        //     console.log(conn);
-        // });
     }
 
     async getConnection(name){

@@ -1,4 +1,5 @@
 import { InstanceFactory } from "./instancefactory";
+import { NoomiError } from "../errorfactory";
 
 interface FilterConfig{
     name:string;
@@ -64,7 +65,7 @@ class FilterFactory{
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw "实例文件配置错误"!
+            throw new NoomiError("2200");
         }
 
         if(Array.isArray(json.filters)){

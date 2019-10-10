@@ -4,6 +4,7 @@
 import {InstanceFactory} from "./instancefactory";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
+import { NoomiError } from "../errorfactory";
 interface RouteCfg{
     path:string;
     reg:RegExp;
@@ -44,7 +45,7 @@ class RouteFactory{
         if(results && results.length>0){
             for(let r of results){
                 if((r.type === 'jump' || r.type === 'redirect') && (!r.url || typeof r.url !=='string' || (r.url = r.url.trim())=== '')){
-                    throw "route配置：result 类型为jump和redirect时，url不能为空";
+                    throw new NoomiError("2101");
                 }
             }
         }
@@ -289,12 +290,12 @@ class RouteFactory{
         const pathTool = require('path');
         const fs = require("fs");
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:RouteJSON = null;
         try{
+            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw e;
+            throw new NoomiError("2100");
         }
         let ns1 = json.namespace? json.namespace.trim():'';
         //设置命名空间，如果是子文件，需要连接上级文件
