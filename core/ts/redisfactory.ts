@@ -46,9 +46,7 @@ class RedisFactory{
     /**
      * 设置值
      * @param clientName    client name
-     * @param key           键数组（hash的设置方式）
-     * @param subkeyOrValue 子键or值（当value不存在时，为value，否则为subkey）
-     * @param value         值
+     * @param item          redis item
      */
     static set(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
@@ -73,8 +71,8 @@ class RedisFactory{
     /**
      * 获取值
      * @param clientName    client name
-     * @param key           键
-     * @param subKey        子键
+     * @param item          redis item
+     * @return              item value
      */
     static async get(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
