@@ -1,5 +1,5 @@
 [{
     "name":"default",
     "host":"localhost",
-    "port":"3333"
+    "port":"6379"
 }]

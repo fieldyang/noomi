@@ -1,4 +1,7 @@
 {
+    "auth_type":0,
+    "save_type":1,
+    "redis":"default",
     "dboption":{
         "product":"mysql",
         "host":"localhost",

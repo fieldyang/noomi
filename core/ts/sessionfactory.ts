@@ -172,7 +172,7 @@ class Session {
             return null;
         }else{ //redis
             return RedisFactory.get(SessionFactory.redis,{
-                key:this.id,
+                key:"SESSION:"+this.id,
                 subKey:key,
                 timeout:SessionFactory.timeout*60
             });
@@ -195,7 +195,7 @@ class Session {
             this.data.set(key, value);
         }else{  //redis
             RedisFactory.set(SessionFactory.redis,{
-                key:this.id,
+                key:"SESSION:"+this.id,
                 subKey:key,
                 value:value,
                 timeout:SessionFactory.timeout*60  //分钟转为秒

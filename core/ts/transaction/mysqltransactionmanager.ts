@@ -6,16 +6,18 @@ import { Transaction } from "./transaction";
  */
 
 export class MysqlTransactionManager{
+    //mysql module
     moduleDb:NodeModule;
-    transactions:Array<Transaction> = [];
+    //事务map，存放transaction
+    transactionMap:Map<string,Transaction>;
     
     constructor(){
         this.moduleDb = require('mysql');
+        this.transactionMap = new Map();
     }
 
     getTransaction():Transaction{
-
+        
         return null;
     }
-
 }

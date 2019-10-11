@@ -30,7 +30,7 @@ class noomi{
     /**
      * 初始化
      */
-    init(basePath:string){
+    async init(basePath:string){
         console.log('服务启动中...');
         const fs = require('fs');
         let iniJson:object = null;
@@ -77,7 +77,6 @@ class noomi{
             console.log('实例工厂初始化完成！');
         }
         
-
         //filter初始化
         if(iniJson.hasOwnProperty('filter_path')){
             console.log('过滤器初始化...');
@@ -97,6 +96,7 @@ class noomi{
             }
             console.log('路由工厂初始化完成！');
         }
+
 
         //aop初始化
         if(iniJson.hasOwnProperty('aop_path')){
@@ -118,17 +118,7 @@ class noomi{
             console.log('orm初始化完成！');
         }
 
-        //security初始化
-        if(iniJson.hasOwnProperty('security_path')){
-            console.log('security初始化...');
-            let rPath = iniJson['security_path'];
-            if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadSecurity(path.join(basePath,rPath));
-            }
-            console.log('security初始化完成！');
-        }
-
-        //orm初始化
+        //redis初始化
         if(iniJson.hasOwnProperty('redis_path')){
             console.log('redis初始化...');
             let rPath = iniJson['redis_path'];
@@ -137,6 +127,18 @@ class noomi{
             }
             console.log('redis初始化完成！');
         }
+        
+        //security初始化
+        if(iniJson.hasOwnProperty('security_path')){
+            console.log('security初始化...');
+            let rPath = iniJson['security_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                await SecurityFactory.parseFile(path.join(basePath,rPath));
+                // this.loadSecurity(path.join(basePath,rPath));
+            }
+            console.log('security初始化完成！');
+        }
+
         //errorPage
         if(iniJson.hasOwnProperty('error_page')){
             this.setErrorPages(iniJson['error_page']);

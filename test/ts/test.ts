@@ -1,20 +1,24 @@
 import { RedisFactory } from "../../core/ts/redisfactory";
 
 
-try{
     RedisFactory.addClient({
         name:'default',
         host:'localhost',
         port:'3333',
-        options:{
-            password:'field'
-        }
+        // options:{
+        //     password:'field'
+        // }
     });
+    
     let client = RedisFactory.getClient('default');
-    client.set('yyy',2);
-}catch(e){
-    console.log(e);
-}
+    client.hmset('xxx',{
+        'aaa':'1',
+        "bbb":'y'
+    });
+    client.hgetall('xxx',(e,r)=>{
+        console.log(r);
+    })
+
 
 
 // // client.expire('xxx',5);

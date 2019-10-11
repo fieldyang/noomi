@@ -1,4 +1,5 @@
 import { NoomiError } from "../errorfactory";
+import { resolve } from "dns";
 
 interface RedisCfg{
     name?:string,
@@ -48,18 +49,31 @@ class RedisFactory{
      * @param clientName    client name
      * @param item          redis item
      */
-    static set(clientName:string,item:RedisItem){
+    static async set(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
         if(item.subKey){
-            client.hset(item.key,item.subKey,item.value);
+            await new Promise((resolve,reject)=>{
+                client.hset(item.key,item.subKey,item.value,(err,v)=>{
+                    resolve(v);
+                });
+            })
         }else{
             if(typeof item.value === 'object'){//对象用set存储
-                client.hmset(item.key,item.value);
+                await new Promise((resolve,reject)=>{
+                    client.hmset(item.key,item.value,(err,v)=>{
+                        resolve(v);
+                    });
+                });
+                
             }else{
-                client.set(item.key,item.value);
+                await new Promise((resolve,reject)=>{
+                    client.set(item.key,item.value,(err,v)=>{
+                        resolve(v);
+                    });
+                });
             }
         }
         //设置超时
@@ -74,11 +88,12 @@ class RedisFactory{
      * @param item          redis item
      * @return              item value
      */
-    static async get(clientName:string,item:RedisItem){
+    static async get(clientName:string,item:RedisItem):Promise<string>{
         let client = this.getClient(clientName);
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
+        
         let retValue;
         if(item.subKey){
             retValue = await new Promise((resolve,reject)=>{
@@ -91,9 +106,10 @@ class RedisFactory{
         }else{
             retValue = await new Promise((resolve,reject)=>{
                 client.get(item.key,(err,value)=>{
-                    if(!err){
-                        resolve(value);
+                    if(err){
+                        throw err;
                     }
+                    resolve(value);
                 });  
             });
         }
@@ -103,6 +119,25 @@ class RedisFactory{
             client.expire(item.key,item.timeout);
         }
         return retValue;
+    }
+
+    /**
+     * 获取map数据
+     * @param clientName    client name
+     * @param key           key
+     */
+    static async getMap(clientName:string,key:string){
+        let client = this.getClient(clientName);
+        if(client === null){
+            throw new NoomiError("2601",clientName);
+        }
+        return new Promise((resolve,reject)=>{
+            client.hgetall(key,(err,value)=>{
+                if(!err){
+                    resolve(value);
+                }
+            });  
+        });
     }
 
     /**

@@ -25,5 +25,6 @@
 // let s = '2+&';
 // console.log(reg.test(s));
 let p = [1,2,3,4];
-let msg = "current is ${p[1]}";
-console.log(msg);
+console.log(p+'');
+// let s = 
+console.log(Array.from(JSON.stringify(p)));
