@@ -29,6 +29,22 @@ class UserService{
             });
         }); 
     }
+
+    foo1(){
+        return new Promise((resolve,reject)=>{
+            setTimeout(()=>{
+                resolve(1);
+            },20000);
+        });
+    }
+
+    foo2(){
+        return new Promise((resolve,reject)=>{
+            setTimeout(()=>{
+                resolve(2);
+            },0);
+        });
+    }
 }
 
 export {UserService};

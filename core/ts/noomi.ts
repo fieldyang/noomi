@@ -8,9 +8,7 @@ import { SessionFactory } from "./sessionfactory";
 import { UploadTool } from "./uploadtool";
 import { HttpRequest } from "./httprequest";
 import { Server } from "net";
-import { OrmFactory } from "./ormfactory";
 import { SecurityFactory } from "./securityfactory";
-import { HttpResponse } from "./httpresponse";
 import { IncomingMessage, ServerResponse } from "http";
 import { RedisFactory } from "./redisfactory";
 import { NoomiError,ErrorFactory } from "../errorfactory";
@@ -35,7 +33,10 @@ class noomi{
         const fs = require('fs');
         let iniJson:object = null;
         const path = require('path');
-
+        //超过cpu最大使用效率时处理
+        process.on('SIGXCPU',()=>{
+            // 解决请求拒绝问题，待梳理
+        });
         try{
             let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
@@ -76,7 +77,7 @@ class noomi{
             }
             console.log('实例工厂初始化完成！');
         }
-        
+
         //filter初始化
         if(iniJson.hasOwnProperty('filter_path')){
             console.log('过滤器初始化...');
@@ -108,16 +109,6 @@ class noomi{
             console.log('aop初始化完成！');
         }
 
-        //orm初始化
-        if(iniJson.hasOwnProperty('orm_path')){
-            console.log('orm初始化...');
-            let rPath = iniJson['orm_path'];
-            if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadOrm(path.join(basePath,rPath));
-            }
-            console.log('orm初始化完成！');
-        }
-
         //redis初始化
         if(iniJson.hasOwnProperty('redis_path')){
             console.log('redis初始化...');
@@ -146,6 +137,7 @@ class noomi{
         
         const http = require("http");
         this.server = http.createServer((req:IncomingMessage,res:ServerResponse)=>{
+            console.log(process.cpuUsage());
             this.resVisit(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
             console.log(`服务启动成功，端口${this.port}已监听！！！`);
@@ -186,14 +178,6 @@ class noomi{
      */
     loadAop(path:string){
         AopFactory.parseFile(path);
-    }
-
-    /**
-     * 加载orm配置文件
-     * @param path  文件路径
-     */
-    loadOrm(path:string){
-        OrmFactory.parseFile(path);
     }
 
     /**

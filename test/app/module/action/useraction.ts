@@ -15,13 +15,13 @@ class UserAction extends BaseAction{
         return this.userName;
     }
     getinfo(params){
-        if(params.type==1){
-            this.userName = 'aaa';
-            return 1;
-        }else if(params.type==2){
-            this.userName = 'bbb';
-            return 2;
-        }
+        // if(params.type==1){
+        //     this.userName = 'aaa';
+        //     return 1;
+        // }else if(params.type==2){
+        //     this.userName = 'bbb';
+        //     return 2;
+        // }
         let ui = this.userService.getInfo(params);
         return {
             success:true,
@@ -49,7 +49,15 @@ class UserAction extends BaseAction{
         // }
     }
 
+    async foo1(){
+        let v = await this.userService.foo1();
+        console.log(v);
+    }
 
+    async foo2(){
+        let v = await this.userService.foo2();
+        console.log(v);
+    }
 
     async getfile(){
         let re = await this.userService.getFile();

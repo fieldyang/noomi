@@ -8,17 +8,17 @@ import { NoomiError } from "../errorfactory";
  */
 
 /**
- * 连接点
+ * 通知
  */
-interface Aop{
+interface AopAdvice{
     //切点
-    pointcut_id:string;
+    pointcut_id?:string;
     //类型 (before,after,return,throw,around)
     type:string;
     //切面对应的方法
     method:string;
-    //切面对应的实例名
-    instance:string; 
+    //切面对应的实例名或实例对象
+    instance:any; 
 }
 
 /**
@@ -28,8 +28,8 @@ interface AopAspect{
     instance:string;
     //切点
     pointcuts:Array<AopPointcut>;
-    //连接点
-    aops:Array<Aop>;
+    //通知
+    advices:Array<AopAdvice>;
 }
 
  /**
@@ -39,7 +39,7 @@ class AopPointcut{
     id:string;
     //表达式数组（正则表达式）
     expressions:Array<RegExp> = [];
-    aops:Array<Aop> = [];
+    advices:Array<AopAdvice> = [];
 
     constructor(id:string,expressions:Array<string>){
         this.id = id;
@@ -53,33 +53,9 @@ class AopPointcut{
             // 转字符串为正则表达式并加入到数组
             let reg = new RegExp(item);
             this.expressions.push(reg);
-            
-            //遍历instance factory设置aop代理
-            let insFac = InstanceFactory.getFactory();
-            const util = require('util');
-            
-
-            for(let insName of insFac.keys()){
-                //先检测instanceName
-                if(reg.test(insName+'./')){
-                    let instance = InstanceFactory.getInstance(insName);
-                    if(instance){
-                        Object.getOwnPropertyNames(instance.__proto__).forEach(key=>{
-                            //给方法设置代理，constructor 不需要代理
-                            if(key === 'constructor' || typeof(instance[key]) !== 'function'){
-                                return;
-                            }
-                            
-                            //实例名+方法符合aop正则表达式
-                            if(reg.test(insName + '.' + key)){
-                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
-                            }
-                        });
-                    }
-                }
-            }
         });
     }
+
     /**
      * 匹配方法是否满足表达式
      * @param instanceName  实例名
@@ -96,16 +72,17 @@ class AopPointcut{
     }
 
     /**
-     * 添加连接点
-     * @param aop 
+     * 给切点添加通知
+     * @param advice 
      */
-    addAop(aop:Aop){
-        this.aops.push(aop);
+    addAdvice(advice:AopAdvice){
+        this.advices.push(advice);
     }
 }
 
-
-
+/**
+ * aop factory
+ */
 class AopFactory{
     static aspects:any = new Map();
     static pointcuts:any = new Map();
@@ -117,15 +94,15 @@ class AopFactory{
             throw new NoomiError("2005",cfg.instance); 
         }
         //连接点
-        if(Array.isArray(cfg.aops)){
-            cfg.aops.forEach((item)=>{
+        if(Array.isArray(cfg.advices)){
+            cfg.advices.forEach((item)=>{
                 if(!this.pointcuts.has(item.pointcut_id)){
                     throw new NoomiError("2002",item.pointcut_id);
                 }
                 //设置实例名
                 item.instance = cfg.instance;
                 //添加到pointcut的aop数组(是否需要重复检测，待考虑)
-                this.pointcuts.get(item.pointcut_id).addAop(item);
+                this.addAdvice(item);
             });
         }
         this.aspects.set(cfg.instance,cfg);
@@ -142,7 +119,18 @@ class AopFactory{
             throw new NoomiError("2003",id);
         }
         this.pointcuts.set(id,new AopPointcut(id,expressions));
+    }
 
+    /**
+     * 添加通知
+     * @param advice 
+     */
+    static addAdvice(advice:AopAdvice){
+        let pc = AopFactory.getPointcutById(advice.pointcut_id);
+        if(!pc){
+            throw new NoomiError("2002",advice.pointcut_id);
+        }
+        pc.addAdvice(advice);
     }
 
     /**
@@ -161,7 +149,8 @@ class AopFactory{
             pointcuts:Array<PointcutJson>;   //切点
             aspects:Array<AopAspect>;       //切面
         }
-        
+        //延迟处理method aop代理，避免某些实例尚未加载
+        process.nextTick(()=>AopFactory.updMethodProxy.call(AopFactory));
 
         const fs = require("fs");
         const pathTool = require('path');
@@ -188,23 +177,76 @@ class AopFactory{
     }
 
     /**
+     * 更新aop匹配的方法代理，为所有aop匹配的方法设置代理
+     */
+    static updMethodProxy(){
+        //遍历instance factory设置aop代理
+        let insFac = InstanceFactory.getFactory();
+        //处理过的实例名数组
+        let instances:Array<string> = [];
+        //遍历pointcut
+        let pc:AopPointcut;
+        for(let pc of this.pointcuts.values()){
+            let reg:RegExp;
+            //遍历expression
+            for(reg of pc.expressions){
+                for(let insName of insFac.keys()){
+                    //该实例处理过，不再处理
+                    if(instances.includes(insName)){
+                        return;
+                    }
+                    instances.push(insName);
+                    //先检测instanceName
+                    let instance = InstanceFactory.getInstance(insName);
+                    if(instance){
+                        Object.getOwnPropertyNames(instance.__proto__).forEach(key=>{
+                            //给方法设置代理，constructor 不需要代理
+                            if(key === 'constructor' || typeof(instance[key]) !== 'function'){
+                                return;
+                            }
+                            //实例名+方法符合aop正则表达式
+                            if(reg.test(insName + '.' + key)){
+                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                            }
+                        });
+                    }
+                
+                }
+            }
+            
+        }
+
+        
+    }
+    /**
      * 获取切点
      * @param instanceName  实例名 
      * @param methodName    方法名
+     * @return              pointcut array
      */
-    static getPointcut(instanceName:string,methodName:string):AopPointcut{
+    static getPointcut(instanceName:string,methodName:string):Array<AopPointcut>{
         // 遍历iterator
-        let ite = this.pointcuts.values();
-        for(let p of ite){
+        let a:Array<AopPointcut> = [];
+    
+        for(let p of this.pointcuts.values()){
             if(p.match(instanceName,methodName)){
-                return p; 
+                a.push(p); 
             }
         }
-        return null;
+        return a;
     }
 
     /**
-     * 执行方法
+     * 根据id获取切点
+     * @param pointcutId    pointcut id
+     * @return              pointcut
+     */
+    static getPointcutById(pointcutId:string):AopPointcut{
+        return this.pointcuts.get(pointcutId);
+    }
+
+    /**
+     * 获取advices
      * @param instanceName  实例名
      * @param methodName    方法名
      * @return              {
@@ -214,54 +256,57 @@ class AopFactory{
      *                          throw:[{instance:切面实例,method:切面方法},...]
      *                      }
      */
-    static getAops(instanceName:string,methodName:string):object{
-        let pointcut = this.getPointcut(instanceName,methodName);
-        if(pointcut === null){
+    static getAdvices(instanceName:string,methodName:string):object{
+        let pointcuts = this.getPointcut(instanceName,methodName);
+        if(pointcuts.length === 0){
             return null;
         }
-
+        
         let beforeArr:Array<object> = [];
         let afterArr:Array<object> = [];
         let throwArr:Array<object> = [];
         let returnArr:Array<object> = [];
 
-        pointcut.aops.forEach(aop=>{
-            switch(aop.type){
-                case 'before':
-                    beforeArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-                    return;
-                case 'after':
-                    afterArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-                    return;
-                case 'around':
-                    beforeArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-                    afterArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-                    return;
-                case 'return':
-                    returnArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-                    return;
-                case 'throw':
-                    throwArr.push({
-                        instance:aop.instance,
-                        method:aop.method
-                    });
-            }
-        });
+        for(let pointcut of pointcuts){
+            pointcut.advices.forEach(aop=>{
+                switch(aop.type){
+                    case 'before':
+                        beforeArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                        return;
+                    case 'after':
+                        afterArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                        return;
+                    case 'around':
+                        beforeArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                        afterArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                        return;
+                    case 'return':
+                        returnArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                        return;
+                    case 'throw':
+                        throwArr.push({
+                            instance:aop.instance,
+                            method:aop.method
+                        });
+                }
+            });
+        }
+        
         return {
             before:beforeArr,
             after:afterArr,
@@ -269,6 +314,7 @@ class AopFactory{
             return:returnArr
         }
     }
+
 }
 
 export{AopFactory};

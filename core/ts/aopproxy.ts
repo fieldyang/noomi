@@ -26,7 +26,7 @@ class AopProxy{
             //aop获取
             let aop:any;
             if(AopFactory){
-                aop = AopFactory.getAops(instanceName,methodName);
+                aop = AopFactory.getAdvices(instanceName,methodName);
             }
             
             let result:any;
@@ -34,11 +34,12 @@ class AopProxy{
             //before aop执行
             if(aop !== null){
                 for(let item of aop.before){
+                    //instance可能为实例对象，也可能是实例名
                     InstanceFactory.exec(item.instance,item.method,aopParams);
                 }
             }
             try{
-                result = InstanceFactory.exec(null,null,params,instance,func);
+                result = InstanceFactory.exec(instance,null,params,func);
                 if(util.types.isPromise(result)){  //返回promise调用
                     result.then(re=>{
                         //带入参数
@@ -46,6 +47,7 @@ class AopProxy{
                         //return aop执行
                         if(aop !== null){
                             for(let item of aop.return){
+                                //instance可能为实例对象，也可能是实例名
                                 InstanceFactory.exec(item.instance,item.method,aopParams);
                             }
                         }        
@@ -54,6 +56,7 @@ class AopProxy{
                         aopParams[0].throwValue = e;
                         if(aop !== null){
                             for(let item of aop.throw){
+                                //instance可能为实例对象，也可能是实例名
                                 InstanceFactory.exec(item.instance,item.method,aopParams);
                             }
                         }
@@ -65,6 +68,7 @@ class AopProxy{
                     //return aop执行
                     if(aop !== null){
                         for(let item of aop.return){
+                            //instance可能为实例对象，也可能是实例名
                             InstanceFactory.exec(item.instance,item.method,aopParams);
                         }
                     }
@@ -74,6 +78,7 @@ class AopProxy{
                 //异常aop执行
                 if(aop !== null){
                     for(let item of aop.throw){
+                        //instance可能为实例对象，也可能是实例名
                         InstanceFactory.exec(item.instance,item.method,aopParams);
                     }
                 }

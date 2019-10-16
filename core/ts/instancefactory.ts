@@ -107,15 +107,19 @@ class InstanceFactory{
 
     /**
      * 执行方法
-     * @param instanceName  实例名 
+     * @param instancee     实例名或实例对象 
      * @param methodName    方法名
      * @param params        参数数组
-     * @param instance      实例(与instanceName二选一)
      * @param func          方法(与methodName二选一)
      */
     
-    static exec(instanceName:string,methodName:string,params:Array<any>,instance?:any,func?:any){
-        instance = instance || this.getInstance(instanceName);
+    static exec(instance:any,methodName:string,params:Array<any>,func?:any){
+        //实例名，需要得到实例对象
+        let instanceName = '';
+        if(instance && typeof instance === 'string'){
+            instanceName = instance; 
+            instance = this.getInstance(instance);
+        }
         //实例不存在
         if(!instance){
             throw new NoomiError("1001",instanceName);

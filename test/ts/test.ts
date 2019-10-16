@@ -1,24 +1,31 @@
 import { RedisFactory } from "../../core/ts/redisfactory";
 
 
-    RedisFactory.addClient({
-        name:'default',
-        host:'localhost',
-        port:'3333',
-        // options:{
-        //     password:'field'
-        // }
-    });
+    // RedisFactory.addClient({
+    //     name:'default',
+    //     host:'localhost',
+    //     port:'6379',
+    //     // options:{
+    //     //     password:'field'
+    //     // }
+    // });
     
-    let client = RedisFactory.getClient('default');
-    client.hmset('xxx',{
-        'aaa':'1',
-        "bbb":'y'
-    });
-    client.hgetall('xxx',(e,r)=>{
-        console.log(r);
-    })
+    // let client = RedisFactory.getClient('default');
+    // client.hmset('xxx',{
+    //     'aaa':'1',
+    //     "bbb":'y'
+    // });
+    // client.hgetall('xxx',(e,r)=>{
+    //     console.log(r);
+    // })
 
+    // RedisFactory.set('default',{
+    //     key:'xxxx',
+    //     value:{
+    //         'aaa':'1',
+    //         "bbb":'y'
+    //     }
+    // });
 
 
 // // client.expire('xxx',5);
@@ -55,3 +62,23 @@ import { RedisFactory } from "../../core/ts/redisfactory";
 //     console.log(value);
 // });
 
+// let path = require('path');
+// console.log(path.resolve('./config/database.json'));
+// DBFactory.parseFile('./config/database.json');
+// async function foo(){
+//     let conn = await DBFactory.getConnection();
+//     let o = conn.beginTransaction(async (err)=>{
+//         if(err){
+//             throw err;
+//         }
+//         let conn1 = await DBFactory.getConnection();
+//         conn1.query(`insert into t_resource(resource_id,url) values(11,'/testroute1')`);
+        
+//         conn.commit();
+//         conn.release();
+//         console.log(conn);
+//     });
+//     console.log(o);
+// }
+
+// foo();

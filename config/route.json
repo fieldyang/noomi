@@ -48,6 +48,12 @@
                 {"type":"json"}
             ]
         },{
+            "path":"/user_*",
+            "instance_name":"userAction",
+            "results":[
+                {"type":"json"}
+            ]
+        },{
             "path":"/upload",
             "instance_name":"uploadAction",
             "method":"upload"      

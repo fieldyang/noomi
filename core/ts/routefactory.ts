@@ -49,11 +49,14 @@ class RouteFactory{
                 }
             }
         }
+        if(method){
+            method = method.trim();
+        }
         let r:RouteCfg = {
             path:path,
             reg:new RegExp('^' + path1 + '$'),
             instanceName:clazz.trim(),
-            method:method.trim(),
+            method:method,
             results:results
         };
         this.routes.push(r);

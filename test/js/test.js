@@ -24,7 +24,8 @@
 // let r;
 // let s = '2+&';
 // console.log(reg.test(s));
-let p = [1,2,3,4];
-console.log(p+'');
-// let s = 
-console.log(Array.from(JSON.stringify(p)));
+let os = require('os');
+let r = os.arch();
+// console.log(r);
+// r = os.constants.signals.SIGXCPU;
+console.log(process.cpuUsage());

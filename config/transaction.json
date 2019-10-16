@@ -1,5 +1,0 @@
-{
-    "manager":"mysqlTransactionManager",
-    "isolation":"SERIALIZABLE",
-    "weavepoint":[""]
-}

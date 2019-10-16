@@ -3,13 +3,13 @@
     
     "pointcuts":[{
         "id":"pointcut1",
-        "expressions":["userService\\."]
+        "expressions":["userService\\.getInfo"]
     }],
 
     "aspects":[
         {
             "instance":"logAdvice",
-            "aops":[
+            "advices":[
                 {
                     "pointcut_id":"pointcut1",
                     "type":"before",
@@ -20,11 +20,11 @@
                     "method":"after"
                 },{
                     "pointcut_id":"pointcut1",
-                    "type":"return",
+                    "type":"after-return",
                     "method":"afterReturn"
                 },{
                     "pointcut_id":"pointcut1",
-                    "type":"throw",
+                    "type":"after-throw",
                     "method":"throw"
                 },{
                     "pointcut_id":"pointcut1",
