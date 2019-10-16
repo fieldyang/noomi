@@ -161,7 +161,7 @@ class noomi{
      * @param path 
      */
     loadCtx(path:string,mdlPath:string){
-        InstanceFactory.parseFile(path,mdlPath);
+        InstanceFactory.init(path,mdlPath);
     }
 
     /**

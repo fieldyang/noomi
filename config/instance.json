@@ -2,8 +2,8 @@
 	"files":[
 		"context/common.json",
 		"context/aop.json",
-		"context/service.json",
 		"context/action.json",
+		"context/service.json",
 		"context/filter.json"
 	]
 	

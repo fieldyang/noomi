@@ -30,6 +30,15 @@ interface InstanceObj{
 class InstanceFactory{
     static factory:any = new Map();
     static mdlBasePath:string;
+    static injectList:Array<any> = [];
+
+    static init(path:string,mdlPath?:string){
+        this.parseFile(path,mdlPath);
+        //延迟注入
+        process.nextTick(()=>{
+            InstanceFactory.finishInject();
+        });
+    }
     /**
      * 添加单例到工厂
      * @param cfg 实例配置
@@ -72,19 +81,43 @@ class InstanceFactory{
                 instance:cfg.instance
             }
         }
-        
         this.factory.set(cfg.name,insObj);
     }
 
+    /**
+     * 添加inject
+     * @param instance      实例对象 
+     * @param propName      属性名
+     * @param injectName    注入的实例名
+     * 
+     */
+    static addInject(instance:any,propName:string,injectName:string){
+        this.injectList.push({
+            instance:instance,
+            propName:propName,
+            injectName:injectName
+        });
+    }
+
+    /**
+     * 完成注入列表的注入操作
+     */
+    static finishInject(){
+        for(let item of this.injectList){
+            let instance = InstanceFactory.getInstance(item.injectName);
+            //实例不存在
+            if(!instance){
+                throw new NoomiError('1001',item.injectName);
+            }
+            Reflect.set(item.instance,item.propName,instance); 
+        }
+    }
     /**
      * 获取实例
      * @param name  实例名
      * @return      实例化的对象  
      */
     static getInstance(name:string){
-        if(!this.factory.has(name)){
-            throw new NoomiError("1001",name);
-        }
         let ins:InstanceObj = this.factory.get(name);
         if(!ins){
             return null;

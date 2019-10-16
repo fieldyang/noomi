@@ -12,10 +12,11 @@ import { AopFactory } from './aopfactory';
 function Inject(instanceName:string){
     return function(target:any,propertyName:string){
         let instance = InstanceFactory.getInstance(instanceName);
-        if(!instance){
-            throw new NoomiError("1000");
+        if(instance){
+            Reflect.set(target,propertyName,instance);    
+        }else{
+            InstanceFactory.addInject(target,propertyName,instanceName);
         }
-        Reflect.set(target,propertyName,instance);
     }
 }
 

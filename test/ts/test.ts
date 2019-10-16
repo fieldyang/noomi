@@ -1,4 +1,6 @@
 import { RedisFactory } from "../../core/ts/redisfactory";
+import { User } from "../app/module/dao/pojo/user";
+import { UserAction } from "../app/module/action/useraction";
 
 
     // RedisFactory.addClient({
@@ -82,3 +84,8 @@ import { RedisFactory } from "../../core/ts/redisfactory";
 // }
 
 // foo();
+
+
+let ua = UserAction;
+let u = new ua();
+console.log(u);
