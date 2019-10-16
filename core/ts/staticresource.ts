@@ -1,3 +1,6 @@
+import { HttpResponse } from "./httpresponse";
+import { PageFactory } from "./pagefactory";
+
 /**
  * 静态资源加载器
  */
@@ -8,7 +11,7 @@ class StaticResource{
      * @param path 文件路径
      * @returns {file:文件数据,type:文件类型} 
      */
-    static load(path:string,resolve:any,reject:any){
+    static async load(response:HttpResponse,path:string){
         //config 为默认路径
         if(this.forbiddenMap.size === 0){
             this.addPath('/config');
@@ -23,24 +26,32 @@ class StaticResource{
             }
         }
 
+        let errCode;
         //禁止访问路径，直接返回404
         if(finded){
-            reject(404);
+            errCode = 404;
         }else{
             const fs = require("fs");
-            const mime = require('mime');
             const pathMdl = require('path');
             let filePath = pathMdl.join(process.cwd(),path);
-            fs.readFile(filePath,'utf8',(err,file)=>{
-                if(err){
-                    reject(404);
-                }else{
-                    resolve({
-                        file:file,
-                        type:mime.getType(path)
-                    });
-                }
+            if(!fs.existsSync(filePath)){
+                errCode = 404;
+            }
+            errCode = await response.writeFileToClient({
+                path:filePath
             });
+        }
+        //出现异常
+        if(errCode !== undefined){
+            //存在异常页，直接跳转，否则回传404
+            let page = PageFactory.getErrorPage(errCode);
+            if(page){
+                response.redirect(page);
+            }else{
+                response.writeToClient({
+                    statusCode:errCode
+                });
+            }
         }
     }
 

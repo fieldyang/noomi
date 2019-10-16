@@ -12,6 +12,8 @@ import { SecurityFactory } from "./securityfactory";
 import { IncomingMessage, ServerResponse } from "http";
 import { RedisFactory } from "./redisfactory";
 import { NoomiError,ErrorFactory } from "../errorfactory";
+import { WebConfig } from "./webconfig";
+import { RequestQueue } from "../requestqueue";
 class noomi{
     port:number=3000;
     server:Server;
@@ -33,9 +35,11 @@ class noomi{
         const fs = require('fs');
         let iniJson:object = null;
         const path = require('path');
+
         //超过cpu最大使用效率时处理
         process.on('SIGXCPU',()=>{
             // 解决请求拒绝问题，待梳理
+            RequestQueue.setCanHandle(false);
         });
         try{
             let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
@@ -51,6 +55,10 @@ class noomi{
         //异常
         ErrorFactory.language = iniJson['language'] || 'zh';  //默认中文
         ErrorFactory.init();
+
+        if(iniJson.hasOwnProperty('web_config')){
+            WebConfig.init(iniJson['web_config']);    
+        }
 
         //session工厂初始化
         if(iniJson.hasOwnProperty('session')){
@@ -125,7 +133,6 @@ class noomi{
             let rPath = iniJson['security_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
                 await SecurityFactory.parseFile(path.join(basePath,rPath));
-                // this.loadSecurity(path.join(basePath,rPath));
             }
             console.log('security初始化完成！');
         }
@@ -137,10 +144,11 @@ class noomi{
         
         const http = require("http");
         this.server = http.createServer((req:IncomingMessage,res:ServerResponse)=>{
-            console.log(process.cpuUsage());
-            this.resVisit(new HttpRequest(req,res));
+            RequestQueue.add(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
             console.log(`服务启动成功，端口${this.port}已监听！！！`);
+            //启动队列执行
+            RequestQueue.handle();
         }).on('error',(err)=>{
             if (err.code === 'EADDRINUSE') {
                 console.log('地址正被使用，重试中...');
@@ -152,7 +160,7 @@ class noomi{
             }
         }).on('clientError', (err, socket) => {
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-        });;
+        });
     }
 
     
@@ -228,69 +236,6 @@ class noomi{
         StaticResource.addPath(dirPath);
     }
 
-    /**
-     * 过滤器处理
-     */
-    handleFilter(url:string,request:any,response:any):Promise<boolean>{
-        return FilterFactory.doChain(url,request,response);
-    }
-
-    
-    /**
-     * 资源访问
-     * @param request   request
-     * @param path      url路径
-     */
-    resVisit(request:HttpRequest){
-        let path = require('url').parse(request.url).pathname;
-        if(path === ''){
-            return;
-        }
-        //获得路由，可能没有，则归属于静态资源
-        let route = RouteFactory.getRoute(path);
-        //路由资源
-        if(route !== null){
-            //参数
-            request.init().then((params)=>{
-                //过滤器执行
-                //过滤器
-                this.handleFilter(path,request,request.response).then((r)=>{
-                    if(r){
-                        //路由调用
-                        RouteFactory.handleRoute(route,params,request,request.response);
-                    }
-                });
-            });    
-        }else{ //静态资源
-            new Promise((resolve,reject)=>{
-                StaticResource.load(path,resolve,reject);
-            }).catch((err)=>{
-                return Promise.reject(err);
-            }).then((re:any)=>{
-                request.response.writeToClient({
-                    data:re.file,
-                    type:re.type
-                });
-            },(errCode)=>{
-                //存在异常页，直接跳转，否则回传404
-                let page = PageFactory.getErrorPage(errCode);
-                if(page){
-                    request.response.redirect(page);
-                }else{
-                    request.response.writeToClient({
-                        statusCode:errCode
-                    });
-                }
-            });
-        }
-    }
-
-    /**
-     * 添加应用初始化之前执行的方法
-     */
-    addPreInit(foo:Function){
-        foo.call(this);
-    }
 }
 
 export {noomi};
