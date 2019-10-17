@@ -142,7 +142,7 @@ class RouteFactory{
      * @param instance  路由对应实例
      * @param results   route结果数组    
      */
-    static handleResult(res:HttpResponse,data:any,instance:any,results:Array<RouteResult>){
+    static handleResult(res:HttpResponse,data:any,instance:any,results:Array<RouteResult>):void{
         let find:boolean = false;
         
         if(results && results.length > 0){
@@ -173,7 +173,7 @@ class RouteFactory{
      * @param data          数据
      * @param instance      实例
      */
-    private static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any){
+    private static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any):void{
         switch(result.type){
             case "redirect": //重定向
                 let url = handleParamUrl(instance,result.url);
@@ -246,7 +246,7 @@ class RouteFactory{
          */
         function handleParamUrl(instance:any,url:string):string{
             let reg:RegExp = /\$\{.*?\}/g;
-            let r;
+            let r:RegExpExecArray;
             //处理带参数url
             while((r=reg.exec(result.url)) !== null){
                 let pn = r[0].substring(2,r[0].length-1);
@@ -259,8 +259,9 @@ class RouteFactory{
          * 获取属性值
          * @param instance  实例 
          * @param pn        属性名
+         * @return          属性值
          */
-        function getValue(instance:any,pn:string){
+        function getValue(instance:any,pn:string):any{
             if(instance[pn] !== undefined){
                 return instance[pn];
             }else if(instance.model && instance.model[pn] !== undefined){

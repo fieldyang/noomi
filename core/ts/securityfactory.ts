@@ -36,7 +36,7 @@ class SecurityFactory{
     static async init(){
         //初始化security filter
         InstanceFactory.addInstance({
-            name:'securityFilter',           //实例名
+            name:'NoomiSecurityFilter',           //实例名
             instance:new SecurityFilter(),
             class_name:'SecurityFilter'
         });
@@ -71,8 +71,6 @@ class SecurityFactory{
             }
         }
         
-
-
         //初始化表名和字段名
         let tresource:string = "t_resource";
         let tgroupauth:string="t_group_authority";

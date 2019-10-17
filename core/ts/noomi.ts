@@ -5,7 +5,6 @@ import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
 import { PageFactory } from "./pagefactory";
 import { SessionFactory } from "./sessionfactory";
-import { UploadTool } from "./uploadtool";
 import { HttpRequest } from "./httprequest";
 import { Server } from "net";
 import { SecurityFactory } from "./securityfactory";
@@ -60,11 +59,6 @@ class noomi{
             SessionFactory.init(iniJson['session']);    
         }
         
-        //系统参数初始化
-        if(iniJson.hasOwnProperty('upload')){
-            UploadTool.init(iniJson['upload']);
-        }
-
         //模块路径加入staticresource的禁止访问路径,/开头
         let mdlPath:string = iniJson['module_path'];
 
@@ -139,7 +133,7 @@ class noomi{
         
         //超过cpu最大使用效率时处理
         process.on('SIGXCPU',()=>{
-            // 解决请求拒绝问题，待梳理
+            //请求队列置false
             RequestQueue.setCanHandle(false);
         });
         

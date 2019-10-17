@@ -61,13 +61,18 @@ class RedisFactory{
                 });
             })
         }else{
-            if(typeof item.value === 'object'){//对象用set存储
+            if(Array.isArray(item.value)){//多个键，值组成的数组
+                await new Promise((resolve,reject)=>{
+                    client.hmset.apply(client,[item.key].concat(item.value),(err,v)=>{
+                        resolve(v);
+                    });
+                });
+            }else if(typeof item.value === 'object'){//对象用set存储
                 await new Promise((resolve,reject)=>{
                     client.hmset(item.key,item.value,(err,v)=>{
                         resolve(v);
                     });
                 });
-                
             }else{
                 await new Promise((resolve,reject)=>{
                     client.set(item.key,item.value,(err,v)=>{
@@ -94,7 +99,8 @@ class RedisFactory{
             throw new NoomiError("2601",clientName);
         }
         
-        let retValue;
+        let retValue:any;
+        //有subKey
         if(item.subKey){
             retValue = await new Promise((resolve,reject)=>{
                 client.hget(item.key,item.subKey,(err,value)=>{
