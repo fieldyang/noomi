@@ -1,6 +1,5 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
-import { UserService } from "../../test/app/module/service/userservice";
 import { NoomiError } from "../errorfactory";
 
 /**
@@ -43,9 +42,14 @@ class AopPointcut{
 
     constructor(id:string,expressions:Array<string>){
         this.id = id;
-        if(!Array.isArray(expressions) || expressions.length === 0){
+        if(!expressions){
             throw new NoomiError("2001");
         }
+
+        if(!Array.isArray(expressions)){
+            expressions = [expressions];
+        }
+        
         expressions.forEach((item)=>{
             if(typeof item !== 'string'){
                 throw new NoomiError("2001");
@@ -89,7 +93,7 @@ class AopFactory{
     /**
      * 添加切面
      */
-    static addAspect(cfg:AopAspect){
+    static addAspect(cfg:AopAspect):void{
         if(this.aspects.has(cfg.instance)){
             throw new NoomiError("2005",cfg.instance); 
         }
@@ -113,7 +117,7 @@ class AopFactory{
      * @param id            切点id 
      * @param expressions   方法匹配表达式数组
      */
-    static addPointcut(id:string,expressions:Array<string>){
+    static addPointcut(id:string,expressions:Array<string>):void{
         //切点
         if(this.pointcuts.has(id)){
             throw new NoomiError("2003",id);
@@ -123,10 +127,10 @@ class AopFactory{
 
     /**
      * 添加通知
-     * @param advice 
+     * @param advice 通知配置
      */
-    static addAdvice(advice:AopAdvice){
-        let pc = AopFactory.getPointcutById(advice.pointcut_id);
+    static addAdvice(advice:AopAdvice):void{
+        let pc:AopPointcut = AopFactory.getPointcutById(advice.pointcut_id);
         if(!pc){
             throw new NoomiError("2002",advice.pointcut_id);
         }
@@ -135,9 +139,9 @@ class AopFactory{
 
     /**
      * 解析文件
-     * @param path          文件路径 
+     * @param path  文件路径 
      */
-    static parseFile(path:string){
+    static parseFile(path:string):void{
         //切点json数据
         interface PointcutJson{
             id:string;
@@ -152,10 +156,8 @@ class AopFactory{
         //延迟处理method aop代理，避免某些实例尚未加载
         process.nextTick(()=>AopFactory.updMethodProxy.call(AopFactory));
 
-        const fs = require("fs");
-        const pathTool = require('path');
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        let jsonStr:string = require("fs").readFileSync(require('path').join(process.cwd(),path),'utf-8');
         let json:DataJson = null;
         try{
             json = JSON.parse(jsonStr);
@@ -163,12 +165,14 @@ class AopFactory{
             throw new NoomiError("2000");
         }
 
+        //切点数组
         if(Array.isArray(json.pointcuts)){
             json.pointcuts.forEach((item:PointcutJson)=>{
                 this.addPointcut(item.id,item.expressions);
             });
         }
 
+        //切面数组
         if(Array.isArray(json.aspects)){
             json.aspects.forEach((item:AopAspect)=>{
                 this.addAspect(item);
@@ -179,7 +183,7 @@ class AopFactory{
     /**
      * 更新aop匹配的方法代理，为所有aop匹配的方法设置代理
      */
-    static updMethodProxy(){
+    static updMethodProxy():void{
         //遍历instance factory设置aop代理
         let insFac = InstanceFactory.getFactory();
         //处理过的实例名数组
@@ -210,13 +214,9 @@ class AopFactory{
                             }
                         });
                     }
-                
                 }
             }
-            
         }
-
-        
     }
     /**
      * 获取切点
@@ -257,7 +257,7 @@ class AopFactory{
      *                      }
      */
     static getAdvices(instanceName:string,methodName:string):object{
-        let pointcuts = this.getPointcut(instanceName,methodName);
+        let pointcuts:Array<AopPointcut> = this.getPointcut(instanceName,methodName);
         if(pointcuts.length === 0){
             return null;
         }
@@ -267,7 +267,8 @@ class AopFactory{
         let throwArr:Array<object> = [];
         let returnArr:Array<object> = [];
 
-        for(let pointcut of pointcuts){
+        let pointcut:AopPointcut;
+        for(pointcut of pointcuts){
             pointcut.advices.forEach(aop=>{
                 switch(aop.type){
                     case 'before':

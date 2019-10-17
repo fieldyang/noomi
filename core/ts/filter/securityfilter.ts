@@ -2,11 +2,12 @@ import { HttpRequest } from "../httprequest";
 import { HttpResponse } from "../httpresponse";
 import { SecurityFactory } from "../securityfactory";
 import { Session } from "../sessionfactory";
+import { WebFilter } from "../decorator";
 
 export class SecurityFilter{
-    do(request:HttpRequest,response:HttpResponse){
+    @WebFilter()
+    do1(request:HttpRequest,response:HttpResponse){
         let session:Session = request.getSession();
-        
         return SecurityFactory.check(request.url,session).then((result)=>{
             let page:string;
             switch(result){
@@ -28,7 +29,5 @@ export class SecurityFilter{
             }
             return Promise.resolve(false);
         });
-        
-        
     }
 }

@@ -17,8 +17,6 @@
                     "type":"chain",
                     "url":"/last",
                     "params":["type"]
-                },{
-                    "type":"json"
                 }
             ]         
         },{
@@ -31,8 +29,6 @@
                     "type":"redirect",
                     "url":"/last?type=1"
 
-                },{
-                    "type":"json"
                 }
             ]
         },{
@@ -44,15 +40,12 @@
                     "value":1,
                     "type":"redirect",
                     "url":"/pages/test/test1.html"
-                },
-                {"type":"json"}
+                }
             ]
         },{
             "path":"/user_*",
-            "instance_name":"userAction",
-            "results":[
-                {"type":"json"}
-            ]
+            "instance_name":"userAction"
+            
         },{
             "path":"/upload",
             "instance_name":"uploadAction",

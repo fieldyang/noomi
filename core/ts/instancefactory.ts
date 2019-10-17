@@ -4,27 +4,37 @@ import { NoomiError } from "../errorfactory";
 /**
  * 实例工厂
  */
-interface Argument{
-    index:number;   //参数索引
-    value:any;      //参数置
+
+/**
+ * 实例属性
+ */
+interface InstanceProperty{
+    name:string;    //属性名
+    ref:string;     //引用实例名
 }
+
+/**
+ * 实例配置
+ */
 interface InstanceCfg{
-    name:string;            //实例名
-    class_name:string;      //类名
-    path?:string;           //模块路径（相对noomi.ini配置的modulepath），与instance二选一
-    instance?:any;          //实例与path 二选一
-    singleton?:boolean;     //单例模式
-    params?:Array<any>;     //参数列表
+    name:string;                            //实例名
+    class_name:string;                      //类名
+    path?:string;                           //模块路径（相对noomi.ini配置的modulepath），与instance二选一
+    instance?:any;                          //实例与path 二选一
+    singleton?:boolean;                     //单例模式
+    params?:Array<any>;                     //参数列表
+    properties?:Array<InstanceProperty>;    //属性列表
 }
 
 /**
  * 实例对象
  */
 interface InstanceObj{
-    instance:object;            //实例对象
-    class:any;                  //类引用
-    singleton:boolean;          //单例标志
-    params:Array<any>;          //构造器参数
+    instance?:object;                       //实例对象
+    class?:any;                             //类引用
+    singleton:boolean;                      //单例标志
+    params?:Array<any>;                     //构造器参数
+    properties?:Array<InstanceProperty>;    //属性列表
 }
 
 class InstanceFactory{
@@ -43,17 +53,17 @@ class InstanceFactory{
      * 添加单例到工厂
      * @param cfg 实例配置
      */
-    static addInstance(cfg:InstanceCfg){
+    static addInstance(cfg:InstanceCfg):void{
         if(this.factory.has(cfg.name)){
             throw new NoomiError("1002",cfg.name);
         }
         const pathMdl = require('path');
-        let insObj;
-        let path;
+        let insObj:InstanceObj;
+        let path:string;
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
             let mdl = require(pathMdl.join(process.cwd(),this.mdlBasePath,path));
-            //支持ts 和js ，ts编译后为{className:***},node 直接输出为 class
+            //支持ts和js,ts编译后为{className:***},js直接输出为class
             if(typeof mdl === 'object'){
                 mdl = mdl[cfg.class_name];
             }
@@ -61,26 +71,34 @@ class InstanceFactory{
             if(mdl.constructor !== Function){
                 throw new NoomiError("1003");
             }
-            //默认true
+            //单例模式，默认true
             let singleton = cfg.singleton!==undefined?cfg.singleton:true;
-            
+
             insObj={
                 class:mdl,
-                singleton:singleton
+                singleton:singleton,
+                properties:cfg.properties
             };
 
             if(singleton){      //单例，需要实例化
-                //参数怎么传递
                 insObj.instance = new mdl(cfg.params);
             }else{              //非单例，不需要实例化
                 insObj.params = cfg.params;
             }
-        }else{ //传入模块，不用创建
+        }else{ //传入实例，不用新建，singleton为true
             insObj = {
                 singleton:true,
-                instance:cfg.instance
+                instance:cfg.instance,
+                properties:cfg.properties
             }
         }
+        //有实例，需要加入注入
+        if(insObj.instance && cfg.properties && cfg.properties.length>0){
+            cfg.properties.forEach((item)=>{
+                this.addInject(insObj.instance,item.name,item.ref);
+            });
+        }
+
         this.factory.set(cfg.name,insObj);
     }
 
@@ -91,18 +109,23 @@ class InstanceFactory{
      * @param injectName    注入的实例名
      * 
      */
-    static addInject(instance:any,propName:string,injectName:string){
-        this.injectList.push({
-            instance:instance,
-            propName:propName,
-            injectName:injectName
-        });
+    static addInject(instance:any,propName:string,injectName:string):void{
+        let inj = InstanceFactory.getInstance(injectName);
+        if(inj){
+            instance[propName] = inj;
+        }else{
+            this.injectList.push({
+                instance:instance,
+                propName:propName,
+                injectName:injectName
+            });
+        }
     }
 
     /**
      * 完成注入列表的注入操作
      */
-    static finishInject(){
+    static finishInject():void{
         for(let item of this.injectList){
             let instance = InstanceFactory.getInstance(item.injectName);
             //实例不存在
@@ -117,7 +140,7 @@ class InstanceFactory{
      * @param name  实例名
      * @return      实例化的对象  
      */
-    static getInstance(name:string){
+    static getInstance(name:string):any{
         let ins:InstanceObj = this.factory.get(name);
         if(!ins){
             return null;
@@ -126,7 +149,14 @@ class InstanceFactory{
             return ins.instance;
         }else{
             let mdl = ins.class;
-            return new mdl(ins.params);
+            let instance = new mdl(ins.params);
+            //注入属性
+            if(ins.properties && ins.properties.length>0){
+                ins.properties.forEach((item)=>{
+                    this.addInject(instance,item.name,item.ref);
+                });
+            }
+            return instance;
         }
     }
 
@@ -146,7 +176,7 @@ class InstanceFactory{
      * @param func          方法(与methodName二选一)
      */
     
-    static exec(instance:any,methodName:string,params:Array<any>,func?:any){
+    static exec(instance:any,methodName:string,params:Array<any>,func?:Function):any{
         //实例名，需要得到实例对象
         let instanceName = '';
         if(instance && typeof instance === 'string'){
@@ -167,7 +197,8 @@ class InstanceFactory{
 
     /**
      * 解析实例配置文件
-     * @param path 文件路径
+     * @param path      文件路径
+     * @param mdlPath   模型路径
      */
     static parseFile(path:string,mdlPath?:string){
         interface InstanceJSON{
@@ -175,10 +206,9 @@ class InstanceFactory{
             instances:Array<any>;       //实例配置数组
         }
         const pathTool = require('path');
-        const fs = require("fs");
         this.mdlBasePath = mdlPath || './';
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        let jsonStr:string = require("fs").readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
         try{
             json = JSON.parse(jsonStr);

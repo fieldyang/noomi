@@ -2,22 +2,31 @@
  * 装饰器（注解类）
  */
 import{InstanceFactory} from './instancefactory';
-import { ErrorFactory, NoomiError } from '../errorfactory';
 import { AopFactory } from './aopfactory';
+import { FilterFactory } from './filterfactory';
 
 /**
  * IoC注入装饰器
  * @param instanceName  实例名
  */
 function Inject(instanceName:string){
-    return function(target:any,propertyName:string){
-        let instance = InstanceFactory.getInstance(instanceName);
-        if(instance){
-            Reflect.set(target,propertyName,instance);    
-        }else{
-            InstanceFactory.addInject(target,propertyName,instanceName);
-        }
+    return (target:any,propertyName:string)=>{
+        InstanceFactory.addInject(target,propertyName,instanceName);
     }
+}
+
+/**
+ * web过滤器
+ * @param pattern   过滤正则表达式串，可以为数组
+ */
+function WebFilter(pattern?:any){
+    return function(target:any,name:string){
+        FilterFactory.addFilter({
+            instance:target,
+            method_name:name,
+            url_pattern:pattern
+        });
+    } 
 }
 
 /**
@@ -25,13 +34,14 @@ function Inject(instanceName:string){
  */
 function Aspect(target:any){
     target.isAspect = true;
+    target.prototype.isAspect = true;
 }
 
 /**
  * 切点装饰器
  */
-function Pointcut(expressions:Array<string>){
-    return function(target:any,name:string){
+function Pointcut(expressions:any){
+    return (target:any,name:string)=>{
         AopFactory.addPointcut(name+'()',expressions);
     }
 }
@@ -41,7 +51,7 @@ function Pointcut(expressions:Array<string>){
  * @param pointcutId    切点id
  */
 function Before(pointcutId:string){
-    return function(target:any,name:string,desc:any){
+    return (target:any,name:string,desc:any)=>{
         AopFactory.addAdvice({
             pointcut_id:pointcutId,
             type:'before',
@@ -56,7 +66,7 @@ function Before(pointcutId:string){
  * @param pointcutId    切点id
  */
 function After(pointcutId:string){
-    return function(target:any,name:string,desc:any){
+    return (target:any,name:string,desc:any)=>{
         AopFactory.addAdvice({
             pointcut_id:pointcutId,
             type:'after',
@@ -71,7 +81,7 @@ function After(pointcutId:string){
  * @param pointcutId    切点id
  */
 function Around(pointcutId:string){
-    return function(target:any,name:string,desc:any){
+    return (target:any,name:string,desc:any)=>{
         AopFactory.addAdvice({
             pointcut_id:pointcutId,
             type:'around',
@@ -85,7 +95,7 @@ function Around(pointcutId:string){
  * @param pointcutId    切点id
  */
 function AfterReturn(pointcutId:string){
-    return function(target:any,name:string,desc:any){
+    return (target:any,name:string,desc:any)=>{
         AopFactory.addAdvice({
             pointcut_id:pointcutId,
             type:'after-return',
@@ -100,7 +110,7 @@ function AfterReturn(pointcutId:string){
  * @param pointcutId    切点id
  */
 function AfterThrow(pointcutId:string){
-    return function(target:any,name:string,desc:any){
+    return (target:any,name:string,desc:any)=>{
         AopFactory.addAdvice({
             pointcut_id:pointcutId,
             type:'after-throw',
@@ -110,4 +120,4 @@ function AfterThrow(pointcutId:string){
     }
 }
 
-export {Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow}
+export {WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow}

@@ -7,7 +7,7 @@ import { BaseAction } from "../../../../core/ts/baseaction";
  */
 class UserAction extends BaseAction{
     userName:string;
-    @Inject("userService")
+    // @Inject("userService")
     userService:UserService;
     
     

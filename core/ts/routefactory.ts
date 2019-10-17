@@ -152,14 +152,16 @@ class RouteFactory{
             }else{
                 let r:RouteResult;
                 for(r of results){
-                    //找到返回值匹配，则不在对比
-                    if(data && data == r.value){
+                    //result不带value，或找到返回值匹配，则处理
+                    if(r.value === undefined || data && data == r.value){
+                        find = true;
                         this.handleOneResult(res,r,data,instance);
                         break;
-                    }    
+                    }
                 }
             }
-        }else{ //默认回写json
+        }
+        if(!find){ //默认回写json
             this.handleOneResult(res,{},data);
         }
     }

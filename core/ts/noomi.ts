@@ -36,11 +36,6 @@ class noomi{
         let iniJson:object = null;
         const path = require('path');
 
-        //超过cpu最大使用效率时处理
-        process.on('SIGXCPU',()=>{
-            // 解决请求拒绝问题，待梳理
-            RequestQueue.setCanHandle(false);
-        });
         try{
             let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
@@ -142,8 +137,13 @@ class noomi{
             this.setErrorPages(iniJson['error_page']);
         }
         
-        const http = require("http");
-        this.server = http.createServer((req:IncomingMessage,res:ServerResponse)=>{
+        //超过cpu最大使用效率时处理
+        process.on('SIGXCPU',()=>{
+            // 解决请求拒绝问题，待梳理
+            RequestQueue.setCanHandle(false);
+        });
+        
+        this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
             RequestQueue.add(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
             console.log(`服务启动成功，端口${this.port}已监听！！！`);

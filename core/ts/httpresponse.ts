@@ -54,6 +54,8 @@ export class HttpResponse extends ServerResponse{
         this.srcRes.end();
     }
 
+    
+
     /**
      * 回写文件到浏览器端
      * @param file          待写文件 

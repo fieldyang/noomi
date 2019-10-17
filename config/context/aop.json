@@ -4,10 +4,12 @@
             "name":"logAdvice", 	
             "class_name":"LogAdvice",
             "path":"advice/logadvice"
+
         },{
             "name":"testAdvice", 	
             "class_name":"TestAdvice",
             "path":"advice/testadvice"
+
         }
     ]
 }

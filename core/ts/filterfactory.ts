@@ -2,37 +2,53 @@ import { InstanceFactory } from "./instancefactory";
 import { NoomiError } from "../errorfactory";
 
 interface FilterConfig{
-    name:string;
-    instanceName:string;
+    instance_name?:string;  //实例名(与instance二选一)
+    method_name?:string;    //方法名,默认do
+    url_pattern?:any;       //正则表达式串，或数组
+    instance?:any;          //实例
 }
 
-interface FilterMapping{
-    filterName:string;      //过滤器名
-    pattern:any;            //url正则式
+/**
+ * filter
+ */
+interface Filter{
+    instance:any;           //实例或实例名
+    method:string;          //方法名
+    patterns:Array<RegExp>; //正则表达式
 }
 
+
+
+/**
+ * 过滤器工厂类
+ */
 class FilterFactory{
-    static filters:any = new Map();
-    static mappings:Array<FilterMapping>=[];
-
+    static filters:Array<Filter> = [];
+    
     /**
      * 添加过滤器到工厂
      * @param name          过滤器名
      * @param instanceName  实例名
      */
-    static addFilter(name:string,instanceName:string){
-        this.filters.set(name,{name:name,instanceName:instanceName});
-    }
+    static addFilter(cfg:FilterConfig):void{
+        let ins:any = cfg.instance || cfg.instance_name;
+        let ptns:Array<RegExp> = [];
+        //默认 /*
+        if(!cfg.url_pattern){
+            ptns = [/^\/*/];
+        }else if(Array.isArray(cfg.url_pattern)){ //数组
+            cfg.url_pattern.forEach((item)=>{
+                ptns.push(new RegExp(item));
+            });
+        }else{ //字符串
+            ptns.push(new RegExp(cfg.url_pattern));
+        }
 
-    /**
-     * 添加过滤器映射
-     * @param filterName    过滤器名
-     * @param urlPattern    url正则式
-     */    
-    static addMapping(filterName:string,urlPattern:string){
-        this.mappings.push({
-            filterName:filterName,
-            pattern:new RegExp(urlPattern)
+        //加入过滤器集合
+        this.filters.push({
+            instance:ins,
+            method:cfg.method_name || 'do', //默认do
+            patterns:ptns
         });
     }
 
@@ -40,42 +56,21 @@ class FilterFactory{
      * 文件解析
      * @param path      filter的json文件
      */
-    static parseFile(path:string){
-        //切点json数据
-        interface FilterJson{
-            name:string;
-            instance_name:string;
-        }
-        //数据json
-        interface MappingJson{
-            filter_name:string;
-            url_pattern:string;
-        }
-        
-        interface DataJson{
-            filters:Array<FilterJson>;
-            mappings:Array<MappingJson>;
-        }
-
-        const fs = require("fs");
-        const pathTool = require('path');
+    static parseFile(path:string):void{
+    
         //读取文件
-        let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
-        let json:DataJson = null;
+        let jsonStr:string = require("fs").readFileSync(require('path').join(process.cwd(),path),'utf-8');
+        let json:any = null;
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
             throw new NoomiError("2200");
         }
 
+        //处理filters
         if(Array.isArray(json.filters)){
-            json.filters.forEach((item:FilterJson)=>{
-                this.addFilter(item.name,item.instance_name);
-            });
-        }
-        if(Array.isArray(json.mappings)){
-            json.mappings.forEach((item:MappingJson)=>{
-                this.addMapping(item.filter_name,item.url_pattern);
+            json.filters.forEach((item:FilterConfig)=>{
+                this.addFilter(item);
             });
         }
     }
@@ -84,11 +79,16 @@ class FilterFactory{
      * @param url   url
      * @returns     filter名数组
      */
-    static getFilterChain(url:string):Array<string>{
-        let arr:Array<any> = [];
-        this.mappings.forEach((item:FilterMapping)=>{
-            if(item.pattern.test(url)){
-                arr.push(item.filterName);
+    static getFilterChain(url:string):Array<Filter>{
+        let arr:Array<Filter> = [];
+        this.filters.forEach((item:Filter)=>{
+            let reg:RegExp;
+            for(reg of item.patterns){
+                //找到匹配
+                if(reg.test(url)){
+                    arr.push(item);
+                    return;
+                }
             }
         });
         return arr;
@@ -96,25 +96,32 @@ class FilterFactory{
 
     /**
      * 执行过滤器链
-     * @param url 
-     * @param request 
-     * @param response 
+     * @param url       url路径
+     * @param request   httprequest    
+     * @param response  httpresponse
+     * @param           promise boolean
      */
     static async doChain(url:string,request:any,response:any):Promise<boolean>{
-        let arr:Array<string> = FilterFactory.getFilterChain(url);
+        let arr:Array<Filter> = FilterFactory.getFilterChain(url);
         if(arr.length === 0){
             return true;
         }
-        let methods:Array<Function> = [];
         
+        //过滤器方法集合
+        let methods:Array<Function> = [];
         //根据过滤器名找到过滤器实例
         arr.forEach(item=>{
-            let filter = InstanceFactory.getInstance(item);
-            if(filter !== null && typeof filter.do === 'function'){
-                methods.push(filter.do);
+            //可能是实例名，需要从实例工厂中获得
+            let ins = typeof item.instance === 'string'? InstanceFactory.getInstance(item.instance):item.instance;
+            if(!ins){
+                return;
+            }
+            if(typeof ins[item.method] === 'function'){
+                methods.push(ins[item.method]);
             }
         });
 
+        //全部通过才通过
         for(let i=0;i<methods.length;i++){
             if(!await methods[i](request,response)){
                 return false;

@@ -34,14 +34,22 @@ class RequestQueue{
      * 处理队列
      */
     static handle(){
-        //延迟执行
-        if(!this.canHandle || this.queue.length === 0){
-            this.canHandle = true;
+        //队列轮询
+        if(this.queue.length === 0){
             setImmediate(()=>{
                 RequestQueue.handle();
             });
             return;
         }
+        //cpu超限，延迟1m执行队列
+        if(!this.canHandle){
+            this.canHandle = true;
+            setTimeout(()=>{
+                RequestQueue.handle();
+            },1000);
+            return;
+        } 
+            
         let item:any = this.queue.shift();
         if(item.expire === 0 || item.expire > new Date().getTime()){
             this.handleOne(item.req);

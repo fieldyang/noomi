@@ -1,34 +1,14 @@
 {
     "filters":[
         {
-            "name":"nodomFilter",
             "instance_name":"nodomFilter"
-        },
-        {
-            "name":"pathFilter",
-            "instance_name":"pathFilter"
-        },
-        {
-            "name":"uploadFilter",
-            "instance_name":"uploadFilter"
         },{
-            "name":"securityFilter",
-            "instance_name":"securityFilter"
-        }    
-    ],
-    "mappings":[
-       
-        {
-            "filter_name":"nodomFilter",
+            "instance_name":"pathFilter",
+            "url_pattern":"/*",
+            "method_name":"do2"
+        },{
+            "instance_name":"uploadFilter",
             "url_pattern":"/*"
-        },
-        {
-            "filter_name":"pathFilter",
-            "url_pattern":"/*"
-        },
-        {
-            "filter_name":"securityFilter",
-            "url_pattern":"/*"
-        }
+        } 
     ]
 }
