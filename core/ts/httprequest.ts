@@ -107,8 +107,8 @@ class HttpRequest extends IncomingMessage{
      * @param request   httprequest
      * @return          session
      */
-    getSession():Session{
-        return SessionFactory.getSession(this);
+    async getSession():Promise<Session>{
+        return await SessionFactory.getSession(this);
     }
 
     /**

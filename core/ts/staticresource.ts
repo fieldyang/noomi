@@ -68,6 +68,8 @@ class StaticResource{
             }
         }
     }
+
+
 }
 
 export {StaticResource};

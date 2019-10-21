@@ -3,7 +3,8 @@ import { InstanceFactory } from "./instancefactory";
 import { SecurityFilter } from "./filter/securityfilter";
 import { Session } from "./sessionfactory";
 import { NoomiError } from "../errorfactory";
-import { RedisFactory } from "./redisfactory";
+import { NCache } from "./ncache";
+import { SessionFactory } from "./sessionfactory";
 
 /**
  * 安全工厂
@@ -19,14 +20,20 @@ class SecurityFactory{
     static authType:number = 0;     //认证类型 0 session 1 token
     static saveType:number = 0;     //数据存储类型，0内存 1redis    默认0
     static redis:string='default';  //redis名，在redis.json中已定义
+    static cache:NCache;            //cache
     static securityPages:Map<string,string> = new Map();
+    
     //资源列表
     static resources:Map<number,ResourceObj> = new Map();
     //用户
     static users:Map<number,Array<number>> = new Map(); 
     //组
     static groups:Map<number,Array<number>> = new Map();
-    
+    static USERKEY:string = 'USER';
+    static GROUPKEY:string = 'GROUP';
+    static RESKEY:string = 'RESOURCE';
+    static USERID:string='NSECURITY_USERID';                        //userid在session中的名字
+    static PRELOGIN:string='NSECURITY_PRELOGIN';                    //prelogin在session中的名字
     static redisUserKey:string = "NOOMI_SECURITY_USERS";            //users在redis的key
     static redisGroupKey:string = "NOOMI_SECURITY_GROUPS";          //groups在redis的key
     static redisResourceKey:string = "NOOMI_SECURITY_RESOURCES";    //resource在redis的key
@@ -34,42 +41,20 @@ class SecurityFactory{
      * 初始化配置
      */
     static async init(){
+        
         //初始化security filter
         InstanceFactory.addInstance({
             name:'NoomiSecurityFilter',           //实例名
             instance:new SecurityFilter(),
             class_name:'SecurityFilter'
         });
-        //redis需要初始化对象
-        if(this.saveType === 1){
-            //判断是否建立组，未建立，则新建
-            let client = RedisFactory.getClient(this.redis);
-            let r = await client.exists(this.redisGroupKey);
-            if(!r){
-                await RedisFactory.set(this.redis,{
-                    key:this.redisGroupKey,
-                    value:{}
-                });
-            }
 
-            //判断是否建立用户，未建立，则新建
-            r = await client.exists(this.redisUserKey);
-            if(!r){
-                await RedisFactory.set(this.redis,{
-                    key:this.redisUserKey,
-                    value:{noomi:1}
-                });
-            }
-
-            //判断是否建立resources，未建立，则新建
-            r = await client.exists(this.redisResourceKey);
-            if(!r){
-                await RedisFactory.set(this.redis,{
-                    key:this.redisResourceKey,
-                    value:{}
-                });
-            }
-        }
+        //创建cache
+        this.cache = new NCache({
+            name:'NSECURITY',
+            saveType:this.saveType,
+            redis:this.redis
+        });
         
         //初始化表名和字段名
         let tresource:string = "t_resource";
@@ -102,28 +87,47 @@ class SecurityFactory{
             resourceUrl:resourceUrl
         }
 
-        
+        let results:Array<any>;
         //从表中加载数据
         switch(this.dbOptions.product){
             case "mysql":
-                await handleMysql.call(this,this.dbOptions,ids);
+                results = await handleMysql(this.dbOptions,ids);
                 break;
             case "mssql":
-                await handleMssql.call(this,this.dbOptions,ids);
+                results = await handleMssql.call(this,this.dbOptions,ids);
                 break;
             case "oracle":
-                await handleOracle.call(this,this.dbOptions,ids);
+                results = await handleOracle.call(this,this.dbOptions,ids);
                 break;
             case "mangodb":
-                await handleMongo.call(this,this.dbOptions,ids);
+                results = await handleMongo.call(this,this.dbOptions,ids);
                 break;
+        }
+        //组权限
+        for(let r of results[0]){
+            this.addGroupAuthority(r.gid,r.aid);
+        }
+        let resArr:Array<any> = [];
+        //资源
+        for(let r of results[1]){
+            let a = [];
+            for(let r1 of results[2]){
+                if(r1.rid === r.rid){
+                    let aid = r1.aid;
+                    if(a.includes(aid)){
+                        continue;
+                    }
+                    a.push(aid);
+                }
+            }
+            this.addResourceAuths(r.url,a);
         }
 
         /**
          * 处理mysql
          * @param cfg 
          */
-        async function handleMysql(cfg:any,ids:any){
+        async function handleMysql(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('mysql');
             const port = cfg.port || 3306;
             let conn = db.createConnection({
@@ -133,40 +137,56 @@ class SecurityFactory{
                 password: cfg.pwd,
                 database: cfg.schema
             });
+            let arr:Array<any> = [];
             try{
                 conn.connect();
                 //组权限
-                await new Promise((resolve,reject)=>{
+                let results:Array<any> = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
                     (error,results,fields)=>{
-                        for(let r of results){
-                            this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
                 });
+                let a:Array<any> = [];
+                for(let r of results){
+                    a.push({
+                        gid:r[ids.groupId],
+                        aid:r[ids.authId]
+                    });
+                }
+                arr.push(a);
 
                 //资源
-                await new Promise((resolve,reject)=>{
+                results = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
                     (error,results,fields)=>{
-                        for(let r of results){
-                            this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
                 });
-
+                let a1:Array<any> = [];
+                for(let r of results){
+                    a1.push({
+                        rid:r[ids.resourceId],
+                        url:r[ids.resourceUrl]
+                    });
+                }
+                arr.push(a1);
+                
                 //资源权限
-                await new Promise((resolve,reject)=>{
+                results = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
                     (error,results,fields)=>{
-                        for(let r of results){
-                            this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
                 });
+                let a2:Array<any> = [];
+                for(let r of results){
+                    a2.push({
+                        rid:r[ids.resourceId],
+                        aid:r[ids.authId]
+                    });
+                }
+                arr.push(a2);
             }catch(e){
                 throw e;
             }finally{
@@ -179,6 +199,8 @@ class SecurityFactory{
                     }
                 }
             }
+
+            return arr;
         }
 
         /**
@@ -186,10 +208,11 @@ class SecurityFactory{
          * @param cfg 
          * @param ids 
          */
-        async function handleMssql(cfg:any,ids:any){
+        async function handleMssql(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('mssql');
             const port = cfg.port || 1433;
             let conn;
+            let arr:Array<any> = [];
             try{
                 conn = await db.connect({
                     host: cfg.host,
@@ -200,22 +223,12 @@ class SecurityFactory{
                 });
                 
                 //组权限
-                let results = await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
-                for(let r of results){
-                    await this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                }
-                
+                arr.push(await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
                 //资源
-                results = await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
-                for(let r of results){
-                    await this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
-                }
-
+                arr.push(await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
                 //资源权限
-                results = await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
-                for(let r of results){
-                    await this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
-                }
+                arr.push(await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
+                
             }catch(e){
                 throw e;
             }finally{
@@ -228,6 +241,7 @@ class SecurityFactory{
                     }
                 }
             }
+            return arr;
         }
 
         /**
@@ -235,10 +249,11 @@ class SecurityFactory{
          * @param cfg 
          * @param ids 
          */
-        async function handleOracle(cfg:any,ids:any){
+        async function handleOracle(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('oracledb');
             const port = cfg.port || 1521;
             let conn;
+            let arr:Array<any> = [];
             try{
                 conn = await db.getConnection({
                     host: cfg.host,
@@ -249,22 +264,14 @@ class SecurityFactory{
                 });
                 
                 //组权限
-                let results = await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
-                for(let r of results){
-                    await this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                }
+                arr.push(await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
                 
                 //资源
-                results = await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
-                for(let r of results){
-                    await this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
-                }
-
+                arr.push(await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
+                
                 //资源权限
-                results = await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
-                for(let r of results){
-                    await this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
-                }
+                arr.push(await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
+                
             }catch(e){
                 throw e;
             }finally{
@@ -277,6 +284,7 @@ class SecurityFactory{
                     }
                 }
             }
+            return arr;
         }
 
         /**
@@ -284,7 +292,7 @@ class SecurityFactory{
          * @param cfg 
          * @param ids 
          */
-        async function handleMongo(cfg:any,ids:any){
+        async function handleMongo(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('mongodb').MongoClient;
             let dbUrl = 'mongodb://';
             if(cfg.user && cfg.pwd){
@@ -295,46 +303,38 @@ class SecurityFactory{
                 dbUrl += ':' + cfg.port;
             }
             dbUrl += '/' + cfg.database;
-
+            let arr:Array<any> = [];
             db.connect(dbUrl,async (err,client)=>{
                 if(err){
                     throw err;
                 }
                 let db1 = client.db(cfg.database);
                 let coll = db1.collection(ids.tgroupauth);
-                await new Promise((resolve,reject)=>{
+                arr.push(await new Promise((resolve,reject)=>{
                     coll.find({}).toArray(async (err,results)=>{
-                        for(let r of results){
-                            await this.addGroupAuthority(r[ids.groupId],r[ids.authId]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
-                });
+                }));
 
                 //资源
                 coll = db1.collection(ids.tresource);
-                await new Promise((resolve,reject)=>{
+                arr.push(await new Promise((resolve,reject)=>{
                     coll.find({}).toArray(async (err,results)=>{
-                        for(let r of results){
-                            await this.addResource(r[ids.resourceId],r[ids.resourceUrl]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
-                });
+                }));
 
                 //资源权限
                 coll = db1.collection(ids.tresourceauth);
-                await new Promise((resolve,reject)=>{
+                arr.push(await new Promise((resolve,reject)=>{
                     coll.find({}).toArray(async (err,results)=>{
-                        for(let r of results){
-                            await this.addResourceAuth(r[ids.resourceId],r[ids.authId]);
-                        }
-                        resolve();
+                        resolve(results);
                     });
-                });
+                }));
 
                 client.close();
             });
+            return arr;
         }
     }
 
@@ -344,41 +344,22 @@ class SecurityFactory{
      * @param groupId   组id
      */
     static async addUserGroup(userId:number,groupId:number){
-        if(this.saveType === 0){
-            let arr:Array<any> = this.users.get(userId);
-            if(!arr){
-                arr = [];
-                this.users.set(userId,arr);
-            }
-            if(arr.includes(groupId)){
-                return;
-            }
-            arr.push(groupId);
+        let key:string = this.USERKEY + userId;
+        let s = await this.cache.get(key);
+        let arr:Array<number>;
+        if(s !== null){
+            arr = JSON.parse(s);
         }else{
-            let user:string = await RedisFactory.get(this.redis,{
-                key:this.redisUserKey,
-                subKey:userId+''
-            });
-            let groupArr;
-            //group未创建
-            if(user === null){
-                groupArr = [userId];
-            }else{
-                groupArr = JSON.parse(user);
-                if(groupArr.length>0 && groupArr.includes(groupId)){
-                    return;
-                }
-                groupArr.push(groupId);
-            }
-
-            //写回redis
-            await RedisFactory.set(this.redis,{
-                key:this.redisUserKey,
-                subKey:userId+'',
-                value:JSON.stringify(groupArr)
-            });
-        }      
-        
+            arr = [];
+        }
+        if(arr.includes(groupId)){
+            return;
+        }
+        arr.push(groupId);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(arr)
+        });
     }
 
     /**
@@ -386,14 +367,19 @@ class SecurityFactory{
      * @param userId    用户id
      * @param groups    组id 数组
      */
-    static addUserGroups(userId:number,groups:Array<number>,request?:HttpRequest){
-        //保存userId 到security session object
+    static async addUserGroups(userId:number,groups:Array<number>,request?:HttpRequest){
+        //保存userId 到session object
         if(request){
-            this.setSession(request.getSession(),'userId',userId);
+            let session:Session = await SessionFactory.getSession(request);
+            if(session){
+                await session.set(this.USERID,userId);
+            }
         }
-        for(let gid of groups){
-            this.addUserGroup(userId,gid);
-        }
+        //保存用户组
+        await this.cache.set({
+            key:this.USERKEY + userId,
+            value:JSON.stringify(groups)
+        });
     }
     /**
      * 添加组权限
@@ -401,71 +387,22 @@ class SecurityFactory{
      * @param authId    权限id
      */
     static async addGroupAuthority(groupId:number,authId:number){
-        if(this.saveType === 0){ //存内存
-            let arr:Array<any> = this.groups.get(groupId);
-            if(!arr){
-                arr = [];
-                this.groups.set(groupId,arr);
-            }
-            if(arr.includes(authId)){
-                return;
-            }
-            arr.push(authId);
-        }else{ //存redis
-            let group:string = await RedisFactory.get(this.redis,{
-                key:this.redisGroupKey,
-                subKey:groupId+''
-            });
-            let authArr;
-            //group未创建
-            if(group === null){
-                authArr = [authId];
-            }else{
-                authArr = JSON.parse(group);
-                if(authArr.length>0 && authArr.includes(authId)){
-                    return;
-                }
-                authArr.push(authId);
-            }
-
-            //写回redis
-            await RedisFactory.set(this.redis,{
-                key:this.redisGroupKey,
-                subKey:groupId+'',
-                value:JSON.stringify(authArr)
-            });
+        let key:string = this.GROUPKEY + groupId;
+        let s = await this.cache.get(key);
+        let arr:Array<number>;
+        if(s !== null){
+            arr = JSON.parse(s);
+        }else{
+            arr = [];
         }
-    }
-
-    /**
-     * 
-     * @param id    资源id
-     * @param url   资源路径，可以是正则式
-     */
-    static async addResource(id:number,url:string){
-        if(this.saveType === 0){
-            let ro:ResourceObj = {
-                url:url,
-                auths:[]
-            };
-            this.resources.set(id,ro);
-        }else{ //存redis
-            let resource:string = await RedisFactory.get(this.redis,{
-                key:this.redisResourceKey,
-                subKey:id+''
-            });
-            
-            //resource未创建
-            if(resource === null){
-                let au = {url:url,auths:[]};
-                //写回redis
-                await RedisFactory.set(this.redis,{
-                    key:this.redisResourceKey,
-                    subKey:id+'',
-                    value:JSON.stringify(au)
-                });
-            }
+        if(arr.includes(authId)){
+            return;
         }
+        arr.push(authId);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(arr)
+        });
     }
 
     /**
@@ -473,44 +410,52 @@ class SecurityFactory{
      * @param resourceId    资源id
      * @param authId        资源id
      */
-    static async addResourceAuth(resourceId:number,authId:number){
-        if(this.saveType === 0){
-            let ro:ResourceObj = this.resources.get(resourceId);
-            if(!ro || ro.auths.includes(authId)){
-                return;
-            }
-            ro.auths.push(authId);
-
-        }else{ //存redis
-            let resource:string = await RedisFactory.get(this.redis,{
-                key:this.redisResourceKey,
-                subKey:resourceId+''
-            });
-            let resObj = JSON.parse(resource);
-            let authArr = resObj.auths;
-            if(authArr.length>0 && authArr.includes(authId)){
-                return;
-            }
-            authArr.push(authId);
-            //写回redis
-            await RedisFactory.set(this.redis,{
-                key:this.redisResourceKey,
-                subKey:resourceId+'',
-                value:JSON.stringify(resObj)
-            });
+    static async addResourceAuth(url:string,authId:number){
+        let key:string = this.RESKEY + url;
+        let s = await this.cache.get(key);
+        let arr:Array<number>;
+        if(s !== null){
+            arr = JSON.parse(s);
+        }else{
+            arr = [];
         }
+        if(arr.includes(authId)){
+            return;
+        }
+        arr.push(authId);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(arr)
+        });
+    }
+
+    /**
+     * 添加资源权限(多个权限)
+     * @param url       资源id
+     * @param auths     权限id数组
+     */
+    static async addResourceAuths(url:string,auths:Array<number>){
+        let key:string = this.RESKEY + url;
+        let s = await this.cache.set({
+            key:key,
+            value:JSON.stringify(auths)
+        });
     }
 
     /**
      * 删除用户     用户id
      * @param userId 
      */
-    static async deleteUser(userId:number){
-        if(this.saveType === 0){
-            this.users.delete(userId);
-        }else{
-            await RedisFactory.del(this.redis,this.redisUserKey,userId+'');
+    static async deleteUser(userId:number,request?:HttpRequest){
+        //保存userId 到session object
+        if(request){
+            let session:Session = await SessionFactory.getSession(request);
+            if(session){
+                await SessionFactory.delSession(session.id);
+            }
         }
+        //从cache删除
+        this.cache.del(this.USERKEY + userId);
     }
 
     /**
@@ -519,34 +464,20 @@ class SecurityFactory{
      * @param groupId   组id
      */
     static async deleteUserGroup(userId:number,groupId:number){
-        if(this.saveType === 0){
-            if(!this.users.has(userId)){
-                return;
-            }
-            let a = this.users.get(userId);
-            if(!a.includes(groupId)){
-                return;
-            }
-            //从数组移除
-            a.splice(a.indexOf(groupId),1);
-            
-        }else{
-            let astr:string = await RedisFactory.get(this.redis,{
-                key:this.redisUserKey,
-                subKey:userId+''
-            });
-            let a:Array<number> = JSON.parse(astr);
-            if(!a.includes(groupId)){
-                return;
-            }
-            a.splice(a.indexOf(groupId),1);
-            
-            await RedisFactory.set(this.redis,{
-                key:this.redisUserKey,
-                subKey:userId+'',
-                value:JSON.stringify(a)
-            });
+        let key:string = this.USERKEY + userId;
+        let astr:string = await this.cache.get(key);
+        if(astr === null){
+            return;
         }
+        let a:Array<number> = JSON.parse(astr);
+        if(!a.includes(groupId)){
+            return;
+        }
+        a.splice(a.indexOf(groupId),1);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(a)
+        });
     }
 
     /**
@@ -554,11 +485,7 @@ class SecurityFactory{
      * @param groupId   组id 
      */
     static async deleteGroup(groupId:number){
-        if(this.saveType === 0){
-            this.groups.delete(groupId);
-        }else{
-            await RedisFactory.del(this.redis,this.redisGroupKey,groupId+'');
-        }
+        await this.cache.del(this.GROUPKEY+groupId);
     }
 
     /**
@@ -567,45 +494,28 @@ class SecurityFactory{
      * @param authId    权限id
      */
     static async deleteGroupAuthority(groupId:number,authId:number){
-        if(this.saveType === 0){
-            if(!this.groups.has(groupId)){
-                return;
-            }
-            let a = this.groups.get(groupId);
-            if(!a.includes(authId)){
-                return;
-            }
-            //从数组移除
-            a.splice(a.indexOf(authId),1);
-        }else{
-            let astr:string = await RedisFactory.get(this.redis,{
-                key:this.redisGroupKey,
-                subKey:groupId+''
-            });
-            let a:Array<number> = JSON.parse(astr);
-            if(!a.includes(authId)){
-                return;
-            }
-            a.splice(a.indexOf(authId),1);
-            
-            await RedisFactory.set(this.redis,{
-                key:this.redisGroupKey,
-                subKey:groupId+'',
-                value:JSON.stringify(a)
-            });
+        let key:string = this.GROUPKEY + groupId;
+        let astr:string = await this.cache.get(key);
+        if(astr === null){
+            return;
         }
+        let a:Array<number> = JSON.parse(astr);
+        if(!a.includes(authId)){
+            return;
+        }
+        a.splice(a.indexOf(authId),1);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(a)
+        });
     }
 
     /**
      * 删除资源     
      * @param resourceId   资源id 
      */
-    static async deleteResource(resourceId:number){
-        if(this.saveType === 0){
-            this.resources.delete(resourceId);
-        }else{
-            await RedisFactory.del(this.redis,this.redisResourceKey,resourceId+'');
-        }
+    static async deleteResource(url:string){
+        await this.cache.del(this.RESKEY + url);
     }
 
     /**
@@ -613,72 +523,65 @@ class SecurityFactory{
      * @param resourceId     资源id 
      * @param authId    权限id
      */
-    static async deleteResourceAuthority(resourceId:number,authId:number){
-        if(this.saveType === 0){
-            if(!this.resources.has(resourceId)){
-                return;
-            }
-            let a = this.resources.get(resourceId).auths;
-            if(!a.includes(authId)){
-                return;
-            }
-            //从数组移除
-            a.splice(a.indexOf(authId),1);
-        }else{
-            let astr:string = await RedisFactory.get(this.redis,{
-                key:this.redisResourceKey,
-                subKey:resourceId+''
-            });
-            let obj = JSON.parse(astr);
-            let a:Array<number> = obj.auths;
-            if(!a.includes(authId)){
-                return;
-            }
-            a.splice(a.indexOf(authId),1);
-            
-            await RedisFactory.set(this.redis,{
-                key:this.redisGroupKey,
-                subKey:resourceId+'',
-                value:JSON.stringify(obj)
-            });
+    static async deleteResourceAuthority(url:string,authId:number){
+        let key:string = this.RESKEY + url;
+        let astr:string = await this.cache.get(key);
+        if(astr === null){
+            return;
         }
+        let a:Array<number> = JSON.parse(astr);
+        if(!a.includes(authId)){
+            return;
+        }
+        a.splice(a.indexOf(authId),1);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(a)
+        });
     }
 
     /**
      * 删除权限
      * @param authId    权限Id
      */
-    static deleteAuthority(authId:number){
-        // 删除资源权限
-        for(let res of this.resources){
-            let a:Array<number> = res[1].auths;
-            if(a.includes(authId)){
-                //移除资源auth
-                a.splice(a.indexOf(authId),1);
-                //如果没有auth，则该资源不再需要鉴权，删除资源
-                if(a.length === 0){
-                    this.resources.delete(res[0]);
+    static async deleteAuthority(authId:number){
+        //遍历资源权限并清除
+        let arr:Array<string> = await this.cache.getKeys(this.RESKEY + '*');
+        if(arr !== null){
+            for(let item of arr){
+                let astr:string = await this.cache.get(item);
+                if(astr === null){
+                    return;
                 }
+                let a:Array<number> = JSON.parse(astr);
+                if(!a.includes(authId)){
+                    return;
+                }
+                a.splice(a.indexOf(authId),1);
+                await this.cache.set({
+                    key:item,
+                    value:JSON.stringify(a)
+                });
             }
         }
 
-        //删除组权限
-        for(let grp of this.groups){
-            let a:Array<number> = grp[1];
-            if(a.includes(authId)){
-                //移除资源auth
-                a.splice(a.indexOf(authId),1);
-                //如果没有auth，则删除该组
-                if(a.length === 0){
-                    this.groups.delete(grp[0]);
-                    //删除用户组
-                    for(let user of this.users){
-                        let a1:Array<number> = user[1];
-                        if(a1.includes(grp[0])){
-                            a1.splice(a1.indexOf(grp[0]),1);
-                        }
-                    }
+        //遍历组权限并清除
+        arr = await this.cache.getKeys(this.GROUPKEY + '*');
+        if(arr !== null){
+            for(let item of arr){
+                let astr:string = await this.cache.get(item);
+                if(astr === null){
+                    return;
                 }
+                let a:Array<number> = JSON.parse(astr);
+                if(!a.includes(authId)){
+                    return;
+                }
+                a.splice(a.indexOf(authId),1);
+                await this.cache.set({
+                    key:item,
+                    value:JSON.stringify(a)
+                });
             }
         }
     }
@@ -692,79 +595,54 @@ class SecurityFactory{
     static async check(url:string,session:Session):Promise<number>{
         //获取路径
         url = require('url').parse(url).pathname;
-        let resAuthArr:Array<number>;
-        let res:Map<number,ResourceObj>;
-        if(this.saveType === 0){
-            res = this.resources;
-        }else{
-            let res1 = await RedisFactory.getMap(this.redis,this.redisResourceKey);
-            res = new Map();
-            for(let p of Object.getOwnPropertyNames(res1)){
-                res.set(parseInt(p),JSON.parse(res1[p]));
-            }
-        }
-        for(let item of res){
-            let it = item[1];
-            //redis 转换问题
-            if(typeof it === 'string'){
-                it = JSON.parse(it);
-            }
-            let reg = new RegExp('^' + it.url + '$');
-            //进行资源匹配
-            if(reg.test(url)){
-                resAuthArr = it.auths;
-                break;
-            }
-        }
-        //资源不存在，则直接返回true
-        if(resAuthArr === undefined || resAuthArr.length === 0){
+        
+        let astr:string = await this.cache.get(this.RESKEY + url);
+        if(astr === null){
             return 0;
         }
-        
-        let userId = await this.getSession(session,'userId');        
-        if(userId === undefined){
+        let resAuthArr:Array<number> = JSON.parse(astr);
+        //资源不存在，则直接返回true
+        if(!Array.isArray(resAuthArr) || resAuthArr.length === 0){
+            return 0;
+        }
+        // sesion 不存在，返回1
+        if(!session){
+            return 1;
+        }
+        let userId:any = await session.get(this.USERID);        
+        if(userId === null){
             return 1;
         }
         if(typeof userId === 'string'){
             userId = parseInt(userId);
         }
 
-        //用户所在组
-        let groupIds;
-        if(this.saveType === 0){
-            groupIds = this.users.get(userId);
-        }else{
-            let gids:string = await RedisFactory.get(this.redis,{
-                key:this.redisUserKey,
-                subKey:userId+''
-            });
+        let groupIds:Array<number>;
+        let gids:string = await this.cache.get(this.USERKEY + userId);
+        if(gids !== null){
             groupIds = JSON.parse(gids);
         }
-         
-        //用户无权限
-        if(!groupIds){
+        
+        //无组权限，返回无权
+        if(!Array.isArray(groupIds) || groupIds.length === 0){
             return 2;
         }
+
         //用户权限
         let authArr = [];
-        //组权限数组
         for(let id of groupIds){
             //组对应权限
-            let a;
-            if(this.saveType === 0){
-                a = this.groups.get(id);
-            }else{
-                let ids:string = await RedisFactory.get(this.redis,{
-                    key:this.redisGroupKey,
-                    subKey:id+''
-                });
-                a = JSON.parse(ids);
+            let a:Array<number>;
+            let s:string = await this.cache.get(this.GROUPKEY + id);
+            if(!s){
+                continue;
             }
-            
+            a = JSON.parse(s);
             if(Array.isArray(a) && a.length > 0){
                 authArr = authArr.concat(a);
             }
         }
+
         if(authArr.length === 0){
             return 2;
         }
@@ -789,54 +667,27 @@ class SecurityFactory{
     }
 
     /**
-     * 设置security session 值
-     * @param session   session
-     * @param key   键
-     * @param value 值
-     */
-    static async setSession(session:Session,key:string,value:any){
-        if(!session){
-            return;
-        }
-        let secObj:any = await session.get(this.sessionName);
-        
-        //不存在
-        if(!secObj){
-            secObj = {};
-        }else{
-            //返回为字符串，需要解析城json
-            secObj = JSON.parse(secObj);
-        }
-        secObj[key] = value;
-        session.set(this.sessionName,JSON.stringify(secObj));
-    }
-
-    /**
-     * 获取security session值
-     * @param session   session
-     * @param key       键
-     */
-    static async getSession(session:Session,key:string):Promise<any>{
-        if(!session){
-            return;
-        }
-        let secObj:any = await session.get(this.sessionName);
-        if(secObj){
-            //session存储为字符串
-            secObj = JSON.parse(secObj);
-            return secObj[key];
-        }
-    }
-
-    /**
      * 获取登录前页面
      * @param session   session
      * @return          page url
      */
     static async getPreLoginPage(session:Session):Promise<string>{
-        return this.getSession(session,'prelogin');
+        return await session.get(this.PRELOGIN);
+    }
+
+    /**
+     * 设置认证前页面
+     * @param session   Session
+     * @param page      pageurl
+     */
+    static async setPreLoginPage(session:Session,page:string){
+        await session.set(this.PRELOGIN,page);
     }
     
+    /**
+     * 文件解析
+     * @param path 
+     */
     static async parseFile(path){
         const pathTool = require('path');
         const fs = require("fs");
@@ -875,7 +726,6 @@ class SecurityFactory{
         if(json.hasOwnProperty('dboption')){
             this.dbOptions = json.dboption;
         }
-
         await this.init();
     }
 }

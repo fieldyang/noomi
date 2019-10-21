@@ -13,6 +13,7 @@ interface RedisCfg{
  */
 interface RedisItem{
     key:string;         //键
+    pre?:string;         //pre key,与pre+key作为真正的key
     subKey?:string;     //子键
     value?:any,         //值
     timeout?:number;    //超时时间
@@ -28,7 +29,12 @@ class RedisFactory{
      */
     static addClient(cfg:RedisCfg){
         const redis = require('redis');
-        this.clientMap.set(cfg.name,redis.createClient(cfg.port,cfg.host,cfg.options));
+        let client = redis.createClient(cfg.port,cfg.host,cfg.options)
+        
+        client.on('error',err=>{
+            throw err;
+        });
+        this.clientMap.set(cfg.name,client);
     }
 
     /**
@@ -54,37 +60,37 @@ class RedisFactory{
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
+        //合并pre
+        let key:string=item.pre?item.pre+item.key:item.key;
+        
         if(item.subKey){
             await new Promise((resolve,reject)=>{
-                client.hset(item.key,item.subKey,item.value,(err,v)=>{
+                client.hset(key,item.subKey,item.value,(err,v)=>{
                     resolve(v);
                 });
             })
         }else{
             if(Array.isArray(item.value)){//多个键，值组成的数组
                 await new Promise((resolve,reject)=>{
-                    client.hmset.apply(client,[item.key].concat(item.value),(err,v)=>{
+                    client.hmset.apply(client,[key].concat(item.value),(err,v)=>{
                         resolve(v);
                     });
                 });
             }else if(typeof item.value === 'object'){//对象用set存储
                 await new Promise((resolve,reject)=>{
-                    client.hmset(item.key,item.value,(err,v)=>{
+                    client.hmset(key,item.value,(err,v)=>{
                         resolve(v);
                     });
                 });
             }else{
                 await new Promise((resolve,reject)=>{
-                    client.set(item.key,item.value,(err,v)=>{
+                    client.set(key,item.value,(err,v)=>{
                         resolve(v);
                     });
                 });
             }
         }
-        //设置超时
-        if(item.timeout>0){
-            client.expire(item.key,item.timeout);
-        }
+        this.setTimeout(client,key,item.timeout);
     }
 
     /**
@@ -98,12 +104,14 @@ class RedisFactory{
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
-        
+        //合并pre
+        let key:string=item.pre?item.pre+item.key:item.key;
+
         let retValue:any;
         //有subKey
         if(item.subKey){
             retValue = await new Promise((resolve,reject)=>{
-                client.hget(item.key,item.subKey,(err,value)=>{
+                client.hget(key,item.subKey,(err,value)=>{
                     if(!err){
                         resolve(value);
                     }
@@ -111,29 +119,67 @@ class RedisFactory{
             }); 
         }else{
             retValue = await new Promise((resolve,reject)=>{
-                client.get(item.key,(err,value)=>{
+                client.get(key,(err,value)=>{
                     if(err){
-                        throw err;
+                        console.log(err);
+                        // throw err;
                     }
                     resolve(value);
                 });  
             });
         }
-
-        //修改过期时间
-        if(item.timeout && item.timeout>0){
-            client.expire(item.key,item.timeout);
-        }
+        this.setTimeout(client,key,item.timeout);
         return retValue;
+    }
+
+    /**
+     * 是否存在某个key
+     * @param clientName    redis name
+     * @param key           key
+     * @return              true/false
+     */
+    static async has(clientName:string,key:string):Promise<boolean>{
+        let client = this.getClient(clientName);
+        if(client === null){
+            throw new NoomiError("2601",clientName);
+        }
+        return new Promise(resolve=>{
+            client.exists(key,(err,v)=>{
+                resolve(v);
+            });
+        })
+    }
+    /**
+     * 设置过期时间
+     * @param client 
+     * @param key 
+     * @param timeout 
+     */
+    static async setTimeout(client:any,key:string,timeout:number){
+        if(typeof timeout !== 'number' || timeout <= 0){
+            return;
+        }
+        let cn;
+        if(typeof client === 'string'){
+            cn = client;
+            client = this.getClient(client);
+        }
+        
+        if(client === null){
+            throw new NoomiError("2601",cn);
+        }
+        client.expire(key,timeout);
     }
 
     /**
      * 获取map数据
      * @param clientName    client name
      * @param key           key
+     * @param pre           pre key
      */
-    static async getMap(clientName:string,key:string){
+    static async getMap(clientName:string,key:string,pre?:string){
         let client = this.getClient(clientName);
+        key = pre?pre+key:key;
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
@@ -142,12 +188,13 @@ class RedisFactory{
                 if(!err){
                     resolve(value);
                 }
-            });  
+            }); 
         });
     }
 
     /**
      * 删除项
+     * @clientName      redis name
      * @param key       键 
      * @param subKey    子键
      */

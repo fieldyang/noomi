@@ -143,27 +143,24 @@ class RouteFactory{
      * @param results   route结果数组    
      */
     static handleResult(res:HttpResponse,data:any,instance:any,results:Array<RouteResult>):void{
-        let find:boolean = false;
-        
         if(results && results.length > 0){
             //单个结果，不判断返回值
             if(results.length === 1){
                 this.handleOneResult(res,results[0],data,instance);
+                return;
             }else{
                 let r:RouteResult;
                 for(r of results){
                     //result不带value，或找到返回值匹配，则处理
                     if(r.value === undefined || data && data == r.value){
-                        find = true;
                         this.handleOneResult(res,r,data,instance);
-                        break;
+                        return;
                     }
                 }
             }
         }
-        if(!find){ //默认回写json
-            this.handleOneResult(res,{},data);
-        }
+        //默认回写json
+        this.handleOneResult(res,{},data);
     }
 
     /**

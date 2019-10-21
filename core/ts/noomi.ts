@@ -50,6 +50,16 @@ class noomi{
         ErrorFactory.language = iniJson['language'] || 'zh';  //默认中文
         ErrorFactory.init();
 
+        //redis初始化
+        if(iniJson.hasOwnProperty('redis_path')){
+            console.log('redis初始化...');
+            let rPath = iniJson['redis_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                this.loadRedis(path.join(basePath,rPath));
+            }
+            console.log('redis初始化完成！');
+        }
+        
         if(iniJson.hasOwnProperty('web_config')){
             WebConfig.init(iniJson['web_config']);    
         }
@@ -106,16 +116,6 @@ class noomi{
             console.log('aop初始化完成！');
         }
 
-        //redis初始化
-        if(iniJson.hasOwnProperty('redis_path')){
-            console.log('redis初始化...');
-            let rPath = iniJson['redis_path'];
-            if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadRedis(path.join(basePath,rPath));
-            }
-            console.log('redis初始化完成！');
-        }
-        
         //security初始化
         if(iniJson.hasOwnProperty('security_path')){
             console.log('security初始化...');

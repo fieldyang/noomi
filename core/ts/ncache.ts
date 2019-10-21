@@ -1,5 +1,6 @@
 import { NoomiError } from "../errorfactory";
 import { RedisFactory } from "./redisfactory";
+import { runInThisContext } from "vm";
 
 /**
  * cache类
@@ -7,8 +8,26 @@ import { RedisFactory } from "./redisfactory";
 interface CacheItem{
     expire:number;      //超时时间
     lastUse:number;     //最后使用时间
-    value:string;       //值
+    value:any;          //值
     size:number;        //memory大小
+    timeout?:number;    //超时时间(秒)
+}
+
+/**
+ * redis 存储项
+ */
+interface RedisItem{
+    key:string;         //键
+    subKey?:string;     //子键
+    value:any;          //值
+}
+
+interface CacheCfg{
+    name:string;        //cache 名
+    saveType:number;    //存储类型 0内存，1redis，默认1
+    redis?:string;       //redis名
+    maxSize?:number;     //最大空间，默认为0，如果saveType=1，设置无效
+    cleanNum?:number;   //单次清除最大数量，默认100，如果saveType=1，设置无效
 }
 
 export class NCache{
@@ -16,12 +35,14 @@ export class NCache{
     name:string;                                    //名字（redis需要）
     maxSize:number;                                 //最大 memorysize，默认0
     size:number;                                    //当前map memory size
-    cleanNum:number;                                //单次清理个数(默认10)
+    cleanNum:number=100;                            //单次清理个数(默认10)
     map:Map<string,CacheItem> = new Map();          //cache map
     extraSize:number;                               //存储单元额外size
     saveType:number;                                //存储类型 0内存 1redis     默认0
-    redisSizeName:string = 'NOOMI_CACHE_SIZE';      //redis存储的size名字
-    redisPreName:string = 'NOOMI_CACHE_';           //redis存储前缀
+    redisSizeName:string = 'NCACHE_SIZE_';          //redis存储的cache size名字前缀
+    redisPreName:string = 'NCACHE_';                //redis存储前缀
+    redisTimeout:string = 'NCACHE_TIMEOUT_';        //timeout 前缀
+
     /**
      * 
      * @param name 
@@ -29,18 +50,20 @@ export class NCache{
      * @param maxSize 
      * @param cleanNum 
      */
-    constructor(cfg:any){
+    constructor(cfg:CacheCfg){
         this.saveType = cfg.saveType || 0;
         this.name = cfg.name;
         this.redis = cfg.redis;
         this.maxSize = cfg.maxSize || 0;
-        this.cleanNum = cfg.cleanNum || 10;     
+        this.cleanNum = cfg.cleanNum || 100;     
         this.extraSize = 8;
 
         if(this.saveType === 0){
             this.size = 0;
         }else{
-            this.setCacheParamToRedis();
+            this.redisPreName += this.name + '_';
+            this.redisTimeout += this.name + '_';
+            this.redisSizeName += this.name;
         }
     }
 
@@ -48,35 +71,54 @@ export class NCache{
      * 添加到cache
      * @param key       键
      * @param value     值
+     * @param extra     附加信息
      * @param timeout   超时时间(秒)         
      */
-    async add(key:string,value:string,timeout?:number){
-        let size = this.getRealSize(value) + this.extraSize;
-        
-        //获取当前缓存size
-        if(this.saveType === 1){
-            await this.getCacheParamFromRedis();
-        }
-
-        if(this.maxSize>0 && size + this.size>this.maxSize){
-            this.cleanup(size + this.size - this.maxSize);
-            if(size + this.size > this.maxSize){
-                throw new NoomiError("存入值超过缓存最大值");
+    async set(item:RedisItem,timeout?:number){
+        //存到内存才需要清理，redis会采用LRU算法清理
+        if(this.saveType === 0){
+            let size:number = this.getRealSize(item.value);
+            if(this.maxSize>0 && size + this.size>this.maxSize){
+                this.cleanup(size + this.size - this.maxSize);
+                if(size + this.size > this.maxSize){
+                    throw new NoomiError("存入值超过缓存最大值");
+                }
             }
-        }
+            let ci:CacheItem = this.map.get(item.key);
 
-        let ct = new Date().getTime();
-        if(this.saveType === 0){ //存内存
-            this.map.set(key,{
-                value:value,
-                lastUse:ct,
-                expire:timeout&&timeout>0?ct+timeout*1000:0,
-                size:size
-            });    
+            if(item.subKey){//子键
+                if(!ci || typeof ci.value !== 'object'){
+                    return;
+                }
+                //保留原size
+                let si = ci.size;
+                if(ci.value[item.subKey]){
+                    let s = this.getRealSize(ci.value[item.subKey]);
+                    ci.size -= s;
+                }
+                ci.value[item.subKey] = item.value;
+                let s1 = this.getRealSize(item.value);
+                ci.size += s1;
+                //更新cache size
+                this.size += ci.size - si;
+            }else{
+                
+                if(ci !== undefined){
+                    this.size -= this.getRealSize(ci);
+                }
+                let ct = new Date().getTime();
+                ci = {
+                    value:item.value,
+                    lastUse:ct,
+                    expire:timeout&&timeout>0?ct+timeout*1000:0,
+                    size:size
+                };
+                this.map.set(item.key,ci);
+                this.size += this.getRealSize(ci);
+            }
+        }else{//数据存到redis
+            await this.addToRedis(item,timeout);
         }
-       
-        //修改size
-        this.size += size;
     }
 
     /**
@@ -85,10 +127,11 @@ export class NCache{
      * @param changeExpire  是否更新过期时间
      * @return              value或null
      */
-    async get(key:string,changeExpire?:boolean){
+    async get(key:string,subKey?:string,changeExpire?:boolean){
+        let ci:CacheItem = null;
         if(this.saveType === 0){
             if(this.map.has(key)){
-                let ci:CacheItem = this.map.get(key);
+                ci = this.map.get(key);
                 const ct:number = new Date().getTime();
                 if(ci.expire > 0 && ci.expire < ct){
                     this.map.delete(key);
@@ -101,12 +144,13 @@ export class NCache{
                     ci.expire += ct - ci.lastUse;
                 }
                 ci.lastUse = ct;
-                return ci.value;
+                if(subKey && typeof ci.value === 'object'){
+                    return ci.value[subKey];
+                }
             }
         }else{
-            let ci = await this.getFromRedis(key);
+            return await this.getFromRedis(key,subKey,changeExpire);
         }
-        
         return null;
     }
 
@@ -114,7 +158,7 @@ export class NCache{
      * 删除
      * @param key 键
      */
-    async del(key:string){
+    async del(key:string,subKey?:string){
         if(this.saveType === 0){
             let ci:CacheItem = this.map.get(key);
             if(ci){
@@ -123,15 +167,43 @@ export class NCache{
                 ci = null;
             }
         }else{
-            let ci = await this.getFromRedis(key);
-            if(ci !== null){
-                this.size -= ci.size;
-                await RedisFactory.del(this.redis,this.redis,key);
-                this.setCacheParamToRedis();
-            }
+            await RedisFactory.del(this.redis,this.redisPreName + key,subKey);
         }
     }
 
+    /**
+     * 获取键
+     * @param key   键，可以带通配符 
+     */
+    async getKeys(key:string):Promise<Array<string>>{
+        if(this.saveType === 0){
+
+        }else{
+            let client = RedisFactory.getClient(this.redis);
+            if(client === null){
+                throw new NoomiError("2601",this.redis);
+            }
+            let arr = client.keys(this.redisPreName + key);
+            //把前缀去掉
+            arr.forEach((item,i)=>{
+                arr[i] = item.substr(this.redisPreName.length);
+            })
+            return arr;
+        }
+        return null;
+    }
+    /**
+     * 是否拥有key
+     * @param key 
+     * @return   true/false
+     */
+    async has(key:string):Promise<boolean>{
+        if(this.saveType === 0){
+
+        }else{
+            return await RedisFactory.has(this.redis,this.redisPreName + key);
+        }
+    }
     /**
      * 清理缓存
      * @param size  清理大小，为0仅清除超时元素
@@ -196,100 +268,59 @@ export class NCache{
 
     /**
      * 从redis获取值
-     * @param key           key
+     * @param key           键
+     * @apram subKey        子键
      * @param changeExpire  是否修改expire
      */
-    private async getFromRedis(key:string,changeExpire?:boolean):Promise<any>{
-        let value:string = await RedisFactory.get(this.redis,{
-            key:this.name,
-            subKey:this.redisPreName + key + '_VALUE'
-        });
-
-        let timeout=0;
-        //修改超时时间
+    private async getFromRedis(key:string,subKey?:string,changeExpire?:boolean):Promise<any>{
+        let timeout:number = 0;
         if(changeExpire){
-            let v:string = await RedisFactory.get(this.redis,{
-                key:this.name,
-                subKey:this.redisPreName + key + '_EXPIRE'
+            let ts:string = await RedisFactory.get(this.redis,{
+                pre:this.redisTimeout,
+                key:key
             });
-            if(v!== null){
-                let expire = parseInt(v);
-                if(expire > 0){
-                    v = await RedisFactory.get(this.redis,{
-                        key:this.name,
-                        subKey:this.redisPreName + key + '_LASTUSE'
-                    });
-                    if(v !== null){
-                        timeout = expire - parseInt(v);
-                    }    
-                }
+            if(ts !== null){
+                timeout = parseInt(ts);
             }
         }
-        let ct = new Date().getTime();
-        let data:Array<any> = [this.redisPreName + key + '_LASTUSE',ct];
-        if(timeout > 0){ //修改expire
-            data.push(this.redisPreName + key + '_EXPIRE');
-            data.push(ct+timeout);
-        }
         
-        await RedisFactory.set(this.redis,{
-            key:this.name,
-            value:data
+        let value = await RedisFactory.get(this.redis,{
+            pre:this.redisPreName,
+            key:key,
+            subKey:subKey,
+            timeout:timeout
         });
-        return value;
+        return value||null;
     }
 
     /**
      * 存到redis
-     * @param key 
-     * @param ci        cacheitem 
-     * @param timeout 
+     * @param item      Redis item
+     * @param timeout   超时
      */
-    private async addToRedis(key:string,ci:CacheItem,timeout:number){
-        let key1:string = this.redisPreName + key + '_';
-        // size,lastuse,expire,value分开存
-        RedisFactory.set(
+    private async addToRedis(item:RedisItem,timeout?:number){
+        //存储timeout
+        if(typeof timeout==='number' && timeout>0){
+            await RedisFactory.set(
+                this.redis,
+                {
+                    pre:this.redisTimeout,
+                    key:item.key,
+                    value:timeout
+                }
+            );
+        }
+        //存储值
+        await RedisFactory.set(
             this.redis,
             {
-                key:this.name,
-                value:[
-                    key1+'SIZE',
-                    ci.size,
-                    key1+'LASTUSE',
-                    ci.lastUse,
-                    key1 + 'EXPIRE',
-                    ci.expire,
-                    key1+'VALUE',
-                    ci.value
-                ]
+                pre:this.redisPreName,
+                key:item.key,
+                subKey:item.subKey,
+                value:item.value,
+                timeout:timeout
             }
         );
-    }
-
-    /**
-     * 获取cache参数
-     */
-    private async getCacheParamFromRedis(){
-        let s:string = await RedisFactory.get(this.redis,{
-            key:this.name,
-            subKey:this.redisSizeName
-        });
-        this.size = s!==null?parseInt(s):0;
-    }
-
-    /**
-     * 设置cache 参数 到redis
-     */
-    private async setCacheParamToRedis(){
-        await RedisFactory.get(this.redis,{
-            key:this.name,
-            subKey:this.redisSizeName,
-            value:this.size
-        });
-    }
-
-    private async cleanRedis(size:number){
-
     }
 
     /**
@@ -297,7 +328,7 @@ export class NCache{
      * @param value     待检测值
      * @return          size
      */
-    getRealSize(value:string):number{
+    getRealSize(value:any):number{
         let totalLength:number = 0;
         for (let i = 0; i < value.length; i++) {
             let charCode = value.charCodeAt(i);
