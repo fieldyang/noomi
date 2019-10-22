@@ -144,8 +144,15 @@ class WebCache{
         }
 
         if(data){
+            //设置etag
             response.setHeader('Etag',etag);
+            //设置lastmodified
             response.setHeader('Last-Modified',lastModified);
+            //设置expire
+            if(this.expires && this.expires>0){
+                response.setHeader('Expires',new Date(new Date().getTime() + this.expires*1000).toUTCString());
+            }
+            //设置cache-control
             let cc:Array<string> = [];
             this.isPublic?cc.push('public'):'';
             this.isPrivate?cc.push('private'):'';
@@ -155,6 +162,7 @@ class WebCache{
             this.mustRevalidation?cc.push('must-revalidation'):'';
             this.proxyRevalidation?cc.push('proxy-revalidation'):'';
             response.setHeader('cache-control',cc.join(','));
+            
             return data;
         }
     }

@@ -181,19 +181,25 @@ class RedisFactory{
      * @param key           key
      * @param pre           pre key
      */
-    static async getMap(clientName:string,key:string,pre?:string){
+    static async getMap(clientName:string,item:RedisItem){
         let client = this.getClient(clientName);
-        key = pre?pre+key:key;
+        let key:string = item.pre?item.pre+item.key:item.key;
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
-        return new Promise((resolve,reject)=>{
+        let r = new Promise((resolve,reject)=>{
             client.hgetall(key,(err,value)=>{
                 if(!err){
                     resolve(value);
                 }
             }); 
         });
+        
+        if(item.timeout && item.timeout>0){
+            this.setTimeout(clientName,item.key,item.timeout);
+        }
+        return r;
+        
     }
 
     /**

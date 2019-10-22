@@ -332,6 +332,7 @@ export class NCache{
      */
     private async getMapFromRedis(key:string,changeExpire?:boolean):Promise<any>{
         let timeout:number = 0;
+        //超时修改expire
         if(changeExpire){
             let ts:string = await RedisFactory.get(this.redis,{
                 pre:this.redisTimeout,
@@ -342,7 +343,11 @@ export class NCache{
             }
         }
         
-        let value = await RedisFactory.getMap(this.redis,key,this.redisPreName);
+        let value = await RedisFactory.getMap(this.redis,{
+            key:key,
+            pre:this.redisPreName,
+            timeout:timeout
+        });
         return value||null;
     }
 
