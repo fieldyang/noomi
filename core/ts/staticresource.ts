@@ -1,5 +1,8 @@
 import { HttpResponse } from "./httpresponse";
 import { PageFactory } from "./pagefactory";
+import { WebCache } from "./webcache";
+import { WebConfig } from "./webconfig";
+import { HttpRequest } from "./httprequest";
 
 /**
  * 静态资源加载器
@@ -8,10 +11,11 @@ class StaticResource{
     static forbiddenMap:Map<string,RegExp> = new Map(); //forbidden path map
     /**
      * 
-     * @param path 文件路径
-     * @returns {file:文件数据,type:文件类型} 
+     * @param path      文件路径
+     * @param request   request
+     * @param response  response
      */
-    static async load(response:HttpResponse,path:string){
+    static async load(request:HttpRequest,response:HttpResponse,path:string):Promise<void>{
         //config 为默认路径
         if(this.forbiddenMap.size === 0){
             this.addPath('/config');
@@ -36,14 +40,34 @@ class StaticResource{
             let filePath = pathMdl.join(process.cwd(),path);
             if(!fs.existsSync(filePath)){
                 errCode = 404;
+            }else{
+                let data;
+                if(WebConfig.useServerCache){ //从缓存取
+                    data = await WebCache.load(request,response,filePath);
+                }else{ //从文件读
+                    data = await new Promise((resolve,reject)=>{
+                        fs.readFile(path,'utf8',(err,v)=>{
+                            if(err){
+                                resolve();
+                            }
+                            resolve(v);
+                        });
+                    });
+                }
+                //无数据，取文件
+                if(data === undefined){
+                    errCode = 404;
+                }else{
+                    //写到浏览器
+                    await response.writeToClient({
+                        data:data
+                    });
+                    return;
+                }
             }
-            errCode = await response.writeFileToClient({
-                path:filePath
-            });
         }
         //出现异常
         if(errCode !== undefined){
-            //存在异常页，直接跳转，否则回传404
             let page = PageFactory.getErrorPage(errCode);
             if(page){
                 response.redirect(page);

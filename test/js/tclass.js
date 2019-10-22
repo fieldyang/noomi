@@ -8,5 +8,6 @@ class tclass {
     sayHello(){
         console.log(this.param);
     }
+    
 }
 exports.tclass = tclass;

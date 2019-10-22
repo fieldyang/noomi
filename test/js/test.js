@@ -24,8 +24,35 @@
 // let r;
 // let s = '2+&';
 // console.log(reg.test(s));
-let os = require('os');
-let r = os.arch();
+// let os = require('os');
+// let r = os.arch();
 // console.log(r);
 // r = os.constants.signals.SIGXCPU;
-console.log(process.cpuUsage());
+// async function foo(){
+//     let fs = require('fs');
+//     let crypto = require('crypto');
+//     let stat = await new Promise((resolve,reject)=>{
+//         fs.stat('test/js/tclass.js',(err,v)=>{
+//             resolve(v);
+//         });
+//     })
+    
+
+//     let data = await new Promise((resolve,reject)=>{
+//         fs.readFile('test/js/tclass1.js','utf8',(err,data)=>{
+//             if(err){
+//                 // response.writeToClient({
+//                 //     statusCode:404
+//                 // });
+//                 reject(404);
+//             }
+//             resolve(data);    
+//         });
+//     }).catch((e)=>{
+//         console.log(e);
+//     });
+//     console.log(data);
+// }
+
+// foo();
+

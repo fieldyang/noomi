@@ -155,6 +155,37 @@ export class NCache{
     }
 
     /**
+     * 获取值
+     * @param key           键
+     * @param changeExpire  是否更新过期时间
+     * @return              value或null
+     */
+    async getMap(key:string,changeExpire?:boolean){
+        let ci:CacheItem = null;
+        if(this.saveType === 0){
+            if(this.map.has(key)){
+                ci = this.map.get(key);
+                const ct:number = new Date().getTime();
+                if(ci.expire > 0 && ci.expire < ct){
+                    this.map.delete(key);
+                    this.size -= ci.size;
+                    ci = null;
+                    return null;
+                }
+                //修改过期时间
+                if(changeExpire){
+                    ci.expire += ct - ci.lastUse;
+                }
+                ci.lastUse = ct;
+                
+            }
+        }else{
+            return await this.getMapFromRedis(key);
+        }
+        return null;
+    }
+
+    /**
      * 删除
      * @param key 键
      */
@@ -290,6 +321,28 @@ export class NCache{
             subKey:subKey,
             timeout:timeout
         });
+        return value||null;
+    }
+
+    /**
+     * 从redis获取值
+     * @param key           键
+     * @apram subKey        子键
+     * @param changeExpire  是否修改expire
+     */
+    private async getMapFromRedis(key:string,changeExpire?:boolean):Promise<any>{
+        let timeout:number = 0;
+        if(changeExpire){
+            let ts:string = await RedisFactory.get(this.redis,{
+                pre:this.redisTimeout,
+                key:key
+            });
+            if(ts !== null){
+                timeout = parseInt(ts);
+            }
+        }
+        
+        let value = await RedisFactory.getMap(this.redis,key,this.redisPreName);
         return value||null;
     }
 

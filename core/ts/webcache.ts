@@ -6,26 +6,41 @@ import { Stats } from "fs";
 interface ResCfg{
     etag:string;            //ETag
     lastModified:string;    //最后修改时间
-    data?:string;           //数据
+    data?:any;           //数据
 }
 /**
  * web 缓存类
  */
 class WebCache{
-    static cache:NCache;                    //缓存
-    static maxAge:number;                   //cache-control max-age 值
-    static fileTypes:Array<string>;         //缓存文件类型
+    static cache:NCache;                //缓存
+    static maxAge:number;               //cache-control max-age 值
+    static isPublic:boolean;            //cache-control public
+    static isPrivate:boolean;           //cache-control privite
+    static noCache:boolean;             //cache-control no cache
+    static noStore:boolean;             //cache-control no store
+    static mustRevalidation:boolean;    //cache-control must revalidation
+    static proxyRevalidation:boolean;   //cache-control proxy revalidation
+    static expires:number;              //expires
+    static fileTypes:Array<string>;     //缓存文件类型
     /**
      * 初始化
      */
     static async init(cfg:any){
         this.maxAge = cfg.max_age|0;
         this.fileTypes = cfg.file_type || ['*'];
+        this.noCache = cfg.no_cache || false;
+        this.noStore = cfg.no_store || false;
+        this.isPublic = cfg.public || false;
+        this.isPrivate = cfg.private || false;
+        this.mustRevalidation = cfg.must_revalidation || false;
+        this.proxyRevalidation = cfg.proxy_revalidation || false;
+        this.expires = cfg.expires || 0;
+
         //创建cache
         this.cache = new NCache({
             name:'NWEBCACHE',
-            maxSize:cfg.max_size,
-            saveType:cfg.save_type,
+            maxSize:cfg.max_size || 0,
+            saveType:cfg.save_type || 1,
             redis:cfg.redis
         });
     }
@@ -40,7 +55,7 @@ class WebCache{
         let addFlag:boolean = true;
         //非全部类型，需要进行类型判断
         if(this.fileTypes[0] !== '*'){
-            let extName = pathMdl.extName(url);
+            let extName = pathMdl.extname(url);
             for(let t of this.fileTypes){
                 if(t === extName){
                     addFlag = true;
@@ -58,26 +73,34 @@ class WebCache{
 
     /**
      * 加载资源
-     * @param url 
+     * @param request   request
+     * @param response  response
+     * @param url       url
+     * @return          404 或 数据
      */
-    static async load(request:HttpRequest,response:HttpResponse){
-        let url = require('url').parse(request.getUrl()).pathname;
+    static async load(request:HttpRequest,response:HttpResponse,url:string):Promise<any>{
         let rCheck:number = await this.check(request,url);
         let needReadFile:boolean = false;
+        let data:any;
+        let lastModified:string;
+        let etag:string;
         switch(rCheck){
             case 0:
                 //回写没修改
                 response.writeToClient({
                     statusCode:304
                 });
-                break;
+                return;
             case 1:
                 //从缓存获取
-                let value = await this.cache.get(url,'data');
-                if(value !== null){
-                    return value;
+                let map = await this.cache.getMap(url);
+                if(map === null || !map.data || map.data === ''){
+                    needReadFile = true;
+                }else{
+                    data = map.data;
+                    etag = map.etag;
+                    lastModified = map.lastModified
                 }
-                needReadFile = true;
                 break;
             case 2:
                 //读文件
@@ -87,35 +110,55 @@ class WebCache{
 
         if(needReadFile){
             let fs = require('fs');
-            let path = require('path').posix.join(process.cwd(),url);
+            let path = require('path').posix.join(url);
             //读文件
-            fs.readFile(path,'utf8',(err,data)=>{
-                if(!err){
-                    //404异常
-                    response.writeToClient({
-                        statusCode:404
-                    });
-                }else{ //加入cache
-                    //计算hash
-                    const crypto = require('crypto');
-                    const hash = crypto.createHash('sha256');
-                    hash.update(data);
-                    let etag:string = hash.disest('hex');
-                    //获取lastmodified
-                    let stat:Stats = fs.stat(path);
-                    let lastModified:string = stat.mtime.toUTCString();
-                    //添加到cache
-                    this.add(url,{
-                        etag:etag,
-                        lastModified:lastModified,
-                        data:data
-                    });
-                    //写到浏览器
-                }
+            data = await new Promise((resolve,reject)=>{
+                fs.readFile(path,'utf8',(err,v)=>{
+                    if(err){
+                        resolve();
+                    }
+                    resolve(v);
+                });
+            });
+
+            //获取lastmodified
+            let stat:Stats = await new Promise((resolve,reject)=>{
+                fs.stat(path,(err,data)=>{
+                    resolve(data);
+                });
+            });
+            lastModified = stat.mtime.toUTCString();
+            //计算hash
+            const crypto = require('crypto');
+            const hash = crypto.createHash('md5');
+            hash.update(data,'utf8');
+            etag = hash.digest('hex');
+            
+            //添加到cache
+            this.add(url,{
+                etag:etag,
+                lastModified:lastModified,
+                data:data
             });
             
         }
+
+        if(data){
+            response.setHeader('Etag',etag);
+            response.setHeader('Last-Modified',lastModified);
+            let cc:Array<string> = [];
+            this.isPublic?cc.push('public'):'';
+            this.isPrivate?cc.push('private'):'';
+            this.noCache?cc.push('no-cache'):'';
+            this.noStore?cc.push('no-store'):'';
+            this.maxAge>0?cc.push('max-age=' + this.maxAge):'';
+            this.mustRevalidation?cc.push('must-revalidation'):'';
+            this.proxyRevalidation?cc.push('proxy-revalidation'):'';
+            response.setHeader('cache-control',cc.join(','));
+            return data;
+        }
     }
+
     /**
      * 资源check，如果需要更改，则从服务器获取
      * @param request
@@ -128,19 +171,25 @@ class WebCache{
         }
         //检测 lastmodified
         let modiSince:string = request.getHeader('If-Modified_Since');
-        let result:string;
+        let r:boolean = false;
         if(modiSince){
-            result = await this.cache.get(url,'lastModified');
-            return result === modiSince?0:1;
+            let result = await this.cache.get(url,'lastModified');
+            r = (modiSince === result);
+            if(!r){
+                return 1;
+            }
+        }
+        //检测etag
+        let etag = request.getHeader('If-None-Match');
+        if(etag){
+            let result = await this.cache.get(url,'etag');
+            r = (result === etag);
+            if(!r){
+                return 1;
+            }
         }
         
-        //检测etag
-        let etag = request.getHeader('ETag');
-        if(etag){
-            result = await this.cache.get(url,'etag');
-            return etag === result?0:1;
-        }
-        return 1;
+        return r?0:1;
     }
 }
 

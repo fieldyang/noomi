@@ -83,7 +83,7 @@ class RequestQueue{
                 });
             });    
         }else{ //静态资源
-            StaticResource.load(request.response,path);
+            StaticResource.load(request,request.response,path);
         }
     }
 

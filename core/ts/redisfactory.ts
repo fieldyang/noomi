@@ -143,11 +143,15 @@ class RedisFactory{
         if(client === null){
             throw new NoomiError("2601",clientName);
         }
-        return new Promise(resolve=>{
+        let re = await new Promise(resolve=>{
             client.exists(key,(err,v)=>{
                 resolve(v);
             });
-        })
+        });
+        if(re === 1){
+            return true;
+        }
+        return false;
     }
     /**
      * 设置过期时间

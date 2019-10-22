@@ -1,6 +1,7 @@
 import { ServerResponse, OutgoingHttpHeaders, IncomingMessage } from "http";
 import { HttpCookie } from "./httpcookie";
 import { WebConfig } from "./webconfig";
+import { PageFactory } from "./pagefactory";
 
 interface WriteCfg{
     data?:any;              //数据
@@ -44,7 +45,7 @@ export class HttpResponse extends ServerResponse{
             headers['Access-Control-Allow-Origin'] = '*';
             headers['Access-Control-Allow-Headers'] = 'Content-Type';
         }
-
+        
         //contenttype 和 字符集
         headers['Content-Type'] = type + ';charset=' + charset;
         //数据长度
@@ -54,6 +55,14 @@ export class HttpResponse extends ServerResponse{
         this.srcRes.end();
     }
 
+    /**
+     * 写header
+     * @param key 
+     * @param value 
+     */
+    setHeader(key:string,value:any){
+        this.srcRes.setHeader(key,value);
+    }
     
 
     /**
