@@ -1,5 +1,5 @@
 import { AopFactory} from "./aopfactory";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 
 /**
  * 实例工厂
@@ -53,7 +53,7 @@ class InstanceFactory{
      * 添加单例到工厂
      * @param cfg 实例配置
      */
-    static addInstance(cfg:InstanceCfg):void{
+    static addInstance(cfg:InstanceCfg):any{
         if(this.factory.has(cfg.name)){
             throw new NoomiError("1002",cfg.name);
         }
@@ -63,6 +63,9 @@ class InstanceFactory{
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
             let mdl = require(pathMdl.join(process.cwd(),this.mdlBasePath,path));
+            if(!mdl){
+                throw new NoomiError("1004",path);
+            }
             //支持ts和js,ts编译后为{className:***},js直接输出为class
             if(typeof mdl === 'object'){
                 mdl = mdl[cfg.class_name];
@@ -100,6 +103,9 @@ class InstanceFactory{
         }
 
         this.factory.set(cfg.name,insObj);
+        if(insObj.instance){
+            return insObj.instance;
+        }
     }
 
     /**
@@ -138,9 +144,10 @@ class InstanceFactory{
     /**
      * 获取实例
      * @param name  实例名
+     * @param param 参数数组
      * @return      实例化的对象  
      */
-    static getInstance(name:string):any{
+    static getInstance(name:string,param?:Array<any>):any{
         let ins:InstanceObj = this.factory.get(name);
         if(!ins){
             return null;
@@ -149,7 +156,9 @@ class InstanceFactory{
             return ins.instance;
         }else{
             let mdl = ins.class;
-            let instance = new mdl(ins.params);
+            param = param || ins.params || [];
+            // let instance = new mdl(param);
+            let instance = Reflect.construct(mdl,param);
             //注入属性
             if(ins.properties && ins.properties.length>0){
                 ins.properties.forEach((item)=>{

@@ -1,9 +1,9 @@
-import { HttpRequest } from "./ts/httprequest";
-import { HttpResponse } from "./ts/httpresponse";
-import { WebConfig } from "./ts/webconfig";
-import { RouteFactory } from "./ts/routefactory";
-import { FilterFactory } from "./ts/filterfactory";
-import { StaticResource } from "./ts/staticresource";
+import { HttpRequest } from "./httprequest";
+import { HttpResponse } from "./httpresponse";
+import { WebConfig } from "./webconfig";
+import { RouteFactory } from "./routefactory";
+import { FilterFactory } from "./filterfactory";
+import { StaticResource } from "./staticresource";
 
 /**
  * request 队列
@@ -28,6 +28,9 @@ class RequestQueue{
             req:req,
             expire:timeout>0?new Date().getTime() + timeout*1000:0
         });
+        if(this.canHandle){
+            this.handle();
+        }
     }
 
     /**
@@ -36,9 +39,6 @@ class RequestQueue{
     static handle(){
         //队列轮询
         if(this.queue.length === 0){
-            setImmediate(()=>{
-                RequestQueue.handle();
-            });
             return;
         }
         //cpu超限，延迟1m执行队列

@@ -56,3 +56,30 @@
 
 // foo();
 
+function f1(flag){
+    return new Promise((resolve,reject)=>{
+        if(flag === 1){
+            resolve(1);
+        }
+        reject(2);
+    });
+}
+
+async function foo(){
+    // try{
+    //     r = await f1(2);
+    //     console.log(r);
+    // }catch(e){
+    //     console.log(e);
+    // }
+    return new Promise((resolve,reject)=>{
+        resolve(1);
+    });
+}
+
+async function f2(){
+    let a = await foo();
+    console.log(a);
+}
+
+f2();

@@ -1,4 +1,4 @@
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 import { RedisFactory } from "./redisfactory";
 import { runInThisContext } from "vm";
 

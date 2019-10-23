@@ -2,7 +2,7 @@ import { HttpRequest } from "./httprequest";
 import { InstanceFactory } from "./instancefactory";
 import { SecurityFilter } from "./filter/securityfilter";
 import { Session } from "./sessionfactory";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 import { NCache } from "./ncache";
 import { SessionFactory } from "./sessionfactory";
 

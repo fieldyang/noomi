@@ -1,4 +1,4 @@
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 import { resolve } from "dns";
 
 interface RedisCfg{

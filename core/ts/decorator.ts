@@ -4,6 +4,7 @@
 import{InstanceFactory} from './instancefactory';
 import { AopFactory } from './aopfactory';
 import { FilterFactory } from './filterfactory';
+import { ConnectionManager } from './connectionmanager';
 
 /**
  * IoC注入装饰器

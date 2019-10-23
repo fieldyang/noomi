@@ -10,9 +10,12 @@ import { Server } from "net";
 import { SecurityFactory } from "./securityfactory";
 import { IncomingMessage, ServerResponse } from "http";
 import { RedisFactory } from "./redisfactory";
-import { NoomiError,ErrorFactory } from "../errorfactory";
+import { NoomiError,ErrorFactory } from "./errorfactory";
 import { WebConfig } from "./webconfig";
-import { RequestQueue } from "../requestqueue";
+import { RequestQueue } from "./requestqueue";
+import { TransactionManager } from "./transactionmanager";
+
+
 class noomi{
     port:number=3000;
     server:Server;
@@ -23,7 +26,9 @@ class noomi{
         if(typeof port === 'number'){
             this.port = port;
         }
+        
         this.init('config');
+        
     }
 
     /**
@@ -105,7 +110,16 @@ class noomi{
             console.log('路由工厂初始化完成！');
         }
 
-
+        //事务初始化
+        if(iniJson.hasOwnProperty('transaction_path')){
+            console.log('事务初始化...');
+            let rPath = iniJson['transaction_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                TransactionManager.parseFile(path.join(basePath,rPath));
+            }
+            console.log('事务初始化完成！');
+        }
+        
         //aop初始化
         if(iniJson.hasOwnProperty('aop_path')){
             console.log('aop初始化...');
@@ -137,6 +151,14 @@ class noomi{
             RequestQueue.setCanHandle(false);
         });
         
+        //开启async hook
+    //    let asyncHooks = require('async_hooks').createHook({
+    //         init:()=>{}
+    //     });
+    //     asyncHooks.enable();
+        
+    //     Application.asyncHooks = asyncHooks;
+        //创建server
         this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
             RequestQueue.add(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{

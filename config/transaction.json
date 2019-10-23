@@ -1,0 +1,4 @@
+{
+    "transaction":"mysqlTransaction",
+    "pointcut":["dataImpl*"]
+}

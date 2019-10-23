@@ -1,6 +1,6 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 
 /**
  * AOP 工厂
@@ -197,9 +197,8 @@ class AopFactory{
                 for(let insName of insFac.keys()){
                     //该实例处理过，不再处理
                     if(instances.includes(insName)){
-                        return;
+                        continue;
                     }
-                    instances.push(insName);
                     //先检测instanceName
                     let instance = InstanceFactory.getInstance(insName);
                     if(instance){
@@ -211,6 +210,7 @@ class AopFactory{
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
                                 instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                                instances.push(insName);
                             }
                         });
                     }
@@ -293,13 +293,13 @@ class AopFactory{
                             method:aop.method
                         });
                         return;
-                    case 'return':
+                    case 'after-return':
                         returnArr.push({
                             instance:aop.instance,
                             method:aop.method
                         });
                         return;
-                    case 'throw':
+                    case 'after-throw':
                         throwArr.push({
                             instance:aop.instance,
                             method:aop.method

@@ -1,6 +1,7 @@
 import { Inject } from "../../../../core/ts/decorator";
 import { UserService } from "../service/userservice";
 import { BaseAction } from "../../../../core/ts/baseaction";
+import { DataImpl } from "../service/dataimpl";
 
 /**
  * 测试用户
@@ -9,8 +10,11 @@ class UserAction extends BaseAction{
     userName:string;
     // @Inject("userService")
     userService:UserService;
-    
-    
+    @Inject("dataImpl")
+    dataImpl:DataImpl;
+    addres(){
+        this.dataImpl.add();
+    }
     getUserName(){
         return this.userName;
     }
@@ -29,8 +33,8 @@ class UserAction extends BaseAction{
         }
     }
 
-    showinfo(params){
-        return new Promise((resolve,reject)=>{
+    async showinfo(params){
+        await new Promise((resolve,reject)=>{
             if(params.userName === 'aaa'){
                 resolve(1);
                 return;

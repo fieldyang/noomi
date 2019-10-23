@@ -1,0 +1,15 @@
+{
+    
+    "instances":[
+        {
+            "name":"mysqlTransaction", 	
+            "class_name":"MysqlTransaction",
+            "path":"transaction/mysqltransaction",
+            "singleton":false
+        },{
+            "name":"NoomiConnectionManager", 	
+            "class_name":"MysqlConnectionManager",
+            "path":"dao/mysqlconnectionmanager"
+        }
+    ]
+}

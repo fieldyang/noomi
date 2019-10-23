@@ -1,5 +1,5 @@
 import { InstanceFactory } from "./instancefactory";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 
 interface FilterConfig{
     instance_name?:string;  //实例名(与instance二选一)

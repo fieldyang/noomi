@@ -4,7 +4,7 @@
 import {InstanceFactory} from "./instancefactory";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "./errorfactory";
 interface RouteCfg{
     path:string;
     reg:RegExp;

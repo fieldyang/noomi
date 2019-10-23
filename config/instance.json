@@ -4,7 +4,8 @@
 		"context/aop.json",
 		"context/action.json",
 		"context/service.json",
-		"context/filter.json"
+		"context/filter.json",
+		"context/transaction.json"
 	]
 	
 }
