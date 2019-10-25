@@ -7,7 +7,7 @@ class MysqlConnectionManager extends ConnectionManager{
     pool:any;
     async getConnection(){
         let conn = this.getTransactionConnection();
-        if(conn !== null){
+        if(conn){
             return conn;
         }
         if(!this.pool){

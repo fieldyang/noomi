@@ -14,6 +14,7 @@ import { NoomiError,ErrorFactory } from "./errorfactory";
 import { WebConfig } from "./webconfig";
 import { RequestQueue } from "./requestqueue";
 import { TransactionManager } from "./transactionmanager";
+import { App } from "./application";
 
 
 class noomi{
@@ -151,13 +152,31 @@ class noomi{
             RequestQueue.setCanHandle(false);
         });
         
-        //开启async hook
-    //    let asyncHooks = require('async_hooks').createHook({
-    //         init:()=>{}
-    //     });
-    //     asyncHooks.enable();
         
-    //     Application.asyncHooks = asyncHooks;
+        //开启async hook
+        let asyncHooks = App.asyncHooks.createHook({
+            init(asyncId, type, triggerAsyncId,resource) {
+                const eid = App.asyncHooks.executionAsyncId();
+                TransactionManager.bindTransaction(asyncId,eid);
+                fs.writeFileSync('log.out', 
+                  `${type}(${asyncId}):` +
+                  ` trigger: ${triggerAsyncId} execution: ${eid}\n`,{ flag: 'a' });
+              },
+              before(asyncId) {
+                fs.writeFileSync('log.out',
+                                 `before:  ${asyncId} ${new Date().getTime()}\n`, { flag: 'a' });
+                
+              },
+              after(asyncId) {
+                
+                fs.writeFileSync('log.out',
+                                 `after:  ${asyncId}   ${new Date().getTime()}\n`, { flag: 'a' });
+              },
+        });
+        asyncHooks.enable();
+        
+        
+
         //创建server
         this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
             RequestQueue.add(new HttpRequest(req,res));

@@ -12,8 +12,8 @@ class UserAction extends BaseAction{
     userService:UserService;
     @Inject("dataImpl")
     dataImpl:DataImpl;
-    addres(){
-        this.dataImpl.add();
+    async addres(){
+        await this.dataImpl.add();
     }
     getUserName(){
         return this.userName;

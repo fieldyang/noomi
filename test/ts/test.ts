@@ -1,24 +1,25 @@
 import { RedisFactory } from "../../core/ts/redisfactory";
 import { User } from "../app/module/dao/pojo/user";
 import { UserAction } from "../app/module/action/useraction";
+import { App } from "../../core/ts/application";
 
 
-    RedisFactory.addClient({
-        name:'default',
-        host:'localhost',
-        port:'6379',
-        // options:{
-        //     password:'field'
-        // }
-    });
+    // RedisFactory.addClient({
+    //     name:'default',
+    //     host:'localhost',
+    //     port:'6379',
+    //     // options:{
+    //     //     password:'field'
+    //     // }
+    // });
     
-    let client = RedisFactory.getClient('default');
-    client.get('NOOMI_SECURITY_RES*',(err,v)=>{
-        console.log(v);
-    });
-    client.keys('NOOMI_SECURITY_RES*',(err,v)=>{
-        console.log(v);
-    })
+    // let client = RedisFactory.getClient('default');
+    // client.get('NOOMI_SECURITY_RES*',(err,v)=>{
+    //     console.log(v);
+    // });
+    // client.keys('NOOMI_SECURITY_RES*',(err,v)=>{
+    //     console.log(v);
+    // })
     // client.hmset('xxx',{
     //     'aaa':'1',
     //     "bbb":'y'
@@ -91,3 +92,4 @@ import { UserAction } from "../app/module/action/useraction";
 
 // foo();
 
+console.log(App.asyncHooks);

@@ -1,10 +1,16 @@
 import { Transaction } from "../../../../core/ts/transactionmanager";
+import { getConnection } from "../../../../core/ts/connectionmanager";
 
 class MysqlTransaction extends Transaction{
-    async begin(){
+    async begin():Promise<void>{
         if(this.isBegin){
             return;
         }
+        this.isBegin = true;
+        if(!this.connection){
+            this.connection = await getConnection();
+        }
+        
         return new Promise((resolve,reject)=>{
             this.connection.beginTransaction((err,conn)=>{
                 if(err){
@@ -36,7 +42,7 @@ class MysqlTransaction extends Transaction{
             return;
         }
         return new Promise((resolve,reject)=>{
-            this.connection.commit((err)=>{
+            this.connection.rollback((err)=>{
                 if(!err){
                     reject(err);
                 }

@@ -1,12 +1,18 @@
 import { Transaction, TransactionManager } from "./transactionmanager";
-import { Aspect } from "./decorator";
+import { App } from "./application";
+import { getConnection } from "./connectionmanager";
+
 
 export class TransactionAdvice{
     /**
      * 事务方法调用前
      */
     async before(){
-        let tr:Transaction = await TransactionManager.get();
+        let id = App.asyncHooks.executionAsyncId();
+        let tr:Transaction = await TransactionManager.get(id,true);
+        if(!tr.connection){
+            tr.connection = await getConnection();
+        }
         tr.begin();
     }
 
@@ -14,14 +20,14 @@ export class TransactionAdvice{
      * 事务方法返回时
      */
     async afterReturn(){
-        let id = require('async_hooks').executionAsyncId();
+        let id = App.asyncHooks.executionAsyncId();
         let tr:Transaction = await TransactionManager.get(id);
         //当前id为事务头，进行提交
-        if(id === tr.asyncIds[0]){
+        if(tr && id === tr.id){
             tr.commit();
+            //删除事务
+            TransactionManager.del(tr);
         }
-        //删除事务
-        TransactionManager.del(tr);
     }
 
 
@@ -29,9 +35,12 @@ export class TransactionAdvice{
      * 事务方法抛出异常时
      */
     async afterThrow(){
-        let id = require('async_hooks').executionAsyncId();
-        let tr:Transaction = await TransactionManager.get();
-        tr.rollback();
-        TransactionManager.del(tr);
+        let id = App.asyncHooks.executionAsyncId();
+        let tr:Transaction = await TransactionManager.get(id);
+        if(tr){
+            tr.rollback();
+            TransactionManager.del(tr);
+        }
+        
     }
 }
