@@ -1,7 +1,7 @@
 import { getConnection } from "../../../../core/ts/connectionmanager";
 class DataImpl{
     async addRes(url:string){
-        let sql:string = "insert into t_resource(resource_id,url) values(12,'"+url+"')";
+        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
         let r = await new Promise(async (resolve,reject)=>{
             let conn = await getConnection();
             conn.query(sql,(err,result)=>{
@@ -11,6 +11,7 @@ class DataImpl{
                 resolve(result);
             });
         }); 
+        return 2;
     }
 
     async addResAuth(){
@@ -24,12 +25,19 @@ class DataImpl{
                 resolve(result);
             });
         });
+        return 1;
     }
     
 
     async add(){
-        await this.addResAuth();
-        await this.addRes('/testtran');
+        let r1 = await this.addResAuth();
+        let r2 = await this.addRes('/testtran');
+        
+        if(r1 === 1 && r2 === 2){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
 

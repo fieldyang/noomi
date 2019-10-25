@@ -72,7 +72,6 @@ class TransactionManager{
         }else if(newOne){          //父亲对象不存在，则新建
             tr = InstanceFactory.getInstance(this.transactionMdl,[id]);
             this.transactionMap.set(id,tr);
-            require('fs').writeFileSync('log.out',`get tran ${new Date().getTime()}`,{flag:'a'});
         }
         return tr;
     }
@@ -117,19 +116,6 @@ class TransactionManager{
     }
 
     /**
-     * 设置connection
-     * @param id        transaction id
-     * @param conn      connection
-     */
-    static setConnection(id:number,conn:any){
-        if(!this.transactionMap.has(id)){
-            return;
-        }
-        let tr:Transaction = this.transactionMap.get(id);
-        tr.connection = conn;
-    }
-
-    /**
      * 解析实例配置文件
      * @param path      文件路径
      * @param mdlPath   模型路径
@@ -159,7 +145,8 @@ class Transaction{
     src:TransactionSource;
     type:TransactionType;
     isBegin:boolean;
-    asyncIds:Array<number>=[];     //绑定的的async id
+    asyncIds:Array<number>=[];      //绑定的的async id
+    trIds:Array<number>=[];         //有开始事务的async id数组
     constructor(id:number,connection?:any,type?:TransactionType){
         this.id = id; 
         this.connection = connection;

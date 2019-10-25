@@ -157,21 +157,22 @@ class noomi{
         let asyncHooks = App.asyncHooks.createHook({
             init(asyncId, type, triggerAsyncId,resource) {
                 const eid = App.asyncHooks.executionAsyncId();
+                //为asyncId绑定transaction
                 TransactionManager.bindTransaction(asyncId,eid);
-                fs.writeFileSync('log.out', 
-                  `${type}(${asyncId}):` +
-                  ` trigger: ${triggerAsyncId} execution: ${eid}\n`,{ flag: 'a' });
+                // fs.writeFileSync('log.out', 
+                //   `${type}(${asyncId}):` +
+                //   ` trigger: ${triggerAsyncId} execution: ${eid}\n`,{ flag: 'a' });
               },
-              before(asyncId) {
-                fs.writeFileSync('log.out',
-                                 `before:  ${asyncId} ${new Date().getTime()}\n`, { flag: 'a' });
+            //   before(asyncId) {
+            //     fs.writeFileSync('log.out',
+            //                      `before:  ${asyncId} ${new Date().getTime()}\n`, { flag: 'a' });
                 
-              },
-              after(asyncId) {
+            //   },
+            //   after(asyncId) {
                 
-                fs.writeFileSync('log.out',
-                                 `after:  ${asyncId}   ${new Date().getTime()}\n`, { flag: 'a' });
-              },
+            //     fs.writeFileSync('log.out',
+            //                      `after:  ${asyncId}   ${new Date().getTime()}\n`, { flag: 'a' });
+            //   },
         });
         asyncHooks.enable();
         

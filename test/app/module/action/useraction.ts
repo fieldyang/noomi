@@ -13,7 +13,15 @@ class UserAction extends BaseAction{
     @Inject("dataImpl")
     dataImpl:DataImpl;
     async addres(){
-        await this.dataImpl.add();
+        try{
+            let r = await this.dataImpl.add();
+            return{
+                success:true,
+                result:r
+            }
+        }catch(e){
+            return {success:false,result:e};
+        }
     }
     getUserName(){
         return this.userName;
