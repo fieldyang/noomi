@@ -1,4 +1,4 @@
-import { getConnection } from "../../../../core/ts/connectionmanager";
+import { getConnection } from "../../../../core/ts/database/connectionmanager";
 class DataImpl{
     async addRes(url:string){
         let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";

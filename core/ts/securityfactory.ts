@@ -5,6 +5,8 @@ import { Session } from "./sessionfactory";
 import { NoomiError } from "./errorfactory";
 import { NCache } from "./ncache";
 import { SessionFactory } from "./sessionfactory";
+import { DBManager } from "./database/dbmanager";
+import { ConnectionManager } from "./database/connectionmanager";
 
 /**
  * 安全工厂
@@ -46,7 +48,7 @@ class SecurityFactory{
         InstanceFactory.addInstance({
             name:'NoomiSecurityFilter',           //实例名
             instance:new SecurityFilter(),
-            class_name:'SecurityFilter'
+            class:'SecurityFilter'
         });
 
         //创建cache
@@ -129,21 +131,24 @@ class SecurityFactory{
          */
         async function handleMysql(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('mysql');
-            const port = cfg.port || 3306;
-            let conn = db.createConnection({
-                host: cfg.host,
-                port: port,
-                user: cfg.user,
-                password: cfg.pwd,
-                database: cfg.schema
-            });
+            let conn;
             let arr:Array<any> = [];
+            let cm:ConnectionManager = null;
             try{
-                conn.connect();
+                if(cfg.connectionmanager){
+                    cm = DBManager.getConnectionManager();
+                    conn = await cm.getConnection();
+                }else{    
+                    conn = db.createConnection(cfg);
+                    await conn.connect();
+                }
                 //组权限
                 let results:Array<any> = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
                     (error,results,fields)=>{
+                        if(error){
+                            reject(error);
+                        }
                         resolve(results);
                     });
                 });
@@ -160,6 +165,9 @@ class SecurityFactory{
                 results = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
                     (error,results,fields)=>{
+                        if(error){
+                            reject(error);
+                        }
                         resolve(results);
                     });
                 });
@@ -176,6 +184,9 @@ class SecurityFactory{
                 results = await new Promise((resolve,reject)=>{
                     conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
                     (error,results,fields)=>{
+                        if(error){
+                            reject(error);
+                        }
                         resolve(results);
                     });
                 });
@@ -192,14 +203,17 @@ class SecurityFactory{
             }finally{
                 //关闭连接
                 if (conn) {
-                    try {
-                        conn.end();
-                    } catch (err) {
-                        throw err;
+                    if(cm !== null){
+                        cm.release(conn);
+                    }else{
+                        try {
+                            conn.end();
+                        } catch (err) {
+                            throw err;
+                        }
                     }
                 }
             }
-
             return arr;
         }
 
@@ -210,18 +224,16 @@ class SecurityFactory{
          */
         async function handleMssql(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('mssql');
-            const port = cfg.port || 1433;
             let conn;
             let arr:Array<any> = [];
+            let cm:ConnectionManager = null;
             try{
-                conn = await db.connect({
-                    host: cfg.host,
-                    port: port,
-                    user: cfg.user,
-                    password: cfg.pwd,
-                    database: cfg.schema
-                });
-                
+                if(cfg.connectionmanager){
+                    cm = DBManager.getConnectionManager();
+                    conn = cm.getConnection();
+                }else{
+                    conn = await db.connect(cfg);
+                }
                 //组权限
                 arr.push(await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
                 //资源
@@ -234,10 +246,14 @@ class SecurityFactory{
             }finally{
                 //关闭连接
                 if (conn) {
-                    try {
-                        conn.close();
-                    } catch (err) {
-                        throw err;
+                    if(cm !== null){
+                        cm.release(conn);
+                    }else{
+                        try {
+                            conn.close();
+                        } catch (err) {
+                            throw err;
+                        }
                     }
                 }
             }
@@ -251,36 +267,35 @@ class SecurityFactory{
          */
         async function handleOracle(cfg:any,ids:any):Promise<Array<any>>{
             const db = require('oracledb');
-            const port = cfg.port || 1521;
             let conn;
             let arr:Array<any> = [];
+            let cm:ConnectionManager = null;
             try{
-                conn = await db.getConnection({
-                    host: cfg.host,
-                    port: port,
-                    user: cfg.user,
-                    password: cfg.pwd,
-                    database: cfg.schema
-                });
-                
-                //组权限
-                arr.push(await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
-                
-                //资源
-                arr.push(await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
-                
-                //资源权限
-                arr.push(await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
-                
+                if(cfg.connectionmanager){
+                    cm = DBManager.getConnectionManager();
+                    conn = cm.getConnection();
+                }else{
+                    conn = await db.getConnection(cfg);
+                    //组权限
+                    arr.push(await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
+                    //资源
+                    arr.push(await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
+                    //资源权限
+                    arr.push(await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
+                }
             }catch(e){
                 throw e;
             }finally{
                 //关闭连接
                 if (conn) {
-                    try {
-                        await conn.close();
-                    } catch (err) {
-                        throw err;
+                    if(cm !== null){
+                        cm.release(conn);
+                    }else{
+                        try {
+                            await conn.close();
+                        } catch (err) {
+                            throw err;
+                        }
                     }
                 }
             }

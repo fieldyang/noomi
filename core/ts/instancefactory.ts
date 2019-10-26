@@ -18,7 +18,7 @@ interface InstanceProperty{
  */
 interface InstanceCfg{
     name:string;                            //实例名
-    class_name:string;                      //类名
+    class?:any;                             //类名或类
     path?:string;                           //模块路径（相对noomi.ini配置的modulepath），与instance二选一
     instance?:any;                          //实例与path 二选一
     singleton?:boolean;                     //单例模式
@@ -39,10 +39,10 @@ interface InstanceObj{
 
 class InstanceFactory{
     static factory:any = new Map();
-    static mdlBasePath:string;
+    static mdlBasePath:Array<string>;
     static injectList:Array<any> = [];
 
-    static init(path:string,mdlPath?:string){
+    static init(path:string,mdlPath?:Array<string>){
         this.parseFile(path,mdlPath);
         //延迟注入
         process.nextTick(()=>{
@@ -60,23 +60,30 @@ class InstanceFactory{
         const pathMdl = require('path');
         let insObj:InstanceObj;
         let path:string;
+        //单例模式，默认true
+        let singleton = cfg.singleton!==undefined?cfg.singleton:true;
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
-            let mdl = require(pathMdl.join(process.cwd(),this.mdlBasePath,path));
+            let mdl:any;
+            for(let mdlPath of this.mdlBasePath){
+                mdl = require(pathMdl.join(process.cwd(),mdlPath,path));
+                //支持ts和js,ts编译后为{className:***},js直接输出为class
+                //找到则退出
+                if(mdl){
+                    if(typeof mdl === 'object'){
+                        mdl = mdl[cfg.class];
+                    }
+                    // class
+                    if(mdl.constructor !== Function){
+                        throw new NoomiError("1003");
+                    }
+                    break;
+                }
+            }
             if(!mdl){
                 throw new NoomiError("1004",path);
             }
-            //支持ts和js,ts编译后为{className:***},js直接输出为class
-            if(typeof mdl === 'object'){
-                mdl = mdl[cfg.class_name];
-            }
-            // class
-            if(mdl.constructor !== Function){
-                throw new NoomiError("1003");
-            }
-            //单例模式，默认true
-            let singleton = cfg.singleton!==undefined?cfg.singleton:true;
-
+            
             insObj={
                 class:mdl,
                 singleton:singleton,
@@ -90,9 +97,11 @@ class InstanceFactory{
             }
         }else{ //传入实例，不用新建，singleton为true
             insObj = {
-                singleton:true,
                 instance:cfg.instance,
+                class:cfg.class,
+                singleton:singleton,
                 properties:cfg.properties
+
             }
         }
         //有实例，需要加入注入
@@ -209,13 +218,20 @@ class InstanceFactory{
      * @param path      文件路径
      * @param mdlPath   模型路径
      */
-    static parseFile(path:string,mdlPath?:string){
+    static parseFile(path:string,mdlPath?:any){
         interface InstanceJSON{
             files:Array<string>;        //引入文件
             instances:Array<any>;       //实例配置数组
         }
         const pathTool = require('path');
-        this.mdlBasePath = mdlPath || './';
+        
+        //转换为数组
+        if(mdlPath && typeof mdlPath === 'string'){
+            mdlPath = [mdlPath];
+        }
+        //只设置一次module 基本路径
+        this.mdlBasePath = this.mdlBasePath || mdlPath || ['./'];
+        
         //读取文件
         let jsonStr:string = require("fs").readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
@@ -227,7 +243,7 @@ class InstanceFactory{
 
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(pathTool.join(pathTool.dirname(path),item),this.mdlBasePath);
+                this.parseFile(pathTool.join(pathTool.dirname(path),item));
             });
         }
 

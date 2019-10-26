@@ -1,37 +1,32 @@
-import { InstanceFactory } from "./instancefactory";
-import { getConnection } from "./connectionmanager";
-import { AopFactory } from "./aopfactory";
+import { InstanceFactory } from "../instancefactory";
+import { getConnection, ConnectionManager } from "./connectionmanager";
+import { AopFactory } from "../aopfactory";
 import { TransactionAdvice } from "./transactionadvice";
-import { NoomiError } from "./errorfactory";
-import { AsyncResource, executionAsyncId } from "async_hooks";
-import { TransactionAsyncRecource } from "./transactionasyncresource";
-import { App } from "./application";
+import { NoomiError } from "../errorfactory";
+import { App } from "../application";
+import { MysqlTransaction } from "./mysqltransaction";
+import { DBManager } from "./dbmanager";
+import { Transaction } from "./transaction";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
     static transactionMdl:string;                               //transaction 实例名
     static expressions:Array<string>;                           //纳入事务的过滤串
-    static asyncResource:AsyncResource;                         //自定义异步资源
+    static connectionManager:ConnectionManager;                 //连接管理器
     static init(cfg:any){
         this.transactionMdl = cfg.transaction;
         //添加Aspect
-        //初始化security filter
         let adviceInstance = InstanceFactory.addInstance({
             name:'NoomiTransactionAdvice',           //实例名
             instance:new TransactionAdvice(),
-            class_name:'TransactionAdvice'
+            class:'TransactionAdvice'
         });
 
-        // this.asyncResource = new AsyncResource(
-        //     'NoomiTransactionAsync', { triggerAsyncId: executionAsyncId(), requireManualDestroy: false }
-        // );
-        // this.asyncResource = new TransactionAsyncRecource();
-        
         //切点名
-        const pointcutId = "Noomi_TX_PointCut";
+        const pointcutId = "NOOMI_TX_PointCut";
         //增加pointcut
-        if(cfg.pointcut){
-            AopFactory.addPointcut(pointcutId,cfg.pointcut);
+        if(cfg.expressions){
+            AopFactory.addPointcut(pointcutId,cfg.expressions);
         }
 
         //增加advice
@@ -55,6 +50,40 @@ class TransactionManager{
             method:'afterThrow',
             instance:adviceInstance
         });
+
+        //添加transaction到实例工厂，已存在则不再添加
+        let tn:string = cfg.transaction;
+        if(tn){
+            let ins = InstanceFactory.getInstance(tn);
+            if(ins === null){
+                switch(cfg.db){
+                    case "mysql":
+                    InstanceFactory.addInstance({
+                        name:tn,
+                        class:MysqlTransaction,
+                        singleton:false
+                    });
+                    break;
+                    case "mssql":
+
+                        break;
+                    case "oracle":
+
+                        break;
+                    case "mongodb":
+                        
+                        break;
+                    case "sequalize":
+
+                        break;
+                    case "typeorm":
+
+                        break;
+                }
+            }
+        }
+        
+        this.connectionManager = DBManager.getConnectionManager();
     }
 
 
@@ -116,6 +145,14 @@ class TransactionManager{
     }
 
     /**
+     * 释放连接
+     * @param tr 
+     */
+    static releaseConnection(tr:Transaction){
+        this.connectionManager.release(tr.connection);
+    }
+
+    /**
      * 解析实例配置文件
      * @param path      文件路径
      * @param mdlPath   模型路径
@@ -138,43 +175,4 @@ class TransactionManager{
     }
 }
 
-
-class Transaction{
-    id:number;
-    connection:any;
-    src:TransactionSource;
-    type:TransactionType;
-    isBegin:boolean;
-    asyncIds:Array<number>=[];      //绑定的的async id
-    trIds:Array<number>=[];         //有开始事务的async id数组
-    constructor(id:number,connection?:any,type?:TransactionType){
-        this.id = id; 
-        this.connection = connection;
-        this.type = type || TransactionType.NESTED;
-        this.asyncIds.push(id);
-    }
-    async begin():Promise<void>{
-        this.isBegin = true;
-        if(!this.connection){
-            await getConnection();
-        }
-    }
-    commit():void{}
-    rollback():void{}
-}
-
-enum TransactionType {
-    NESTED,         //嵌套（默认）
-    NEW             //新建
-}
-
-enum TransactionSource{
-    MYSQL='mysql',
-    ORACLE='oracle',
-    MSSQL='mssql',
-    MONGODB='mongodb',
-    SEQUALIZE='sequalize',
-    TYPEORM='typeorm'
-}
-
-export {TransactionManager,Transaction,TransactionType}
+export {TransactionManager}

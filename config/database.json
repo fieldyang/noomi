@@ -1,11 +1,18 @@
 {
-    "product":"mysql",
+    "db":"mysql",
+    "connectionmanager":"mysqlConnectionManager",
+    "usepool":true,
     "options":{
         "host":"localhost",
-        "port":"3306",
+        "port":3306,
         "user":"root",
         "password":"field",
         "database":"codement",
-        "connectionLimit" : 10
+        "connectionLimit":10
+    },
+    "transaction":{
+        "transaction":"mysqlTransaction",
+        "connectionManager":"mysqlConnectionManager",
+        "expressions":["dataImpl*"]
     }
 }

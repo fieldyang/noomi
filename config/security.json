@@ -3,12 +3,13 @@
     "save_type":1,
     "redis":"default",
     "dboption":{
+        "connectionmanager":"mysqlConnectionManager",
         "product":"mysql",
         "host":"localhost",
         "port":"3306",
         "user":"root",
-        "pwd":"field",
-        "schema":"codement",
+        "password":"field",
+        "database":"codement",
         "tables":{
             "groupAuthority":"t_group_authority",
             "resource":"t_resource",

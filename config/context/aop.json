@@ -2,12 +2,12 @@
     "instances":[
         {
             "name":"logAdvice", 	
-            "class_name":"LogAdvice",
+            "class":"LogAdvice",
             "path":"advice/logadvice"
 
         },{
             "name":"testAdvice", 	
-            "class_name":"TestAdvice",
+            "class":"TestAdvice",
             "path":"advice/testadvice"
 
         }

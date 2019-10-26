@@ -1,12 +1,10 @@
-import { Transaction } from "../../../../core/ts/transactionmanager";
-import { getConnection } from "../../../../core/ts/connectionmanager";
-
+import { Transaction } from "./transaction";
+import { getConnection } from "./connectionmanager";
+/**
+ * mysql 事务类
+ */
 class MysqlTransaction extends Transaction{
     async begin():Promise<void>{
-        if(this.isBegin){
-            return;
-        }
-        this.isBegin = true;
         if(!this.connection){
             this.connection = await getConnection();
         }
@@ -22,10 +20,7 @@ class MysqlTransaction extends Transaction{
         });
     }
 
-    async commit(){
-        if(!this.isBegin){
-            return;
-        }
+    async commit():Promise<void>{
         return new Promise((resolve,reject)=>{
             this.connection.commit((err)=>{
                 if(err){
@@ -37,7 +32,7 @@ class MysqlTransaction extends Transaction{
         });
     }
 
-    async rollback(){
+    async rollback():Promise<void>{
         if(!this.isBegin){
             return;
         }

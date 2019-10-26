@@ -2,12 +2,12 @@
     "instances":[
         {
             "name":"userService", 	
-            "class_name":"UserService",
+            "class":"UserService",
             "path":"service/userservice",
             "singleton":false
         },{
             "name":"dataImpl", 	
-            "class_name":"DataImpl",
+            "class":"DataImpl",
             "path":"service/dataimpl",
             "singleton":true
         }

@@ -2,12 +2,12 @@
     "instances":[
         {
             "name":"nodomFilter", 	
-            "class_name":"NodomFilter",
+            "class":"NodomFilter",
             "path":"filter/nodomfilter"
         },
         {
             "name":"pathFilter", 	
-            "class_name":"PathFilter",
+            "class":"PathFilter",
             "path":"filter/pathfilter"
         }
     ]

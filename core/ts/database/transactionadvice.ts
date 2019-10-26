@@ -1,6 +1,7 @@
-import { Transaction, TransactionManager } from "./transactionmanager";
-import { App } from "./application";
+import { TransactionManager } from "./transactionmanager";
+import { App } from "../application";
 import { getConnection } from "./connectionmanager";
+import { Transaction } from "./transaction";
 
 export class TransactionAdvice{
     /**
@@ -14,6 +15,10 @@ export class TransactionAdvice{
             tr.connection = await getConnection();
         }
         tr.trIds.push(id);
+        if(tr.isBegin){
+            return;
+        }
+        tr.isBegin = true;
         tr.begin();
     }
 
@@ -23,12 +28,18 @@ export class TransactionAdvice{
     async afterReturn(){
         let id = App.asyncHooks.executionAsyncId();
         let tr:Transaction = await TransactionManager.get(id);
+        if(!tr || !tr.isBegin){
+            return;
+        }
+        
         tr.trIds.pop();
         //当前id为事务头，进行提交
         if(tr.trIds.length===0){
             tr.commit();
             //删除事务
             TransactionManager.del(tr);
+            //释放连接
+            TransactionManager.releaseConnection(tr);
         }
     }
 
@@ -39,11 +50,15 @@ export class TransactionAdvice{
     async afterThrow(){
         let id = App.asyncHooks.executionAsyncId();
         let tr:Transaction = await TransactionManager.get(id);
-        tr.trIds.pop();
+        if(!tr || tr.isBegin){
+            return;
+        }
         if(tr){
+            tr.trIds.pop();
             tr.rollback();
             TransactionManager.del(tr);
+            //释放连接
+            TransactionManager.releaseConnection(tr);
         }
-        
     }
 }

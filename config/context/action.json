@@ -2,7 +2,7 @@
     "instances":[
         {
             "name":"userAction", 	
-            "class_name":"UserAction",
+            "class":"UserAction",
             "path":"action/useraction",
             "singleton":false,
             "properties":[
@@ -11,13 +11,13 @@
         },
         {
             "name":"uploadAction", 	
-            "class_name":"UploadAction",
+            "class":"UploadAction",
             "path":"action/uploadaction",
             "singleton":false,
             "params":[]
         },{
             "name":"loginAction", 	
-            "class_name":"LoginAction",
+            "class":"LoginAction",
             "path":"action/loginaction",
             "singleton":false,
             "params":[]

@@ -2,7 +2,7 @@
     "instances":[
         {
             "name":"dateHandler", 	
-            "class_name":"DateHandler",
+            "class":"DateHandler",
             "path":"common/datehandler"
         }
     ]

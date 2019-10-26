@@ -1,6 +1,6 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
-import { TransactionManager } from "./transactionmanager";
+import { TransactionManager } from "./database/transactionmanager";
 import { App } from "./application";
 /**
  * Aop 代理类

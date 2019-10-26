@@ -118,9 +118,15 @@ class RouteFactory{
         if(typeof route.instance.setModel === 'function'){
             route.instance.setModel(params);
         }
+
+        let func = route.instance[route.method]; 
+        if(typeof func !== 'function'){
+            throw new NoomiError("1010");
+        }
         const util = require('util');
         try{
-            let re = route.instance[route.method](params);
+            
+            let re = func.call(route.instance,params);
             if(util.types.isPromise(re)){  //返回promise
                 re.then((data)=>{
                     this.handleResult(res,data,route.instance,route.results);

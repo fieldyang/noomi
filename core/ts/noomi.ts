@@ -13,8 +13,9 @@ import { RedisFactory } from "./redisfactory";
 import { NoomiError,ErrorFactory } from "./errorfactory";
 import { WebConfig } from "./webconfig";
 import { RequestQueue } from "./requestqueue";
-import { TransactionManager } from "./transactionmanager";
+import { TransactionManager } from "./database/transactionmanager";
 import { App } from "./application";
+import { DBManager } from "./database/dbmanager";
 
 
 class noomi{
@@ -27,9 +28,7 @@ class noomi{
         if(typeof port === 'number'){
             this.port = port;
         }
-        
         this.init('config');
-        
     }
 
     /**
@@ -76,17 +75,24 @@ class noomi{
         }
         
         //模块路径加入staticresource的禁止访问路径,/开头
-        let mdlPath:string = iniJson['module_path'];
-
-        //添加模块路径为静态资源禁止访问路径
-        StaticResource.addPath(mdlPath.charAt(0) === '/'?mdlPath:'/' + mdlPath);
+        if(iniJson.hasOwnProperty('module_path')){
+            let mdlPath:any = iniJson['module_path'];
+            if(!Array.isArray(mdlPath)){
+                mdlPath = [mdlPath];
+            }
+            //添加模块路径为静态资源禁止访问路径
+            mdlPath.forEach(item=>{
+                StaticResource.addPath(item.charAt(0) === '/'?item:'/' + item);
+            });
+        }
+        
         
         //上下文初始化
         if(iniJson.hasOwnProperty('context_path')){
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['context_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                this.loadCtx(path.join(basePath,ctxPath),iniJson['module_path']);
+                InstanceFactory.init(path.join(basePath,ctxPath),iniJson['module_path']);
             }
             console.log('实例工厂初始化完成！');
         }
@@ -111,14 +117,14 @@ class noomi{
             console.log('路由工厂初始化完成！');
         }
 
-        //事务初始化
-        if(iniJson.hasOwnProperty('transaction_path')){
-            console.log('事务初始化...');
-            let rPath = iniJson['transaction_path'];
+        //数据源初始化
+        if(iniJson.hasOwnProperty('db_path')){
+            console.log('数据源初始化...');
+            let rPath = iniJson['db_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                TransactionManager.parseFile(path.join(basePath,rPath));
+                DBManager.parseFile(path.join(basePath,rPath));
             }
-            console.log('事务初始化完成！');
+            console.log('数据源初始化完成！');
         }
         
         //aop初始化
@@ -199,14 +205,6 @@ class noomi{
         });
     }
 
-    
-    /**
-     * 加载context
-     * @param path 
-     */
-    loadCtx(path:string,mdlPath:string){
-        InstanceFactory.init(path,mdlPath);
-    }
 
     /**
      * 加载路由
