@@ -1,24 +1,10 @@
-import { TransactionManager } from "./transactionmanager";
-import { InstanceFactory } from "../instancefactory";
 import { DBManager } from "./dbmanager";
 
-
-class ConnectionManager{
-    constructor(cfg:any){
-
-    }
-    /**
-     * 获取连接
-     */
-    async getConnection():Promise<any>{};
-    async release(conn:any):Promise<any>{};
-    /**
-     * 获取transaction 自带的connection
-     * @param id 
-     */
-    getTransactionConnection(){
-        return TransactionManager.getConnection();
-    }
+interface ConnectionManager{
+    //获取连接
+    getConnection():Promise<any>;
+    //释放连接
+    release(conn:any):Promise<any>;
 }
 
 /**

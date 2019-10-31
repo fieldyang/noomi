@@ -56,30 +56,30 @@
 
 // foo();
 
-function f1(flag){
-    return new Promise((resolve,reject)=>{
-        if(flag === 1){
-            resolve(1);
-        }
-        reject(2);
-    });
-}
-
-async function foo(){
-    // try{
-    //     r = await f1(2);
-    //     console.log(r);
-    // }catch(e){
-    //     console.log(e);
-    // }
-    return new Promise((resolve,reject)=>{
-        resolve(1);
-    });
+async function f1(){
+    throw "error";
 }
 
 async function f2(){
-    let a = await foo();
-    console.log(a);
+    return 1;
 }
 
-f2();
+async function f3(){
+    let a = await f1();
+    let b = await f2();
+    console.log(a,b);
+    return b;    
+}
+
+async function f4(){
+    try{
+        let v = await f3();
+        console.log(v); 
+    }catch(e){
+        console.log(e);
+    }
+    
+    
+}
+
+f4();

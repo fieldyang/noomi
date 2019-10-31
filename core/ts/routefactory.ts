@@ -177,9 +177,10 @@ class RouteFactory{
      * @param instance      实例
      */
     private static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any):void{
+        let url:string;
         switch(result.type){
             case "redirect": //重定向
-                let url = handleParamUrl(instance,result.url);
+                url = handleParamUrl(instance,result.url);
                 let pa = [];
                 //参数属性
                 if(result.params && Array.isArray(result.params) && result.params.length>0){
@@ -251,7 +252,7 @@ class RouteFactory{
             let reg:RegExp = /\$\{.*?\}/g;
             let r:RegExpExecArray;
             //处理带参数url
-            while((r=reg.exec(result.url)) !== null){
+            while((r=reg.exec(url)) !== null){
                 let pn = r[0].substring(2,r[0].length-1);
                 url = url.replace(r[0],getValue(instance,pn));
             }

@@ -3,7 +3,6 @@
     "save_type":1,
     "redis":"default",
     "dboption":{
-        "connectionmanager":"mysqlConnectionManager",
         "product":"mysql",
         "host":"localhost",
         "port":"3306",

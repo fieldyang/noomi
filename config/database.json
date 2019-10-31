@@ -1,18 +1,26 @@
 {
-    "db":"mysql",
-    "connectionmanager":"mysqlConnectionManager",
+    "product":"sequelize",
+    "connectionmanager":"sequelizeConnectionManager",
     "usepool":true,
     "options":{
+        "dialect":"mysql",
         "host":"localhost",
         "port":3306,
-        "user":"root",
+        "username":"root",
         "password":"field",
         "database":"codement",
-        "connectionLimit":10
+        "pool": {
+            "max": 5,
+            "min": 0,
+            "acquire": 30000,
+            "idle": 10000
+        },
+        "define": {
+            "timestamps": false
+        }
     },
     "transaction":{
-        "transaction":"mysqlTransaction",
-        "connectionManager":"mysqlConnectionManager",
+        "transaction":"sequelizeTransaction",
         "expressions":["dataImpl*"]
     }
 }

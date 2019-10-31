@@ -3,26 +3,28 @@ import { ConnectionManager } from "./connectionmanager";
 import { MysqlConnectionManager } from "./mysqlconnectionmanager";
 import { InstanceFactory } from "../instancefactory";
 import { TransactionManager } from "./transactionmanager";
-import { MysqlTransaction } from "./mysqltransaction";
+import { SequelizeConnectionManager } from "./sequelizeconnectionmanager";
 
 
 class DBManager{
     static connectionManagerName:string;    //连接管理器名
     static transactionName:string;          //事务类名
+    static product:string;                       //数据库类型
     static init(cfg:any){
         //数据库默认mysql
-        let db:string = cfg.db||'mysql';
+        let product:string = cfg.product||'mysql';
+        this.product = product;
         //connection manager配置
-        let cm:ConnectionManager;
+        let cm:any;
         //先查询是否有自定义的connection manager
         if(cfg.connectionmanager){
             cm = InstanceFactory.getInstance(cfg.connectionmanager);
         }
         //新建connection manager
-        if(!cm && db){
+        if(!cm && product){
             let opt = cfg.options;
             opt.usepool = cfg.usepool;
-            switch(db){
+            switch(product){
                 case "mysql":
                     cm = new MysqlConnectionManager(opt);
                     InstanceFactory.addInstance({
@@ -40,8 +42,13 @@ class DBManager{
                 case "mongodb":
                     
                     break;
-                case "sequalize":
-
+                case "sequelize":
+                    cm = new SequelizeConnectionManager(opt);
+                    InstanceFactory.addInstance({
+                        name:cfg.connectionmanager,
+                        instance:cm,
+                        singleton:true
+                    });
                     break;
                 case "typeorm":
 
@@ -52,7 +59,8 @@ class DBManager{
         //事务配置
         if(cfg.transaction){
             let opt = cfg.transaction;
-            opt.db = db;
+            opt.product = product;
+            opt.connectionmanager = cfg.connectionmanager;
             TransactionManager.init(opt);
         }
     }

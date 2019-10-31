@@ -1,16 +1,16 @@
+import { TransactionManager } from "./transactionmanager";
 import { ConnectionManager } from "./connectionmanager";
-import { Db } from "typeorm";
+
 
 /**
  * 连接管理器
  */
-class MysqlConnectionManager extends ConnectionManager{
+class MysqlConnectionManager implements ConnectionManager{
     pool:any;
     connection:any;
     options:object;
     dbMdl:any;
     constructor(cfg){
-        super(cfg);
         this.dbMdl = require('mysql');
         if(cfg.usepool){
             delete cfg.usepool;
@@ -24,7 +24,7 @@ class MysqlConnectionManager extends ConnectionManager{
      * 获取连接
      */
     async getConnection(){
-        let conn = this.getTransactionConnection();
+        let conn = TransactionManager.getConnection();
         if(conn){
             return conn;
         }

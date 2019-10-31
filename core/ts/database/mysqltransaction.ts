@@ -14,7 +14,6 @@ class MysqlTransaction extends Transaction{
                 if(err){
                     reject(err);
                 }
-                this.isBegin = true;
                 resolve();
             });
         });
@@ -26,22 +25,17 @@ class MysqlTransaction extends Transaction{
                 if(err){
                     reject(err);
                 }
-                this.isBegin = false;
                 resolve();
             });
         });
     }
 
     async rollback():Promise<void>{
-        if(!this.isBegin){
-            return;
-        }
         return new Promise((resolve,reject)=>{
             this.connection.rollback((err)=>{
                 if(!err){
                     reject(err);
                 }
-                this.isBegin = false;
                 resolve();
             });
         });

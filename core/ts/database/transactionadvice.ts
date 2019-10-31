@@ -8,13 +8,12 @@ export class TransactionAdvice{
      * 事务方法调用前
      */
     async before(){
-        let id = App.asyncHooks.executionAsyncId();
-        let tr:Transaction = await TransactionManager.get(id,true);
+        let tr:Transaction = await TransactionManager.get(true);
         //connection 未初始化，初始化connection
         if(!tr.connection){
             tr.connection = await getConnection();
         }
-        tr.trIds.push(id);
+        tr.trIds.push(tr.id);
         if(tr.isBegin){
             return;
         }
@@ -26,8 +25,8 @@ export class TransactionAdvice{
      * 事务方法返回时
      */
     async afterReturn(){
-        let id = App.asyncHooks.executionAsyncId();
-        let tr:Transaction = await TransactionManager.get(id);
+        // let id = App.asyncHooks.executionAsyncId();
+        let tr:Transaction = await TransactionManager.get();
         if(!tr || !tr.isBegin){
             return;
         }
@@ -48,9 +47,9 @@ export class TransactionAdvice{
      * 事务方法抛出异常时
      */
     async afterThrow(){
-        let id = App.asyncHooks.executionAsyncId();
-        let tr:Transaction = await TransactionManager.get(id);
-        if(!tr || tr.isBegin){
+        // let id = App.asyncHooks.executionAsyncId();
+        let tr:Transaction = await TransactionManager.get();
+        if(!tr || !tr.isBegin){
             return;
         }
         if(tr){

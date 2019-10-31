@@ -1,18 +1,20 @@
 import { InstanceFactory } from "../instancefactory";
-import { getConnection, ConnectionManager } from "./connectionmanager";
 import { AopFactory } from "../aopfactory";
 import { TransactionAdvice } from "./transactionadvice";
 import { NoomiError } from "../errorfactory";
-import { App } from "../application";
 import { MysqlTransaction } from "./mysqltransaction";
-import { DBManager } from "./dbmanager";
+import { SequelizeTransaction } from "./sequelizetransaction";
 import { Transaction } from "./transaction";
+import { DBManager } from "./dbmanager";
+import { TransactionProxy } from "./transactionproxy";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
     static transactionMdl:string;                               //transaction 实例名
     static expressions:Array<string>;                           //纳入事务的过滤串
-    static connectionManager:ConnectionManager;                 //连接管理器
+    static namespace:any = require('cls-hooked')
+                .createNamespace('NOOMI_TX_NAMESPACE');         //cls namespace
+    static transactionId:number=1;                              //transaction id;
     static init(cfg:any){
         this.transactionMdl = cfg.transaction;
         //添加Aspect
@@ -23,10 +25,10 @@ class TransactionManager{
         });
 
         //切点名
-        const pointcutId = "NOOMI_TX_PointCut";
+        const pointcutId = "NOOMI_TX_POINTCUT";
         //增加pointcut
         if(cfg.expressions){
-            AopFactory.addPointcut(pointcutId,cfg.expressions);
+            AopFactory.addPointcut(pointcutId,cfg.expressions,TransactionProxy);
         }
 
         //增加advice
@@ -50,7 +52,7 @@ class TransactionManager{
             method:'afterThrow',
             instance:adviceInstance
         });
-
+        
         //添加transaction到实例工厂，已存在则不再添加
         let tn:string = cfg.transaction;
         if(tn){
@@ -68,38 +70,55 @@ class TransactionManager{
 
                         break;
                     case "oracle":
-
+                        // InstanceFactory.addInstance({
+                        //     name:tn,
+                        //     class:OracleTransaction,
+                        //     singleton:false
+                        // });
                         break;
                     case "mongodb":
                         
                         break;
-                    case "sequalize":
-
+                    case "sequelize":
+                        InstanceFactory.addInstance({
+                            name:tn,
+                            class:SequelizeTransaction,
+                            singleton:false
+                        }); 
                         break;
                     case "typeorm":
-
+                            
                         break;
                 }
             }
         }
         
-        this.connectionManager = DBManager.getConnectionManager();
     }
 
 
     /**
      * 获取transaction
-     * @param id        asyncid
      * @param newOne    如果不存在，是否新建
      * @return          transacton
      */
-    static get(id?:number,newOne?:boolean):Transaction{
+    
+    static get(newOne?:boolean):Transaction{
         let tr:Transaction;
+        //得到当前执行异步id
         
+        let id:number = this.namespace.get('tr_id');
+        if(!id){
+            if(!newOne){
+                return null;
+            }else{
+                id = this.transactionId++;
+            }  
+        }
         if(this.transactionMap.has(id)){
             tr = this.transactionMap.get(id);
         }else if(newOne){          //父亲对象不存在，则新建
             tr = InstanceFactory.getInstance(this.transactionMdl,[id]);
+            // 保存到transaction map
             this.transactionMap.set(id,tr);
         }
         return tr;
@@ -111,15 +130,27 @@ class TransactionManager{
      * @param parentId  父id
      * @return          transacton
      */
-    static bindTransaction(id:number,parentId:number):void{
-        if(!parentId || !this.transactionMap.has(parentId)){
-            return;
+    // static bindTransaction(id:number,parentId:number):void{
+    //     if(!parentId || !this.transactionMap.has(parentId)){
+    //         return;
+    //     }
+    //     let tr:Transaction = this.transactionMap.get(parentId);
+    //     tr.asyncIds.push(id);
+    //     this.transactionMap.set(id,tr);
+    // }
+
+    static setIdToLocal(){
+        try{
+            this.namespace.set('tr_id',this.transactionId++);
+        }catch(e){
+            console.log(e);
         }
-        let tr:Transaction = this.transactionMap.get(parentId);
-        tr.asyncIds.push(id);
-        this.transactionMap.set(id,tr);
+        
     }
 
+    static getIdLocal(){
+        return this.namespace.get('tr_id');
+    }
     /**
      * 删除事务
      * @param tranId 
@@ -135,7 +166,7 @@ class TransactionManager{
      */
     static getConnection(id?:number){
         if(!id){
-            id = App.asyncHooks.executionAsyncId();
+            id = this.namespace.get('tr_id');
         }
         if(!this.transactionMap.has(id)){
             return null;
@@ -149,7 +180,7 @@ class TransactionManager{
      * @param tr 
      */
     static releaseConnection(tr:Transaction){
-        this.connectionManager.release(tr.connection);
+        DBManager.getConnectionManager().release(tr.connection);
     }
 
     /**

@@ -36,12 +36,14 @@ interface AopAspect{
   */
 class AopPointcut{
     id:string;
+    proxyClass:any;             //代理类
     //表达式数组（正则表达式）
     expressions:Array<RegExp> = [];
     advices:Array<AopAdvice> = [];
 
-    constructor(id:string,expressions:Array<string>){
+    constructor(id:string,expressions:Array<string>,proxyClass?:any){
         this.id = id;
+        this.proxyClass = proxyClass || AopProxy;
         if(!expressions){
             throw new NoomiError("2001");
         }
@@ -116,13 +118,14 @@ class AopFactory{
      * 添加切点
      * @param id            切点id 
      * @param expressions   方法匹配表达式数组
+     * @param proxyClass   特定代理类
      */
-    static addPointcut(id:string,expressions:Array<string>):void{
+    static addPointcut(id:string,expressions:Array<string>,proxyClass?:any):void{
         //切点
         if(this.pointcuts.has(id)){
             throw new NoomiError("2003",id);
         }
-        this.pointcuts.set(id,new AopPointcut(id,expressions));
+        this.pointcuts.set(id,new AopPointcut(id,expressions,proxyClass));
     }
 
     /**
@@ -190,7 +193,7 @@ class AopFactory{
         let instances:Array<string> = [];
         //遍历pointcut
         let pc:AopPointcut;
-        for(let pc of this.pointcuts.values()){
+        for(pc of this.pointcuts.values()){
             let reg:RegExp;
             //遍历expression
             for(reg of pc.expressions){
@@ -209,7 +212,8 @@ class AopFactory{
                             }
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
-                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                                // instance[key] = Reflect.apply('invoke',pc.proxyClass,[insName,key,instance[key],instance]);
+                                instance[key] = pc.proxyClass.invoke(insName,key,instance[key],instance);
                                 instances.push(insName);
                             }
                         });

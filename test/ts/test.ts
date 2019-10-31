@@ -2,94 +2,104 @@ import { RedisFactory } from "../../core/ts/redisfactory";
 import { User } from "../app/module/dao/pojo/user";
 import { UserAction } from "../app/module/action/useraction";
 import { App } from "../../core/ts/application";
+import { ResourceAuthority } from "../app/module/dao/pojosequelize/resourceauthority";
+import { Resource } from "../app/module/dao/pojosequelize/resource";
+import {Sequelize as SequelizeOrigin} from 'sequelize';
+import { Sequelize } from "sequelize-typescript";
+// import { Sequelize as SequelizeTS } from "sequelize-typescript";
+import { Authority } from "../app/module/dao/pojosequelize/authority";
 
+// const Promise = require('bluebird');
 
-    // RedisFactory.addClient({
-    //     name:'default',
-    //     host:'localhost',
-    //     port:'6379',
-    //     // options:{
-    //     //     password:'field'
-    //     // }
-    // });
+async function add(){
+    const Promise = require('cls-bluebird');
+    let cls = require('cls-hooked');
+    let namespace = cls.createNamespace('tx-own');
+    SequelizeOrigin.useCLS(namespace);
     
-    // let client = RedisFactory.getClient('default');
-    // client.get('NOOMI_SECURITY_RES*',(err,v)=>{
-    //     console.log(v);
-    // });
-    // client.keys('NOOMI_SECURITY_RES*',(err,v)=>{
-    //     console.log(v);
-    // })
-    // client.hmset('xxx',{
-    //     'aaa':'1',
-    //     "bbb":'y'
-    // });
-    // client.hgetall('xxx',(e,r)=>{
-    //     console.log(r);
-    // })
+    let seq = new Sequelize({
+        "dialect":"mysql",
+        "host":"localhost",
+        "port":3306,
+        "username":"root",
+        "password":"field",
+        "database":"codement",
+        "pool": {
+            "max": 5,
+            "min": 0,
+            "acquire": 30000,
+            "idle": 10000
+        },
+        "define": {
+            "timestamps": false
+        }
+    });
+    seq.addModels([Resource,ResourceAuthority,Authority]);
+    
+    
 
-    // RedisFactory.set('default',{
-    //     key:'xxxx',
-    //     value:{
-    //         'aaa':'1',
-    //         "bbb":'y'
-    //     }
-    // });
+    let tr = await seq.transaction({autocommit:false});
 
+    // try{
+    //     await ResourceAuthority.create({
+    //         resourceId:13,
+    //         authorityId:2
+    //     });
+    //     await Resource.create({
+    //         resourceId:13,
+    //         url:'/test/test'
+    //     });
+    //     await tr.commit();
+    // }catch(e){
+    //     await tr.rollback();
+    // }  
+    
+    
 
-// // client.expire('xxx',5);
-// client.hget('xxx','name',(err,value)=>{
-//     if(err){throw err};
-//     console.log(value)
-// });
+    seq.transaction(async (t)=>{
+        // console.log(namespace.get('transaction'));
+        await ResourceAuthority.create({
+            resourceId:13,
+            authorityId:2
+        });
 
-// setTimeout(()=>{
-//     client.hget('xxx','name',(err,value)=>{
-//         if(err){throw err};
-//         console.log(value)
-//     });
-// },6000);
-// client.hmset('xxx', {
-//     age: 2,
-//     sex: 'F',
-//     yyy:{
-//         u:'yang'
-//     }
-//   },(err,obj)=>{
-//     console.log(err);
-// });
-// client.hdel('xxx','yyy');
-// // client.hset('xxx','yyy',{
-// //     u:'lei'
-// // });
-// client.hget('xxx','yyy',(err,value)=>{
-//     console.log(value.u);
-// })
-
-
-// RedisFactory.get('default','aaa','name').then(value=>{
-//     console.log(value);
-// });
-
-// let path = require('path');
-// console.log(path.resolve('./config/database.json'));
-// DBFactory.parseFile('./config/database.json');
-// async function foo(){
-//     let conn = await DBFactory.getConnection();
-//     let o = conn.beginTransaction(async (err)=>{
-//         if(err){
-//             throw err;
-//         }
-//         let conn1 = await DBFactory.getConnection();
-//         conn1.query(`insert into t_resource(resource_id,url) values(11,'/testroute1')`);
+        await Resource.create({
+            resourceId:13,
+            url:'/test/test'
+        });
         
-//         conn.commit();
-//         conn.release();
-//         console.log(conn);
-//     });
-//     console.log(o);
-// }
+    }).then(r=>{
+        console.log(r);
+    }).catch(e=>{
+        console.log(e);
+    });
 
-// foo();
+    // return seq.transaction().then((t)=>{
+    //     // console.log(t,namespace);
+    //     console.log(namespace.get('transaction'));
+    //     return ResourceAuthority.create({
+    //         resourceId:13,
+    //         authorityId:2
+    //     }).then((r)=>{
+    //         t.commit();
+    //     }).catch(e=>{
+    //         t.rollback();
+    //     });
 
-console.log(App.asyncHooks);
+    //     /*await Resource.create({
+    //         resourceId:13,
+    //         url:'/test/test'
+    //     },{transaction:t});
+    //     */
+    // }).then(r=>{
+    //     console.log(r);
+
+    // }).catch(e=>{
+    //     console.log(e);
+    // })
+    
+}
+
+add();
+
+

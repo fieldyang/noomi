@@ -3,7 +3,7 @@
     
     "pointcuts":[{
         "id":"pointcut1",
-        "expressions":["userService\\.getInfo"]
+        "expressions":["userService\\.getInfo"]      
     }],
 
     "aspects":[

@@ -1,8 +1,14 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
+import { DataImpl } from "../../test/app/module/service/dataimpl";
 import { TransactionManager } from "./database/transactionmanager";
-import { App } from "./application";
-/**
+import { ConnectionManager, getConnection } from "./database/connectionmanager";
+import { reject } from "bluebird";
+import { DBManager } from "./database/dbmanager";
+import { Sequelize } from "sequelize/types";
+
+
+ /**
  * Aop 代理类
  */
 class AopProxy{
@@ -30,58 +36,71 @@ class AopProxy{
                     params:params  
                 }];
                 
-                //advices获取
-                let advices:any;
-                if(AopFactory){
-                    advices = AopFactory.getAdvices(instanceName,methodName);
+                let retValue = await new Promise((resolve,reject)=>{
+                    TransactionManager.namespace.run(async ()=>{
+                        let v = await foo();
+                        resolve(v);
+                    });
+                });
+                if(retValue instanceof Error){
+                    throw retValue;
                 }
+                return retValue;
+            
                 
-                let result:any;
-                let isReject:boolean;
-                //before aop执行
-                if(advices !== null){
-                    for(let item of advices.before){
-                        //instance可能为实例对象，也可能是实例名
-                        await item.instance[item.method](aopParams);
+                async function foo(){
+                    if(!TransactionManager.getIdLocal()){
+                        //保存transaction id
+                        TransactionManager.setIdToLocal();
                     }
-                }
-                try{
-                    result = await InstanceFactory.exec(instance,null,params,func);
-                    //带入参数
-                    aopParams[0].returnValue = result;
-                    //return aop执行
+                    //advices获取
+                    let advices:any;
+                    if(AopFactory){
+                        advices = AopFactory.getAdvices(instanceName,methodName);
+                    }
+                    
+                    let result:any;
+                    //before aop执行
                     if(advices !== null){
-                        for(let item of advices.return){
+                        for(let item of advices.before){
                             //instance可能为实例对象，也可能是实例名
                             await item.instance[item.method](aopParams);
                         }
                     }
-                }catch(e){
-                    aopParams[0].throwValue = e;
-                    //异常aop执行
-                    if(advices !== null){
-                        for(let item of advices.throw){
-                            //instance可能为实例对象，也可能是实例名
+                    try{
+                        result = await InstanceFactory.exec(instance,null,params,func);
+                        //带入参数
+                        aopParams[0].returnValue = result;
+                        //return aop执行
+                        if(advices !== null){
+                            for(let item of advices.return){
+                                //instance可能为实例对象，也可能是实例名
+                                await item.instance[item.method](aopParams);
+                            }
+                        }
+                    }catch(e){
+                        aopParams[0].throwValue = e;
+                        //异常aop执行
+                        if(advices !== null){
+                            for(let item of advices.throw){
+                                //instance可能为实例对象，也可能是实例名
+                                await item.instance[item.method](aopParams);
+                            }
+                        }
+                        
+                        result = e;
+                    }
+        
+                    // after aop 调用
+                    if(advices !== null && advices.after.length>0){
+                        for(let item of advices.after){
                             await item.instance[item.method](aopParams);
                         }
                     }
-                    isReject = true;
-                    result = e;
+                    return result;
                 }
-    
-                // after aop 调用
-                if(advices !== null && advices.after.length>0){
-                    for(let item of advices.after){
-                        await item.instance[item.method](aopParams);
-                    }
-                }
-
-                //如果是异常，则抛出异常
-                if(isReject){
-                    throw result;
-                }
-                return result;
             }
+                
         }
         //非async 拦截
         return (params)=>{
@@ -171,6 +190,10 @@ class AopProxy{
                         InstanceFactory.exec(item.instance,item.method,aopParams);
                     }
                 }
+            }
+            //抛出异常
+            if(result instanceof Error){
+                throw result;
             }
             return result;
         }
