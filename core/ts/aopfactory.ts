@@ -1,6 +1,8 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
 import { NoomiError } from "./errorfactory";
+import { TransactionManager } from "./database/transactionmanager";
+
 
 /**
  * AOP 工厂
@@ -129,6 +131,19 @@ class AopFactory{
     }
 
     /**
+     * 为pointcut添加expression
+     * @param pointcutId 
+     * @param expression 
+     */
+    static addExpression(pointcutId:string,expression:string){
+        if(this.pointcuts.has(pointcutId)){
+            throw new NoomiError("2002",pointcutId);
+        }
+        let pc:AopPointcut = this.pointcuts.get(pointcutId);
+        pc.expressions.push(new RegExp(expression));
+    }
+
+    /**
      * 添加通知
      * @param advice 通知配置
      */
@@ -213,7 +228,8 @@ class AopFactory{
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
                                 // instance[key] = Reflect.apply('invoke',pc.proxyClass,[insName,key,instance[key],instance]);
-                                instance[key] = pc.proxyClass.invoke(insName,key,instance[key],instance);
+                                // instance[key] = pc.proxyClass.invoke(insName,key,instance[key],instance);
+                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
                                 instances.push(insName);
                             }
                         });
@@ -239,6 +255,7 @@ class AopFactory{
         }
         return a;
     }
+    
 
     /**
      * 根据id获取切点
@@ -272,7 +289,12 @@ class AopFactory{
         let returnArr:Array<object> = [];
 
         let pointcut:AopPointcut;
+        let hasTransaction:boolean = false;
         for(pointcut of pointcuts){
+            if(pointcut.id === TransactionManager.pointcutId){
+                hasTransaction = true;
+                continue;
+            }
             pointcut.advices.forEach(aop=>{
                 switch(aop.type){
                     case 'before':
@@ -313,6 +335,7 @@ class AopFactory{
         }
         
         return {
+            hasTransaction:hasTransaction,
             before:beforeArr,
             after:afterArr,
             throw:throwArr,

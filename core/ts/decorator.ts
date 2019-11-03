@@ -4,6 +4,24 @@
 import{InstanceFactory} from './instancefactory';
 import { AopFactory } from './aopfactory';
 import { FilterFactory } from './filterfactory';
+import { TransactionManager } from './database/transactionmanager';
+
+
+/**
+ * instance装饰器（添加到实例工厂）
+ * @param cfg
+ *              name:       实例名
+ *              singleton:  是否单例
+ */
+function Instance(cfg){
+    return (target) =>{
+        InstanceFactory.addInstance({
+            name:cfg.name,  //实例名
+            class:target,
+            singleton:cfg.singleton 
+        });
+    }
+}
 
 /**
  * IoC注入装饰器
@@ -120,4 +138,13 @@ function AfterThrow(pointcutId:string){
     }
 }
 
-export {WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow}
+
+/**
+ * 事务装饰器
+ */ 
+function Transaction(instanceName:string){
+    return (target:any,name:string,desc:any)=>{
+        TransactionManager.addTransaction(instanceName,target,name);    
+    }
+}
+export {Instance,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transaction}

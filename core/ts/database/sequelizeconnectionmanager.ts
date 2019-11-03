@@ -18,7 +18,6 @@ class SequelizeConnectionManager{
     poolAlias:string;       //pool别名
     constructor(cfg){
         //使用cli-hooked
-        console.log(TransactionManager.namespace);
         // sequelize-typescript不支持cls，要用sequelize
         SequelizeOrigin.useCLS(TransactionManager.namespace);
         this.sequelize = new Sequelize(cfg);

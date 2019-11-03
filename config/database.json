@@ -21,6 +21,6 @@
     },
     "transaction":{
         "transaction":"sequelizeTransaction",
-        "expressions":["dataImpl*"]
+        "expressions":[]
     }
 }

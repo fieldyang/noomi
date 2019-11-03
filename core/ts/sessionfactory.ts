@@ -4,6 +4,7 @@ import { RedisFactory } from "./redisfactory";
 import { NCache } from "./ncache";
 
 
+
 interface SessionCfg{
     name:string;
     timeout:number;
@@ -21,8 +22,6 @@ class SessionFactory {
     static timeout:number = 1800;                  //过期时间(默认30分钟)
     static type:number=0;                           //session存储类型 0内存 1redis，默认0
     static redis:string='default';                  //redis名，type为1时需要设置，默认为default
-    static MAXCOUNT = 10000000;                     //最大计数器(id) 
-    static currentCount = 0;                        //当前技术值(id)
     static cache:NCache;                            //缓存
     /**
      * 参数初始化
@@ -47,7 +46,7 @@ class SessionFactory {
             name:'NSESSION',
             saveType:this.type,
             redis:cfg.redis,
-            maxSize:0,
+            maxSize:0
         });
     }
 
@@ -105,12 +104,9 @@ class SessionFactory {
     /**
      * 创建sessionid
      */
-    static genSessionId(){
-        //创建session
-        if(++this.currentCount > this.MAXCOUNT){
-            this.currentCount = 1;
-        }
-        return new Date().getTime() + '' + this.currentCount;
+    static genSessionId():string{
+        let uuid = require('uuid');
+        return uuid.v1();
     }
     
     /**

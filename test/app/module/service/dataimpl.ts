@@ -3,7 +3,14 @@ import { Resource } from "../dao/pojosequelize/resource";
 import { ResourceAuthority } from "../dao/pojosequelize/resourceauthority";
 import { Authority } from "../dao/pojosequelize/authority";
 import { TransactionManager } from "../../../../core/ts/database/transactionmanager";
+import { Instance } from "../../../../core/ts/decorator";
+import { Transaction } from "typeorm";
+// @Instance({
+//     name:'dataImpl',
+//     singleton:true
+// })
 class DataImpl{
+    @Transaction('dataImpl')
     async addRes(url:string){
         //mysql
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -29,7 +36,7 @@ class DataImpl{
         return 2;
         
     }
-
+    @Transaction('dataImpl')
     async addResAuth(){
         // let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
         // let r = await new Promise(async (resolve,reject)=>{
@@ -52,7 +59,7 @@ class DataImpl{
         return 1;
     }
     
-
+    @Transaction('dataImpl')
     async add(){
         console.log(1);
         let r1 = await this.addResAuth();

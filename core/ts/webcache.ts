@@ -52,15 +52,14 @@ class WebCache{
      */
     static async add(url:string,cfg:ResCfg){
         let pathMdl = require('path');
-        let addFlag:boolean = true;
+        let addFlag:boolean = false;
         //非全部类型，需要进行类型判断
-        if(this.fileTypes[0] !== '*'){
+        if(this.fileTypes[0] === '*'){
+            addFlag = true;
+        }else{
             let extName = pathMdl.extname(url);
-            for(let t of this.fileTypes){
-                if(t === extName){
-                    addFlag = true;
-                    break;
-                }
+            if(this.fileTypes.includes(extName)){
+                addFlag = true;
             }
         }
         if(addFlag){

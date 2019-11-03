@@ -1,5 +1,4 @@
 import { DBManager } from "./dbmanager";
-import { InstanceFactory } from "../instancefactory";
 import { TransactionManager } from "./transactionmanager";
 import { AopFactory } from "../aopfactory";
 import { getConnection } from "./connectionmanager";
@@ -59,7 +58,7 @@ class TransactionProxy{
                 //before aop执行
                 if(advices !== null){
                     for(let item of advices.before){
-                        await item.instance[item.method]();
+                        await item.method.apply(item.instance);
                     }
                 }
                 try{
@@ -67,14 +66,14 @@ class TransactionProxy{
                     //return aop执行
                     if(advices !== null){
                         for(let item of advices.return){
-                            await item.instance[item.method]();
+                            await item.method.apply(item.instance);
                         }
                     }
                 }catch(e){
                     //异常aop执行
                     if(advices !== null){
                         for(let item of advices.throw){
-                            await item.instance[item.method]();
+                            await item.method.apply(item.instance);
                         }
                     }
                     result = e;
@@ -93,7 +92,6 @@ class TransactionProxy{
                     let sequelize = await getConnection();
                     result = await new Promise((res,rej)=>{
                         sequelize.transaction(async (t)=>{
-                            console.log(TransactionManager.namespace);
                             let v = await func.apply(instance,params);
                             res(v);
                         }).catch((e)=>{

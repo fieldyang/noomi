@@ -15,6 +15,7 @@ class TransactionManager{
     static namespace:any = require('cls-hooked')
                 .createNamespace('NOOMI_TX_NAMESPACE');         //cls namespace
     static transactionId:number=1;                              //transaction id;
+    static pointcutId:string = 'NOOMI_TX_POINTCUT';             //切点名
     static init(cfg:any){
         this.transactionMdl = cfg.transaction;
         //添加Aspect
@@ -24,30 +25,28 @@ class TransactionManager{
             class:'TransactionAdvice'
         });
 
-        //切点名
-        const pointcutId = "NOOMI_TX_POINTCUT";
         //增加pointcut
         if(cfg.expressions){
-            AopFactory.addPointcut(pointcutId,cfg.expressions,TransactionProxy);
+            AopFactory.addPointcut(this.pointcutId,cfg.expressions,TransactionProxy);
         }
 
         //增加advice
         AopFactory.addAdvice({
-            pointcut_id:pointcutId,
+            pointcut_id:this.pointcutId,
             type:'before',
             method:'before',
             instance:adviceInstance
         });
 
         AopFactory.addAdvice({
-            pointcut_id:pointcutId,
+            pointcut_id:this.pointcutId,
             type:'after-return',
             method:'afterReturn',
             instance:adviceInstance
         });
 
         AopFactory.addAdvice({
-            pointcut_id:pointcutId,
+            pointcut_id:this.pointcutId,
             type:'after-throw',
             method:'afterThrow',
             instance:adviceInstance
@@ -67,7 +66,6 @@ class TransactionManager{
                     });
                     break;
                     case "mssql":
-
                         break;
                     case "oracle":
                         // InstanceFactory.addInstance({
@@ -95,6 +93,18 @@ class TransactionManager{
         
     }
 
+    /**
+     * 添加为事务
+     * @param instance      实例 
+     * @param methodName    方法名
+     */
+    static addTransaction(instanceName:string,instance:any,methodName:any){
+        let pc = AopFactory.getPointcutById(this.pointcutId);
+        if(!pc){
+            return;
+        }
+        AopFactory.addExpression(this.pointcutId,instanceName + '.' + methodName);
+    }
 
     /**
      * 获取transaction

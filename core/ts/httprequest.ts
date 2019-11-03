@@ -15,7 +15,6 @@ class HttpRequest extends IncomingMessage{
         //response 初始化
         this.response = new HttpResponse(req);
         this.response.init(this,res);
-
         this.url = req.url;
         this.method = req.method;
         this.initQueryString();
@@ -136,6 +135,7 @@ class HttpRequest extends IncomingMessage{
         let startField:boolean = false;     //新字段开始
         let returnObj:any = {};             //返回对象
         let writeStream:WriteStream;        //输出流
+        let oldRowChar:string;              //上一行的换行符
         
         return new Promise((resolve,reject)=>{
             let lData:Buffer;
@@ -232,6 +232,14 @@ class HttpRequest extends IncomingMessage{
                 isFile = false;
                 value = '';
                 return;
+            }else if(oldRowChar !== undefined){//写之前的换行符
+                //写换行符
+                if(isFile){ //文件换行符
+                    writeStream.write(rowChar);
+                }else{ //值换行符
+                    value += rowChar;
+                }
+                oldRowChar = undefined;
             }
 
             if(startField){
@@ -249,7 +257,7 @@ class HttpRequest extends IncomingMessage{
                             let a1 = arr[2].split('=');
                             let fn = a1[1].trim();
                             let fn1 = fn.substring(1,fn.length-1);
-                            let fn2 = uuidMdl.v1().replace(/\-/g,'') + fn1.substr(fn1.lastIndexOf('.'));
+                            let fn2 = uuidMdl.v1() + fn1.substr(fn1.lastIndexOf('.'));
                             let filePath = pathMdl.join(process.cwd(),tmpDir,fn2);
                             value = {
                                 fileName:fn1,
@@ -273,11 +281,11 @@ class HttpRequest extends IncomingMessage{
                         return;
                 }
             } else{
+                oldRowChar = rowChar;
                 if(isFile){  //写文件
                     writeStream.write(lineBuffer);
-                    writeStream.write(rowChar);
                 }else{  //普通字段（textarea可能有换行符）
-                    value += lineBuffer.toString() + rowChar;
+                    value += lineBuffer.toString();
                 }
             }   
         }

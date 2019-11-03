@@ -9,7 +9,6 @@
             "name":"testAdvice", 	
             "class":"TestAdvice",
             "path":"advice/testadvice"
-
         }
     ]
 }
