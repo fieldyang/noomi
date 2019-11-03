@@ -48,7 +48,7 @@ class SecurityFactory{
         InstanceFactory.addInstance({
             name:'NoomiSecurityFilter',           //实例名
             instance:new SecurityFilter(),
-            class:'SecurityFilter'
+            class:SecurityFilter
         });
 
         //创建cache

@@ -30,7 +30,7 @@ interface InstanceCfg{
  * 实例对象
  */
 interface InstanceObj{
-    instance?:object;                       //实例对象
+    instance?:any;                          //实例对象
     class?:any;                             //类引用
     singleton:boolean;                      //单例标志
     params?:Array<any>;                     //构造器参数
@@ -83,7 +83,8 @@ class InstanceFactory{
             if(!mdl){
                 throw new NoomiError("1004",path);
             }
-            
+            //增加实例名
+            mdl.prototype.__instanceName = cfg.name;
             insObj={
                 class:mdl,
                 singleton:singleton,
@@ -96,23 +97,26 @@ class InstanceFactory{
                 insObj.params = cfg.params;
             }
         }else{ //传入实例，不用新建，singleton为true
+            if(typeof cfg.class === 'function'){
+                cfg.class.prototype.__instanceName = cfg.name;
+            }
             insObj = {
                 instance:cfg.instance,
                 class:cfg.class,
                 singleton:singleton,
                 properties:cfg.properties
-
             }
-        }
-        //有实例，需要加入注入
-        if(insObj.instance && cfg.properties && cfg.properties.length>0){
-            cfg.properties.forEach((item)=>{
-                this.addInject(insObj.instance,item.name,item.ref);
-            });
         }
 
         this.factory.set(cfg.name,insObj);
         if(insObj.instance){
+            //设置name
+            //有实例，需要加入注入
+            if(cfg.properties && cfg.properties.length>0){
+                cfg.properties.forEach((item)=>{
+                    this.addInject(insObj.instance,item.name,item.ref);
+                });
+            }
             return insObj.instance;
         }
     }
@@ -168,6 +172,7 @@ class InstanceFactory{
             param = param || ins.params || [];
             // let instance = new mdl(param);
             let instance = Reflect.construct(mdl,param);
+            
             //注入属性
             if(ins.properties && ins.properties.length>0){
                 ins.properties.forEach((item)=>{

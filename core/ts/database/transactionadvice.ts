@@ -25,7 +25,6 @@ export class TransactionAdvice{
      * 事务方法返回时
      */
     async afterReturn(){
-        // let id = App.asyncHooks.executionAsyncId();
         let tr:Transaction = await TransactionManager.get();
         if(!tr || !tr.isBegin){
             return;
@@ -47,7 +46,6 @@ export class TransactionAdvice{
      * 事务方法抛出异常时
      */
     async afterThrow(){
-        // let id = App.asyncHooks.executionAsyncId();
         let tr:Transaction = await TransactionManager.get();
         if(!tr || !tr.isBegin){
             return;
@@ -55,9 +53,9 @@ export class TransactionAdvice{
         if(tr){
             tr.trIds.pop();
             tr.rollback();
-            TransactionManager.del(tr);
             //释放连接
-            TransactionManager.releaseConnection(tr);
+            await TransactionManager.releaseConnection(tr);
+            TransactionManager.del(tr);
         }
     }
 }

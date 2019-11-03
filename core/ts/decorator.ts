@@ -142,9 +142,9 @@ function AfterThrow(pointcutId:string){
 /**
  * 事务装饰器
  */ 
-function Transaction(instanceName:string){
+function Transaction(){
     return (target:any,name:string,desc:any)=>{
-        TransactionManager.addTransaction(instanceName,target,name);    
+        TransactionManager.addTransaction(target,name);    
     }
 }
 export {Instance,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transaction}

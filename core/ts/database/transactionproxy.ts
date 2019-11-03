@@ -2,6 +2,7 @@ import { DBManager } from "./dbmanager";
 import { TransactionManager } from "./transactionmanager";
 import { AopFactory } from "../aopfactory";
 import { getConnection } from "./connectionmanager";
+import { InstanceFactory } from "../instancefactory";
 
 
 class TransactionProxy{
@@ -49,35 +50,21 @@ class TransactionProxy{
                     TransactionManager.setIdToLocal();
                 }
                 //advices获取
-                let advices:any;
-                if(AopFactory){
-                    advices = AopFactory.getAdvices(instanceName,methodName);
-                }
-                
+                let adviceInstance = InstanceFactory.getInstance('NoomiTransactionAdvice');
                 let result:any;
                 //before aop执行
-                if(advices !== null){
-                    for(let item of advices.before){
-                        await item.method.apply(item.instance);
-                    }
-                }
+                await adviceInstance.before.apply(adviceInstance);
+                
                 try{
                     result = await func.apply(instance,params);
                     //return aop执行
-                    if(advices !== null){
-                        for(let item of advices.return){
-                            await item.method.apply(item.instance);
-                        }
-                    }
+                    await adviceInstance.afterReturn.apply(adviceInstance);
                 }catch(e){
                     //异常aop执行
-                    if(advices !== null){
-                        for(let item of advices.throw){
-                            await item.method.apply(item.instance);
-                        }
-                    }
+                    await adviceInstance.afterThrow.apply(adviceInstance);
                     result = e;
                 }
+                
                 return result;
             }
 
