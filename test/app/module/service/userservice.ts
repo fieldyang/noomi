@@ -1,6 +1,9 @@
 import { DateHandler } from "../common/datehandler";
-import { Inject} from "../../../../core/ts/decorator";
+import { Inject, Instance} from "../../../../core/ts/decorator";
 
+@Instance({
+    name:'userService'
+})
 class UserService{
     @Inject("dateHandler")
     dateHandler:DateHandler;

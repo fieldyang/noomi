@@ -15,6 +15,8 @@ import { TransactionManager } from './database/transactionmanager';
  */
 function Instance(cfg){
     return (target) =>{
+        //设置实例名
+        target.prototype.__instanceName = cfg.name;
         InstanceFactory.addInstance({
             name:cfg.name,  //实例名
             class:target,

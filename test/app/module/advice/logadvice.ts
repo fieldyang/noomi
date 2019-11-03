@@ -1,3 +1,8 @@
+import { Instance } from "../../../../core/ts/decorator";
+
+@Instance({
+    name:'logAdvice'
+})
 class LogAdvice{
     before(){
         console.log("配置前置通知",arguments);

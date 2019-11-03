@@ -1,3 +1,8 @@
+import { Instance } from "../../../../core/ts/decorator";
+
+@Instance({
+    name:'logService'
+})
 class LogService{
     static logPath:string = null;
     static writeLog(content){

@@ -1,4 +1,8 @@
+import { Instance } from "../../../../core/ts/decorator";
 
+@Instance({
+    name:'nodomFilter'
+})
 class NodomFilter{
     do(request,response){
         const url = require("url");

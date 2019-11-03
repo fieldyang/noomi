@@ -75,16 +75,16 @@ class noomi{
         }
         
         //模块路径加入staticresource的禁止访问路径,/开头
-        if(iniJson.hasOwnProperty('module_path')){
-            let mdlPath:any = iniJson['module_path'];
-            if(!Array.isArray(mdlPath)){
-                mdlPath = [mdlPath];
-            }
-            //添加模块路径为静态资源禁止访问路径
-            mdlPath.forEach(item=>{
-                StaticResource.addPath(item.charAt(0) === '/'?item:'/' + item);
-            });
-        }
+        // if(iniJson.hasOwnProperty('module_path')){
+        //     let mdlPath:any = iniJson['module_path'];
+        //     if(!Array.isArray(mdlPath)){
+        //         mdlPath = [mdlPath];
+        //     }
+        //     //添加模块路径为静态资源禁止访问路径
+        //     mdlPath.forEach(item=>{
+        //         StaticResource.addPath(item.charAt(0) === '/'?item:'/' + item);
+        //     });
+        // }
         
         
         //上下文初始化
@@ -92,7 +92,8 @@ class noomi{
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['context_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                InstanceFactory.init(path.join(basePath,ctxPath),iniJson['module_path']);
+                // InstanceFactory.init(path.join(basePath,ctxPath),iniJson['module_path']);
+                InstanceFactory.init(path.join(basePath,ctxPath));
             }
             console.log('实例工厂初始化完成！');
         }
@@ -158,32 +159,6 @@ class noomi{
             RequestQueue.setCanHandle(false);
         });
         
-        
-        //开启async hook
-        // let asyncHooks = App.asyncHooks.createHook({
-        //     init(asyncId, type, triggerAsyncId,resource) {
-        //         const eid = App.asyncHooks.executionAsyncId();
-        //         //为asyncId绑定transaction
-        //         TransactionManager.bindTransaction(asyncId,eid);
-        //         // fs.writeFileSync('log.out', 
-        //         //   `${type}(${asyncId}):` +
-        //         //   ` trigger: ${triggerAsyncId} execution: ${eid}\n`,{ flag: 'a' });
-        //       },
-        //     //   before(asyncId) {
-        //     //     fs.writeFileSync('log.out',
-        //     //                      `before:  ${asyncId} ${new Date().getTime()}\n`, { flag: 'a' });
-                
-        //     //   },
-        //     //   after(asyncId) {
-                
-        //     //     fs.writeFileSync('log.out',
-        //     //                      `after:  ${asyncId}   ${new Date().getTime()}\n`, { flag: 'a' });
-        //     //   },
-        // });
-        // asyncHooks.enable();
-        
-        
-
         //创建server
         this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
             RequestQueue.add(new HttpRequest(req,res));

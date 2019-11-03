@@ -30,6 +30,7 @@ class DBManager{
                     InstanceFactory.addInstance({
                         name:cfg.connectionmanager,
                         instance:cm,
+                        class:MysqlConnectionManager,
                         singleton:true
                     });
                     break;
@@ -47,6 +48,7 @@ class DBManager{
                     InstanceFactory.addInstance({
                         name:cfg.connectionmanager,
                         instance:cm,
+                        class:SequelizeConnectionManager,
                         singleton:true
                     });
                     break;

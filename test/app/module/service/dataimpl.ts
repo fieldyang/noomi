@@ -1,13 +1,12 @@
 import { Resource } from "../dao/pojosequelize/resource";
 import { ResourceAuthority } from "../dao/pojosequelize/resourceauthority";
 import { TransactionManager } from "../../../../core/ts/database/transactionmanager";
-import { Transaction } from "../../../../core/ts/decorator";
+import { Transaction, Instance } from "../../../../core/ts/decorator";
 import { getConnection } from "../../../../core/ts/database/connectionmanager";
 
-// @Instance({
-//     name:'dataImpl',
-//     singleton:true
-// })
+@Instance({
+    name:'dataImpl'
+})
 class DataImpl{
     @Transaction()
     async addRes(url:string){

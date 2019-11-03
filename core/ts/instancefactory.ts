@@ -1,5 +1,6 @@
 import { AopFactory} from "./aopfactory";
 import { NoomiError } from "./errorfactory";
+import { threadId } from "worker_threads";
 
 /**
  * 实例工厂
@@ -43,7 +44,8 @@ class InstanceFactory{
     static injectList:Array<any> = [];
 
     static init(path:string,mdlPath?:Array<string>){
-        this.parseFile(path,mdlPath);
+        // this.parseFile(path,mdlPath);
+        this.parseFile1(path);
         //延迟注入
         process.nextTick(()=>{
             InstanceFactory.finishInject();
@@ -62,9 +64,9 @@ class InstanceFactory{
         let path:string;
         //单例模式，默认true
         let singleton = cfg.singleton!==undefined?cfg.singleton:true;
+        let mdl:any;
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
-            let mdl:any;
             for(let mdlPath of this.mdlBasePath){
                 mdl = require(pathMdl.join(process.cwd(),mdlPath,path));
                 //支持ts和js,ts编译后为{className:***},js直接输出为class
@@ -80,33 +82,26 @@ class InstanceFactory{
                     break;
                 }
             }
-            if(!mdl){
-                throw new NoomiError("1004",path);
-            }
-            //增加实例名
-            mdl.prototype.__instanceName = cfg.name;
-            insObj={
-                class:mdl,
-                singleton:singleton,
-                properties:cfg.properties
-            };
-
-            if(singleton){      //单例，需要实例化
-                insObj.instance = new mdl(cfg.params);
-            }else{              //非单例，不需要实例化
-                insObj.params = cfg.params;
-            }
-        }else{ //传入实例，不用新建，singleton为true
-            if(typeof cfg.class === 'function'){
-                cfg.class.prototype.__instanceName = cfg.name;
-            }
-            insObj = {
-                instance:cfg.instance,
-                class:cfg.class,
-                singleton:singleton,
-                properties:cfg.properties
-            }
+        }else{
+            mdl = cfg.class;
         }
+        if(!mdl){
+            throw new NoomiError("1004",path);
+        }
+        //增加实例名
+        mdl.prototype.__instanceName = cfg.name;
+        
+        let instance:any;
+        if(singleton){
+            instance = cfg.instance||new mdl(cfg.params);
+        }
+        
+        insObj={
+            instance:instance,
+            class:mdl,
+            singleton:singleton,
+            properties:cfg.properties,
+        };
 
         this.factory.set(cfg.name,insObj);
         if(insObj.instance){
@@ -259,6 +254,80 @@ class InstanceFactory{
         }
     }
 
+
+    /**
+     * 解析实例配置文件
+     * @param path      文件路径
+     * @param mdlPath   模型路径
+     */
+    static parseFile1(path:string){
+        const pathTool = require('path');
+        const basePath = process.cwd();
+        //读取文件
+        let jsonStr:string = require("fs").readFileSync(pathTool.join(basePath,path),'utf-8');
+        let json:any = null;
+        try{
+            json = JSON.parse(jsonStr);
+        }catch(e){
+            throw new NoomiError("1000");
+        }
+
+        json.files.forEach((item)=>{
+            if(typeof item === 'string'){ //路径
+                this.addInstances(item);
+            }
+        });
+    }
+
+    /**
+     * 添加实例
+     * @param path 
+     */
+    static addInstances(path:string){
+        const pathTool = require('path');
+        const basePath = process.cwd();
+        let pathArr = path.split('/');
+        let pa = [basePath];
+        let handled:boolean = false;    //是否已处理
+        for(let i=0;i<pathArr.length-1;i++){
+            const p = pathArr[i];
+            if(p.indexOf('*') === -1){
+                pa.push(p);
+            }else if(p === '**'){ //所有子孙目录
+                handled=true;
+                if(i<pathArr.length-2){
+                    throw '路径错误';
+                }
+                handleDir(pa.join('/'),pathArr[pathArr.length-1],true);
+            }
+        
+        }
+        if(!handled){
+            handleDir(pa.join('/'),pathArr[pathArr.length-1]);
+        }
+
+        function handleDir(dirPath:string,fileExt:string,deep?:boolean){
+            const fs = require('fs');
+            const dir = fs.readdirSync(dirPath,{withFileTypes:true});
+            let reg:RegExp;
+            let fn:string = fileExt;
+            fn = fn.replace(/\./g,'\\.');
+            fn = fn.replace(/\*/g,'\.*');
+            reg = new RegExp('^' + fn + '$');
+            
+            for (const dirent of dir) {
+                if(dirent.isDirectory()){
+                    if(deep){
+                        handleDir(dirPath + '/' + dirent.name,fileExt,deep);
+                    }
+                }else if(dirent.isFile()){
+                    if(reg.test(dirent.name)){
+                        require(dirPath + '/' + dirent.name);
+                    }
+                }            
+            }
+        }
+    }
     /**
      * 获取instance工厂
      */

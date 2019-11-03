@@ -4,7 +4,12 @@ import { SecurityFactory } from "../../../../core/ts/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
+import { Instance } from "../../../../core/ts/decorator";
 
+@Instance({
+    name:'loginAction',
+    singleton:false
+})
 export class LoginAction extends BaseAction{
     toPage:string = '/pages/loginsuccess.html';
     async login(){

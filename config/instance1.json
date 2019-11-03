@@ -1,0 +1,5 @@
+{
+    "files":[
+        "/build/test/app/module/**/*.js"
+    ]
+}

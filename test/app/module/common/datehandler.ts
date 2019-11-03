@@ -1,3 +1,8 @@
+import { Instance } from "../../../../core/ts/decorator";
+
+@Instance({
+    name:'dateHandler'
+})
 class DateHandler{
     tickerToDTString(ticker:number){
         let d = new Date(ticker);

@@ -1,5 +1,7 @@
-import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn } from "../../../../core/ts/decorator";
-
+import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn, Instance } from "../../../../core/ts/decorator";
+@Instance({
+    name:'testAdvice'
+})
 @Aspect
 class TestAdvice{
     @Pointcut(["userService\\.getInfo","dataImpl\\.*"])

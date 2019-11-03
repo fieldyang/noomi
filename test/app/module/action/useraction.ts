@@ -1,4 +1,4 @@
-import { Inject } from "../../../../core/ts/decorator";
+import { Inject, Instance } from "../../../../core/ts/decorator";
 import { UserService } from "../service/userservice";
 import { BaseAction } from "../../../../core/ts/baseaction";
 import { DataImpl } from "../service/dataimpl";
@@ -6,6 +6,10 @@ import { DataImpl } from "../service/dataimpl";
 /**
  * 测试用户
  */
+@Instance({
+    name:'userAction',
+    singleton:true
+})
 class UserAction extends BaseAction{
     userName:string;
     // @Inject("userService")

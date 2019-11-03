@@ -1,105 +1,45 @@
-import { RedisFactory } from "../../core/ts/redisfactory";
-import { User } from "../app/module/dao/pojo/user";
-import { UserAction } from "../app/module/action/useraction";
-import { App } from "../../core/ts/application";
-import { ResourceAuthority } from "../app/module/dao/pojosequelize/resourceauthority";
-import { Resource } from "../app/module/dao/pojosequelize/resource";
-import {Sequelize as SequelizeOrigin} from 'sequelize';
-import { Sequelize } from "sequelize-typescript";
-// import { Sequelize as SequelizeTS } from "sequelize-typescript";
-import { Authority } from "../app/module/dao/pojosequelize/authority";
-
-// const Promise = require('bluebird');
-
-async function add(){
-    const Promise = require('cls-bluebird');
-    let cls = require('cls-hooked');
-    let namespace = cls.createNamespace('tx-own');
-    SequelizeOrigin.useCLS(namespace);
-    
-    let seq = new Sequelize({
-        "dialect":"mysql",
-        "host":"localhost",
-        "port":3306,
-        "username":"root",
-        "password":"field",
-        "database":"codement",
-        "pool": {
-            "max": 5,
-            "min": 0,
-            "acquire": 30000,
-            "idle": 10000
-        },
-        "define": {
-            "timestamps": false
+function addInstances(path:string){
+    const pathTool = require('path');
+    const basePath = process.cwd();
+    let pathArr = path.split('/');
+    let pa = [basePath];
+    for(let i=0;i<pathArr.length;i++){
+        const p = pathArr[i];
+        if(p.indexOf('*') === -1){
+                pa.push(p);
+        }else{
+            if(p === '**'){ //所有子孙目录
+                if(i<pathArr.length-2){
+                        throw '路径错误';
+                }
+                handleDir(pa.join('/'),pathArr[pathArr.length-1],true);
+            }
         }
-    });
-    seq.addModels([Resource,ResourceAuthority,Authority]);
-    
-    
-
-    let tr = await seq.transaction({autocommit:false});
-
-    // try{
-    //     await ResourceAuthority.create({
-    //         resourceId:13,
-    //         authorityId:2
-    //     });
-    //     await Resource.create({
-    //         resourceId:13,
-    //         url:'/test/test'
-    //     });
-    //     await tr.commit();
-    // }catch(e){
-    //     await tr.rollback();
-    // }  
-    
-    
-
-    seq.transaction(async (t)=>{
-        // console.log(namespace.get('transaction'));
-        await ResourceAuthority.create({
-            resourceId:13,
-            authorityId:2
-        });
-
-        await Resource.create({
-            resourceId:13,
-            url:'/test/test'
-        });
+    }
+    function handleDir(dirPath:string,fileExt:string,deep?:boolean){
+        const fs = require('fs');
+        const dir = fs.readdirSync(dirPath,{withFileTypes:true});
+        let reg:RegExp;
+        let fn:string = fileExt;
+        fn = fn.replace(/\./g,'\\.');
+        fn = fn.replace(/\*/g,'\.*');
+        reg = new RegExp('^' + fn + '$');
         
-    }).then(r=>{
-        console.log(r);
-    }).catch(e=>{
-        console.log(e);
-    });
-
-    // return seq.transaction().then((t)=>{
-    //     // console.log(t,namespace);
-    //     console.log(namespace.get('transaction'));
-    //     return ResourceAuthority.create({
-    //         resourceId:13,
-    //         authorityId:2
-    //     }).then((r)=>{
-    //         t.commit();
-    //     }).catch(e=>{
-    //         t.rollback();
-    //     });
-
-    //     /*await Resource.create({
-    //         resourceId:13,
-    //         url:'/test/test'
-    //     },{transaction:t});
-    //     */
-    // }).then(r=>{
-    //     console.log(r);
-
-    // }).catch(e=>{
-    //     console.log(e);
-    // })
-    
+        for (const dirent of dir) {
+            if(dirent.isDirectory()){
+                if(deep){
+                    handleDir(dirPath + '/' + dirent.name,fileExt,deep);
+                }
+            }else if(dirent.isFile()){
+                if(reg.test(dirent.name)){
+                        console.log(dirPath + '/' + dirent.name);
+                        require(dirPath + '/' + dirent.name);
+                }
+        
+            }            
+            
+        }
+    }
 }
 
-add();
-
-
+addInstances("/build/test/**/*.js");
