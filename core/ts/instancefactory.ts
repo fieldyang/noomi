@@ -1,6 +1,7 @@
 import { AopFactory} from "./aopfactory";
 import { NoomiError } from "./errorfactory";
 import { threadId } from "worker_threads";
+import { StaticResource } from "./staticresource";
 
 /**
  * 实例工厂
@@ -40,12 +41,11 @@ interface InstanceObj{
 
 class InstanceFactory{
     static factory:any = new Map();
-    static mdlBasePath:Array<string>;
+    static mdlBasePath:Array<string> = [];
     static injectList:Array<any> = [];
 
-    static init(path:string,mdlPath?:Array<string>){
-        // this.parseFile(path,mdlPath);
-        this.parseFile1(path);
+    static init(path:string){
+        this.parseFile(path);
         //延迟注入
         process.nextTick(()=>{
             InstanceFactory.finishInject();
@@ -57,7 +57,9 @@ class InstanceFactory{
      */
     static addInstance(cfg:InstanceCfg):any{
         if(this.factory.has(cfg.name)){
-            throw new NoomiError("1002",cfg.name);
+            //throw new NoomiError("1002",cfg.name);
+            console.log(cfg.name + 'is already created');
+            return;
         }
         const pathMdl = require('path');
         let insObj:InstanceObj;
@@ -216,29 +218,43 @@ class InstanceFactory{
     /**
      * 解析实例配置文件
      * @param path      文件路径
-     * @param mdlPath   模型路径
      */
-    static parseFile(path:string,mdlPath?:any){
+    static parseFile(path:string){
         interface InstanceJSON{
+            module_path:any;            //模块基础路径(数组或单个字符串)
             files:Array<string>;        //引入文件
             instances:Array<any>;       //实例配置数组
         }
         const pathTool = require('path');
         
-        //转换为数组
-        if(mdlPath && typeof mdlPath === 'string'){
-            mdlPath = [mdlPath];
-        }
-        //只设置一次module 基本路径
-        this.mdlBasePath = this.mdlBasePath || mdlPath || ['./'];
         
         //读取文件
         let jsonStr:string = require("fs").readFileSync(pathTool.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
+
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
             throw new NoomiError("1000");
+        }
+
+        if(json.module_path){
+            if(Array.isArray(json.module_path)){
+                json.module_path.forEach((item)=>{
+                    if(!this.mdlBasePath.includes(item)){
+                        //加入禁止访问路径
+                        StaticResource.addPath(item.charAt(0) === '/'?item:'/' + item);
+                        this.mdlBasePath.push(item);
+                    }
+                });
+            }else if(typeof json.module_path === 'string'){
+                if(!this.mdlBasePath.includes(json.module_path)){
+                    let item = json.module_path;
+                    //加入禁止访问路径
+                    StaticResource.addPath(item === '/'?item:'/' + item);
+                    this.mdlBasePath.push(item);
+                }
+            }
         }
 
         if(Array.isArray(json.files)){
@@ -249,42 +265,20 @@ class InstanceFactory{
 
         if(Array.isArray(json.instances)){
             json.instances.forEach((item)=>{
-                this.addInstance(item);
+                if(typeof item === 'string'){ //模块在路径中
+                    this.addInstances(item);
+                }else{
+                    this.addInstance(item);
+                }
             });
         }
     }
 
-
     /**
-     * 解析实例配置文件
-     * @param path      文件路径
-     * @param mdlPath   模型路径
-     */
-    static parseFile1(path:string){
-        const pathTool = require('path');
-        const basePath = process.cwd();
-        //读取文件
-        let jsonStr:string = require("fs").readFileSync(pathTool.join(basePath,path),'utf-8');
-        let json:any = null;
-        try{
-            json = JSON.parse(jsonStr);
-        }catch(e){
-            throw new NoomiError("1000");
-        }
-
-        json.files.forEach((item)=>{
-            if(typeof item === 'string'){ //路径
-                this.addInstances(item);
-            }
-        });
-    }
-
-    /**
-     * 添加实例
+     * 添加实例(从路径添加)
      * @param path 
      */
     static addInstances(path:string){
-        const pathTool = require('path');
         const basePath = process.cwd();
         let pathArr = path.split('/');
         let pa = [basePath];
@@ -300,7 +294,6 @@ class InstanceFactory{
                 }
                 handleDir(pa.join('/'),pathArr[pathArr.length-1],true);
             }
-        
         }
         if(!handled){
             handleDir(pa.join('/'),pathArr[pathArr.length-1]);

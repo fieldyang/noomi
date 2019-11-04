@@ -20,7 +20,8 @@ function Instance(cfg){
         InstanceFactory.addInstance({
             name:cfg.name,  //实例名
             class:target,
-            singleton:cfg.singleton 
+            params:cfg.params,
+            singleton:cfg.singleton || true
         });
     }
 }

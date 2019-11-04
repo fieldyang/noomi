@@ -1,9 +1,12 @@
 {
-	"files":[
-		"context/common.json",
-		"context/aop.json",
-		"context/action.json",
-		"context/service.json",
-		"context/filter.json"
-	]
+	"module_path":["/build/test/app/module"],
+	"instances":[
+		"/build/test/app/module/**/*.js",
+		{
+            "name":"logAdvice", 	
+            "class":"LogAdvice",
+            "path":"advice/logadvice"
+
+        }
+    ]
 }

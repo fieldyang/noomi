@@ -74,19 +74,6 @@ class noomi{
             SessionFactory.init(iniJson['session']);    
         }
         
-        //模块路径加入staticresource的禁止访问路径,/开头
-        // if(iniJson.hasOwnProperty('module_path')){
-        //     let mdlPath:any = iniJson['module_path'];
-        //     if(!Array.isArray(mdlPath)){
-        //         mdlPath = [mdlPath];
-        //     }
-        //     //添加模块路径为静态资源禁止访问路径
-        //     mdlPath.forEach(item=>{
-        //         StaticResource.addPath(item.charAt(0) === '/'?item:'/' + item);
-        //     });
-        // }
-        
-        
         //上下文初始化
         if(iniJson.hasOwnProperty('context_path')){
             console.log('实例工厂初始化...');

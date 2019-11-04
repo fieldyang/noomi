@@ -46,7 +46,7 @@ class StaticResource{
                     data = await WebCache.load(request,response,filePath);
                 }else{ //从文件读
                     data = await new Promise((resolve,reject)=>{
-                        fs.readFile(path,'utf8',(err,v)=>{
+                        fs.readFile(filePath,'utf8',(err,v)=>{
                             if(err){
                                 resolve();
                             }
