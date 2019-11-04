@@ -9,7 +9,7 @@ interface RouteCfg{
     path:string;
     reg:RegExp;
     instanceName:string;
-    method:string;
+    method?:string;
     results?:Array<RouteResult>;
 }
 
@@ -37,9 +37,9 @@ class RouteFactory{
      * 添加路由
      * @param path      路由路径，支持通配符*，需要method支持
      * @param clazz     对应类
-     * @param method    方法，支持{n}
+     * @param method    方法，path中包含*，则不设置
      */
-    static addRoute(path:string,clazz:string,method:string,results?:Array<RouteResult>){
+    static addRoute(path:string,clazz:string,method?:string,results?:Array<RouteResult>){
         //替换*
         let path1 = path.replace(/\*/g,".*");
         if(results && results.length>0){

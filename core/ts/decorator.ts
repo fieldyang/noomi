@@ -5,6 +5,7 @@ import{InstanceFactory} from './instancefactory';
 import { AopFactory } from './aopfactory';
 import { FilterFactory } from './filterfactory';
 import { TransactionManager } from './database/transactionmanager';
+import { RouteFactory } from './routefactory';
 
 
 /**
@@ -36,6 +37,45 @@ function Inject(instanceName:string){
     }
 }
 
+/**
+ * route config 路由类
+ * @param cfg 
+ */
+function RouteConfig(cfg?:any){
+    return (target)=>{
+        let instanceName:string = '_nroute_' + target.name;
+        target.prototype.__routeconfig = {
+            namespace:cfg.namespace||'',
+            instanceName:instanceName
+        }
+        
+        //追加到instancefactory
+        InstanceFactory.addInstance({
+            name:instanceName,  //实例名
+            class:target,
+            singleton:false
+        });
+
+        //如果配置了path，则追加到路由，对所有方法有效
+        let path:string = cfg.path;
+        if(typeof path==='string' && (path=path.trim()) !== ''){
+            RouteFactory.addRoute(path+'*',instanceName,null,cfg.results);
+        }
+    }
+}
+
+/**
+ * 路由方法
+ * @param cfg 
+ */
+function Route(cfg:any){
+    return (target:any,propertyName:string)=>{
+        setImmediate(()=>{
+            RouteFactory.addRoute(target.__routeconfig.namespace + cfg.path,target.__routeconfig.instanceName,propertyName,cfg.results);
+        });
+        
+    }
+}
 /**
  * web过滤器
  * @param pattern   过滤正则表达式串，可以为数组
@@ -150,4 +190,4 @@ function Transaction(){
         TransactionManager.addTransaction(target,name);    
     }
 }
-export {Instance,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transaction}
+export {Instance,RouteConfig,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transaction}

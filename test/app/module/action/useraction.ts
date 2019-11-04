@@ -1,4 +1,4 @@
-import { Inject, Instance } from "../../../../core/ts/decorator";
+import { Inject, Instance, RouteConfig, Route } from "../../../../core/ts/decorator";
 import { UserService } from "../service/userservice";
 import { BaseAction } from "../../../../core/ts/baseaction";
 import { DataImpl } from "../service/dataimpl";
@@ -6,16 +6,18 @@ import { DataImpl } from "../service/dataimpl";
 /**
  * 测试用户
  */
-@Instance({
-    name:'userAction',
-    singleton:true
+@RouteConfig({
+    namespace:'/user'
 })
 class UserAction extends BaseAction{
     userName:string;
-    // @Inject("userService")
+    @Inject("userService")
     userService:UserService;
     @Inject("dataImpl")
     dataImpl:DataImpl;
+    @Route({
+        path:'/addres'
+    })
     async addres(){
         try{
             let r = await this.dataImpl.add();
@@ -30,14 +32,29 @@ class UserAction extends BaseAction{
     getUserName(){
         return this.userName;
     }
+
+    @Route({
+        path:'/getinfo',
+        results:[{
+            "value":1,
+            "type":"redirect",
+            "url":"/user/showinfo",
+            "params":["userName"]
+        },{
+            "value":2,
+            "type":"chain",
+            "url":"/user/last",
+            "params":["type"]
+        }]
+    })
     getinfo(params){
-        // if(params.type==1){
-        //     this.userName = 'aaa';
-        //     return 1;
-        // }else if(params.type==2){
-        //     this.userName = 'bbb';
-        //     return 2;
-        // }
+        if(params.type==1){
+            this.userName = 'aaa';
+            return 1;
+        }else if(params.type==2){
+            this.userName = 'bbb';
+            return 2;
+        }
         let ui = this.userService.getInfo(params);
         return {
             success:true,
@@ -45,19 +62,28 @@ class UserAction extends BaseAction{
         }
     }
 
+    @Route({
+        path:'/showinfo'
+    })
     async showinfo(params){
-        await new Promise((resolve,reject)=>{
+        return await new Promise((resolve,reject)=>{
             if(params.userName === 'aaa'){
-                resolve(1);
-                return;
+                resolve({
+                    success:true,
+                    result:1
+                });
+            }else{
+                resolve({
+                    success:true,
+                    result:params.userName
+                });
             }
-            resolve({
-                success:true,
-                result:params.userName
-            });
         });
     }
 
+    @Route({
+        path:'/last'
+    })
     last(params){
         return params.type;
         // return {
