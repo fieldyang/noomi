@@ -20,6 +20,7 @@
         }
     },
     "transaction":{
+        "isolation_level":2,
         "transaction":"sequelizeTransaction",
         "expressions":[]
     }

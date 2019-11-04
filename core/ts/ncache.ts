@@ -25,8 +25,8 @@ interface RedisItem{
 interface CacheCfg{
     name:string;        //cache 名
     saveType:number;    //存储类型 0内存，1redis，默认1
-    redis?:string;       //redis名
-    maxSize?:number;     //最大空间，默认为0，如果saveType=1，设置无效
+    redis?:string;      //redis名
+    maxSize?:number;    //最大空间，默认为0，如果saveType=1，设置无效
     cleanNum?:number;   //单次清除最大数量，默认100，如果saveType=1，设置无效
 }
 

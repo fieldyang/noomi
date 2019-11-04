@@ -44,8 +44,9 @@ function Inject(instanceName:string){
 function RouteConfig(cfg?:any){
     return (target)=>{
         let instanceName:string = '_nroute_' + target.name;
+        let namespace = cfg.namespace||''; 
         target.prototype.__routeconfig = {
-            namespace:cfg.namespace||'',
+            namespace:namespace,
             instanceName:instanceName
         }
         
@@ -59,7 +60,10 @@ function RouteConfig(cfg?:any){
         //如果配置了path，则追加到路由，对所有方法有效
         let path:string = cfg.path;
         if(typeof path==='string' && (path=path.trim()) !== ''){
-            RouteFactory.addRoute(path+'*',instanceName,null,cfg.results);
+            setImmediate(()=>{
+                //延迟到Route注解后，便于先处理非*的路由
+                RouteFactory.addRoute(namespace + path+'*',instanceName,null,cfg.results);
+            });
         }
     }
 }

@@ -1,8 +1,8 @@
 import { DBManager } from "./dbmanager";
 import { TransactionManager } from "./transactionmanager";
-import { AopFactory } from "../aopfactory";
 import { getConnection } from "./connectionmanager";
 import { InstanceFactory } from "../instancefactory";
+import { Sequelize } from "sequelize";
 
 
 class TransactionProxy{
@@ -64,7 +64,6 @@ class TransactionProxy{
                     await adviceInstance.afterThrow.apply(adviceInstance);
                     result = e;
                 }
-                
                 return result;
             }
 
@@ -76,9 +75,11 @@ class TransactionProxy{
                 if(!TransactionManager.getIdLocal()){
                     //保存transaction id
                     TransactionManager.setIdToLocal();
+                    let trOpt:any = TransactionManager.transactionOption||{};
+                    
                     let sequelize = await getConnection();
                     result = await new Promise((res,rej)=>{
-                        sequelize.transaction(async (t)=>{
+                        sequelize.transaction(trOpt,async (t)=>{
                             let v = await func.apply(instance,params);
                             res(v);
                         }).catch((e)=>{

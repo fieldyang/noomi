@@ -5,8 +5,11 @@ import { NoomiError } from "../errorfactory";
 import { MysqlTransaction } from "./mysqltransaction";
 import { SequelizeTransaction } from "./sequelizetransaction";
 import { Transaction } from "./transaction";
+
 import { DBManager } from "./dbmanager";
 import { TransactionProxy } from "./transactionproxy";
+import { Sequelize,Transaction as SeqTransaction } from "sequelize";
+import { OracleTransaction } from "./oracletransaction";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
@@ -16,10 +19,15 @@ class TransactionManager{
                 .createNamespace('NOOMI_TX_NAMESPACE');         //cls namespace
     static transactionId:number=1;                              //transaction id;
     static pointcutId:string = 'NOOMI_TX_POINTCUT';             //切点名
-    static addToAopExpressions:Array<any> = [];              //待添加到transaction aop的表达式串
-
+    static addToAopExpressions:Array<any> = [];                 //待添加到transaction aop的表达式串
+    static isolationLevel:number=0;                             //隔离级 1read uncommited 2read commited 3repeatable read 4serializable
+    static transactionOption:any;                               //事务配置项
     static init(cfg:any){
         this.transactionMdl = cfg.transaction;
+        //隔离级
+        if(cfg.isolation_level && typeof cfg.isolation_level === 'number'){
+            this.isolationLevel = cfg.isolation_level;
+        }
         //添加Aspect
         let adviceInstance = InstanceFactory.addInstance({
             name:'NoomiTransactionAdvice',           //实例名
@@ -72,14 +80,11 @@ class TransactionManager{
                     case "mssql":
                         break;
                     case "oracle":
-                        // InstanceFactory.addInstance({
-                        //     name:tn,
-                        //     class:OracleTransaction,
-                        //     singleton:false
-                        // });
-                        break;
-                    case "mongodb":
-                        
+                        InstanceFactory.addInstance({
+                            name:tn,
+                            class:OracleTransaction,
+                            singleton:false
+                        });
                         break;
                     case "sequelize":
                         InstanceFactory.addInstance({
@@ -87,9 +92,26 @@ class TransactionManager{
                             class:SequelizeTransaction,
                             singleton:false
                         }); 
-                        break;
-                    case "typeorm":
-                            
+                        //事务选项
+                        this.transactionOption = {
+                            autocommit:false
+                        }
+                        //设置隔离级别
+                        if(this.isolationLevel !== 0){
+                            switch(TransactionManager.isolationLevel){
+                                case 1:  
+                                    this.transactionOption.isolationLevel = SeqTransaction.ISOLATION_LEVELS.READ_UNCOMMITTED;
+                                    break;
+                                case 2:
+                                    this.transactionOption.isolationLevel = SeqTransaction.ISOLATION_LEVELS.READ_COMMITTED;
+                                    break;
+                                case 3:
+                                    this.transactionOption.isolationLevel = SeqTransaction.ISOLATION_LEVELS.REPEATABLE_READ;
+                                    break;
+                                case 4:
+                                    this.transactionOption.isolationLevel = SeqTransaction.ISOLATION_LEVELS.SERIALIZABLE;
+                            }
+                        }
                         break;
                 }
             }

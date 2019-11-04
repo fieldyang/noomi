@@ -7,7 +7,8 @@ import { DataImpl } from "../service/dataimpl";
  * 测试用户
  */
 @RouteConfig({
-    namespace:'/user'
+    namespace:'/user',
+    path:'/'
 })
 class UserAction extends BaseAction{
     userName:string;
@@ -15,9 +16,7 @@ class UserAction extends BaseAction{
     userService:UserService;
     @Inject("dataImpl")
     dataImpl:DataImpl;
-    @Route({
-        path:'/addres'
-    })
+    
     async addres(){
         try{
             let r = await this.dataImpl.add();

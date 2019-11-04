@@ -79,7 +79,6 @@ class noomi{
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['context_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                // InstanceFactory.init(path.join(basePath,ctxPath),iniJson['module_path']);
                 InstanceFactory.init(path.join(basePath,ctxPath));
             }
             console.log('实例工厂初始化完成！');
@@ -148,11 +147,12 @@ class noomi{
         
         //创建server
         this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
-            RequestQueue.add(new HttpRequest(req,res));
+            // RequestQueue.add(new HttpRequest(req,res));
+            RequestQueue.handleOne(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
             console.log(`服务启动成功，端口${this.port}已监听！！！`);
             //启动队列执行
-            RequestQueue.handle();
+            // RequestQueue.handle();
         }).on('error',(err)=>{
             if (err.code === 'EADDRINUSE') {
                 console.log('地址正被使用，重试中...');
@@ -166,7 +166,6 @@ class noomi{
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         });
     }
-
 
     /**
      * 加载路由
