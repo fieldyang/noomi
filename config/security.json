@@ -1,6 +1,7 @@
 {
     "auth_type":0,
-    "save_type":1,
+    "save_type":0,
+    "max_size":10000000,
     "redis":"default",
     "dboption":{
         "product":"mysql",

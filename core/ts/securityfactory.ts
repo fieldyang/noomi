@@ -22,6 +22,7 @@ class SecurityFactory{
     static authType:number = 0;     //认证类型 0 session 1 token
     static saveType:number = 0;     //数据存储类型，0内存 1redis    默认0
     static redis:string='default';  //redis名，在redis.json中已定义
+    static maxSize:number;          //最大size
     static cache:NCache;            //cache
     static securityPages:Map<string,string> = new Map();
     
@@ -55,6 +56,7 @@ class SecurityFactory{
         this.cache = new NCache({
             name:'NSECURITY',
             saveType:this.saveType,
+            maxSize:this.maxSize,
             redis:this.redis
         });
         
@@ -107,7 +109,7 @@ class SecurityFactory{
         }
         //组权限
         for(let r of results[0]){
-            this.addGroupAuthority(r.gid,r.aid);
+            await this.addGroupAuthority(r.gid,r.aid);
         }
         let resArr:Array<any> = [];
         //资源
@@ -122,7 +124,7 @@ class SecurityFactory{
                     a.push(aid);
                 }
             }
-            this.addResourceAuths(r.url,a);
+            await this.addResourceAuths(r.url,a);
         }
 
         /**
@@ -654,7 +656,11 @@ class SecurityFactory{
             }
             a = JSON.parse(s);
             if(Array.isArray(a) && a.length > 0){
-                authArr = authArr.concat(a);
+                a.forEach(item=>{
+                    if(!authArr.includes(item)){
+                        authArr.push(item);        
+                    }
+                });
             }
         }
 
@@ -687,7 +693,8 @@ class SecurityFactory{
      * @return          page url
      */
     static async getPreLoginPage(session:Session):Promise<string>{
-        return await session.get(this.PRELOGIN);
+        let p = await session.get(this.PRELOGIN)
+        return p;
     }
 
     /**
@@ -735,6 +742,10 @@ class SecurityFactory{
 
         if(json.hasOwnProperty('redis')){
             this.redis = json['redis'];
+        }
+
+        if(json.hasOwnProperty('max_size')){
+            this.maxSize = json['max_size'];
         }
 
         //数据库解析

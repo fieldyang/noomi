@@ -64,9 +64,14 @@ class noomi{
             }
             console.log('redis初始化完成！');
         }
-        
+        //web config
         if(iniJson.hasOwnProperty('web_config')){
             WebConfig.init(iniJson['web_config']);    
+        }
+
+        //forbidden path
+        if(iniJson.hasOwnProperty('forbidden_path')){
+            this.setForbiddenPath(iniJson['forbidden_path']);
         }
 
         //session工厂初始化
@@ -227,8 +232,19 @@ class noomi{
      * 设置禁止访问路径（静态资源）
      * @param dirPath 
      */
-    setForbiddenPath(dirPath:string){
-        StaticResource.addPath(dirPath);
+    setForbiddenPath(paths:any){
+        if(!Array.isArray(paths)){
+            if(typeof paths === 'string'){
+                StaticResource.addPath(paths);
+            }
+            
+        }else{
+            paths.forEach(item=>{
+                if(typeof item === 'string'){
+                    StaticResource.addPath(item);
+                }
+            });
+        }
     }
 
 }

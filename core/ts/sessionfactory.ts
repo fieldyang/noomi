@@ -8,6 +8,7 @@ import { NCache } from "./ncache";
 interface SessionCfg{
     name:string;
     timeout:number;
+    max_size:number;
     type?:number;
     redis?:string;
 }
@@ -44,9 +45,9 @@ class SessionFactory {
         this.type = cfg.type || 0;
         this.cache = new NCache({
             name:'NSESSION',
+            maxSize:cfg.max_size,
             saveType:this.type,
-            redis:cfg.redis,
-            maxSize:0
+            redis:cfg.redis
         });
     }
 
