@@ -368,12 +368,7 @@ class MemoryCache{
         }
         
         this.changeLastUse(mi);
-        let arr = [];
-        for(let p in mi.value){
-            arr.push(p);
-            arr.push(mi.value[p]);
-        }
-        return arr;
+        return mi.value;
     }
 
     /**
