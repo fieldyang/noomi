@@ -1,5 +1,6 @@
 import { InstanceFactory } from "./instancefactory";
 import { NoomiError } from "./errorfactory";
+import { Util } from "./util";
 
 interface FilterConfig{
     instance_name?:string;  //实例名(与instance二选一)
@@ -38,10 +39,10 @@ class FilterFactory{
             ptns = [/^\/*/];
         }else if(Array.isArray(cfg.url_pattern)){ //数组
             cfg.url_pattern.forEach((item)=>{
-                ptns.push(new RegExp(item));
+                ptns.push(Util.toReg(item));
             });
         }else{ //字符串
-            ptns.push(new RegExp(cfg.url_pattern));
+            ptns.push(Util.toReg(cfg.url_pattern));
         }
 
         //加入过滤器集合

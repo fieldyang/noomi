@@ -108,9 +108,22 @@ class SecurityFactory{
                 break;
         }
         //组权限
+        let gaMap:Map<number,Array<number>> = new Map(); //{groupdId1:[authId1,authId2,..],...}
         for(let r of results[0]){
-            await this.addGroupAuthority(r.gid,r.aid);
+            let aids:Array<number>;
+            if(gaMap.has(r.gid)){
+                aids = gaMap.get(r.gid); 
+            }else{
+                aids = [];
+            }
+            aids.push(r.aid);
+            gaMap.set(r.gid,aids);
         }
+        //更新组权限
+        for(let p of gaMap){
+            await this.updGroupAuths(p[0],p[1]);
+        }
+        
         let resArr:Array<any> = [];
         //资源
         for(let r of results[1]){
@@ -124,7 +137,7 @@ class SecurityFactory{
                     a.push(aid);
                 }
             }
-            await this.addResourceAuths(r.url,a);
+            await this.updResourceAuths(r.url,a);
         }
 
         /**
@@ -137,7 +150,7 @@ class SecurityFactory{
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
             try{
-                if(cfg.connectionmanager){
+                if(cfg.connection_manager){
                     cm = DBManager.getConnectionManager();
                     conn = await cm.getConnection();
                 }else{    
@@ -230,7 +243,7 @@ class SecurityFactory{
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
             try{
-                if(cfg.connectionmanager){
+                if(cfg.connection_manager){
                     cm = DBManager.getConnectionManager();
                     conn = cm.getConnection();
                 }else{
@@ -273,7 +286,7 @@ class SecurityFactory{
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
             try{
-                if(cfg.connectionmanager){
+                if(cfg.connection_manager){
                     cm = DBManager.getConnectionManager();
                     conn = cm.getConnection();
                 }else{
@@ -423,6 +436,20 @@ class SecurityFactory{
     }
 
     /**
+     * 添加组权限
+     * @param groupId   组id
+     * @param authId    权限id
+     */
+    static async updGroupAuths(groupId:number,authIds:Array<number>){
+        let key:string = this.GROUPKEY + groupId;
+        await this.cache.del(key);
+        await this.cache.set({
+            key:key,
+            value:JSON.stringify(authIds)
+        });
+    }
+
+    /**
      * 添加资源权限
      * @param resourceId    资源id
      * @param authId        资源id
@@ -451,8 +478,9 @@ class SecurityFactory{
      * @param url       资源id
      * @param auths     权限id数组
      */
-    static async addResourceAuths(url:string,auths:Array<number>){
+    static async updResourceAuths(url:string,auths:Array<number>){
         let key:string = this.RESKEY + url;
+        await this.cache.del(key);
         let s = await this.cache.set({
             key:key,
             value:JSON.stringify(auths)

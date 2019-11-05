@@ -13,22 +13,19 @@ import { RedisFactory } from "./redisfactory";
 import { NoomiError,ErrorFactory } from "./errorfactory";
 import { WebConfig } from "./webconfig";
 import { RequestQueue } from "./requestqueue";
-import { TransactionManager } from "./database/transactionmanager";
-import { App } from "./application";
 import { DBManager } from "./database/dbmanager";
 
 
 class noomi{
     port:number=3000;
     server:Server;
-    constructor(port:number,pre?:Function){
-        if(pre && pre instanceof Function){
-            pre.call(this);
-        }
+    constructor(port?:number,configPath?:string){
+        port = port || 8255;
+        configPath = configPath || '/config';
         if(typeof port === 'number'){
             this.port = port;
         }
-        this.init('config');
+        this.init(configPath);
     }
 
     /**
@@ -44,7 +41,7 @@ class noomi{
             let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
-            throw new NoomiError("1001");
+            throw new NoomiError("1001") + e;
         }
 
         if(iniJson === null){
@@ -55,30 +52,32 @@ class noomi{
         ErrorFactory.language = iniJson['language'] || 'zh';  //默认中文
         ErrorFactory.init();
 
+
         //redis初始化
         if(iniJson.hasOwnProperty('redis_path')){
             console.log('redis初始化...');
             let rPath = iniJson['redis_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadRedis(path.join(basePath,rPath));
+                RedisFactory.parseFile(path.join(basePath,rPath));
             }
             console.log('redis初始化完成！');
         }
-        //web config
-        if(iniJson.hasOwnProperty('web_config')){
-            WebConfig.init(iniJson['web_config']);    
-        }
-
+        
         //forbidden path
         if(iniJson.hasOwnProperty('forbidden_path')){
             this.setForbiddenPath(iniJson['forbidden_path']);
         }
 
-        //session工厂初始化
-        if(iniJson.hasOwnProperty('session')){
-            SessionFactory.init(iniJson['session']);    
+        //web config
+        if(iniJson.hasOwnProperty('web_path')){
+            console.log('web初始化...');
+            let rPath = iniJson['web_path'];
+            if(rPath !== null && (rPath = rPath.trim())!==''){
+                WebConfig.parseFile(path.join(basePath,rPath));
+            }
+            console.log('web初始化完成！');
         }
-        
+
         //上下文初始化
         if(iniJson.hasOwnProperty('context_path')){
             console.log('实例工厂初始化...');
@@ -94,7 +93,7 @@ class noomi{
             console.log('过滤器初始化...');
             let rPath = iniJson['filter_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadFilter(path.join(basePath,rPath));
+                FilterFactory.parseFile(path.join(basePath,rPath));
             }
             console.log('过滤器初始化完成！');
         }
@@ -104,7 +103,7 @@ class noomi{
             console.log('路由工厂初始化...');
             let rPath = iniJson['route_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadRoute(path.join(basePath,rPath));
+                RouteFactory.parseFile(path.join(basePath,rPath));
             }
             console.log('路由工厂初始化完成！');
         }
@@ -124,7 +123,7 @@ class noomi{
             console.log('aop初始化...');
             let rPath = iniJson['aop_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                this.loadAop(path.join(basePath,rPath));
+                AopFactory.parseFile(path.join(basePath,rPath));
             }
             console.log('aop初始化完成！');
         }
@@ -170,46 +169,6 @@ class noomi{
         }).on('clientError', (err, socket) => {
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         });
-    }
-
-    /**
-     * 加载路由
-     * @param path 
-     */
-    loadRoute(path:string){
-        RouteFactory.parseFile(path);
-    }
-
-    /**
-     * 加载aop配置文件
-     * @param path  文件路径
-     */
-    loadAop(path:string){
-        AopFactory.parseFile(path);
-    }
-
-    /**
-     * 过滤器文件加载
-     * @param path  文件路径
-     */
-    loadFilter(path:string){
-        FilterFactory.parseFile(path);
-    }
-
-     /**
-     * 加载security配置文件
-     * @param path  文件路径
-     */
-    loadSecurity(path:string){
-        SecurityFactory.parseFile(path);
-    }
-
-    /**
-     * 加载redis配置文件
-     * @param path  文件路径
-     */
-    loadRedis(path:string){
-        RedisFactory.parseFile(path);
     }
 
     /**

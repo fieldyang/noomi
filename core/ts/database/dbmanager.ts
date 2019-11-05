@@ -17,18 +17,18 @@ class DBManager{
         //connection manager配置
         let cm:any;
         //先查询是否有自定义的connection manager
-        if(cfg.connectionmanager){
-            cm = InstanceFactory.getInstance(cfg.connectionmanager);
+        if(cfg.connection_manager){
+            cm = InstanceFactory.getInstance(cfg.connection_manager);
         }
         //新建connection manager
         if(!cm && product){
             let opt = cfg.options;
-            opt.usepool = cfg.usepool;
+            opt.usePool = cfg.use_pool;
             switch(product){
                 case "mysql":
                     cm = new MysqlConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connectionmanager,
+                        name:cfg.connection_manager,
                         instance:cm,
                         class:MysqlConnectionManager,
                         singleton:true
@@ -46,7 +46,7 @@ class DBManager{
                 case "sequelize":
                     cm = new SequelizeConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connectionmanager,
+                        name:cfg.connection_manager,
                         instance:cm,
                         class:SequelizeConnectionManager,
                         singleton:true
@@ -57,12 +57,12 @@ class DBManager{
                     break;
             }
         }
-        this.connectionManagerName = cfg.connectionmanager;
+        this.connectionManagerName = cfg.connection_manager;
         //事务配置
         if(cfg.transaction){
             let opt = cfg.transaction;
             opt.product = product;
-            opt.connectionmanager = cfg.connectionmanager;
+            opt.connection_manager = cfg.connection_manager;
             TransactionManager.init(opt);
         }
     }

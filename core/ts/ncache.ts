@@ -1,5 +1,6 @@
 import { NoomiError } from "./errorfactory";
 import { RedisFactory } from "./redisfactory";
+import { Util } from "./util";
 
 /**
  * cache类
@@ -133,7 +134,7 @@ export class NCache{
      */
     async has(key:string):Promise<boolean>{
         if(this.saveType === 0){
-
+            return this.memoryCache.has(key);
         }else{
             return await RedisFactory.has(this.redis,this.redisPreName + key);
         }
@@ -381,9 +382,7 @@ class MemoryCache{
      */
     getKeys(key:string):Array<string>{
         let keys = this.storeMap.keys();
-        //替换*为 .*
-        key = key.replace(/\*/g,'.*');
-        let reg:RegExp = new RegExp(key);
+        let reg:RegExp = Util.toReg(key);
         let k:string;
         let arr:Array<string> = [];
         for(let k of keys){
@@ -393,6 +392,7 @@ class MemoryCache{
         }
         return arr;
     }
+    
     
     /**
      * 删除键
@@ -415,6 +415,15 @@ class MemoryCache{
                 delete mi.value[subKey];
             }
         }
+    }
+
+    /**
+     * 是否拥有key
+     * @param key 
+     * @return   true/false
+     */
+    has(key:string):boolean{
+        return this.storeMap.has(key);
     }
 
     /**

@@ -11,7 +11,7 @@ class MysqlConnectionManager implements ConnectionManager{
     poolAlias:string;       //pool别名
     constructor(cfg){
         this.dbMdl = require('oracledb');
-        this.usePool = cfg.usepool || false;
+        this.usePool = cfg.use_pool || false;
         this.poolAlias = cfg.cfg.poolAlias;
         delete cfg.usepool;
         this.options = cfg;

@@ -5,6 +5,7 @@ import {InstanceFactory} from "./instancefactory";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { NoomiError } from "./errorfactory";
+import { Util } from "./util";
 interface RouteCfg{
     path:string;
     reg:RegExp;
@@ -40,8 +41,6 @@ class RouteFactory{
      * @param method    方法，path中包含*，则不设置
      */
     static addRoute(path:string,clazz:string,method?:string,results?:Array<RouteResult>){
-        //替换*
-        let path1 = path.replace(/\*/g,".*");
         if(results && results.length>0){
             for(let r of results){
                 if((r.type === 'jump' || r.type === 'redirect') && (!r.url || typeof r.url !=='string' || (r.url = r.url.trim())=== '')){
@@ -54,7 +53,7 @@ class RouteFactory{
         }
         let r:RouteCfg = {
             path:path,
-            reg:new RegExp('^' + path1 + '$'),
+            reg:Util.toReg(path,3),
             instanceName:clazz.trim(),
             method:method,
             results:results

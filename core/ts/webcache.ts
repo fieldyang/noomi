@@ -40,7 +40,7 @@ class WebCache{
         this.cache = new NCache({
             name:'NWEBCACHE',
             maxSize:cfg.max_size || 0,
-            saveType:cfg.save_type || 1,
+            saveType:cfg.save_type,
             redis:cfg.redis
         });
     }

@@ -2,6 +2,7 @@ import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
 import { NoomiError } from "./errorfactory";
 import { TransactionManager } from "./database/transactionmanager";
+import { Util } from "./util";
 
 
 /**
@@ -58,9 +59,7 @@ class AopPointcut{
             if(typeof item !== 'string'){
                 throw new NoomiError("2001");
             }
-            // 转字符串为正则表达式并加入到数组
-            let reg = new RegExp(item);
-            this.expressions.push(reg);
+            this.expressions.push(Util.toReg(item));
         });
     }
 
@@ -79,6 +78,7 @@ class AopPointcut{
         return false;
     }
 
+    
     /**
      * 给切点添加通知
      * @param advice 
@@ -140,7 +140,7 @@ class AopFactory{
             throw new NoomiError("2002",pointcutId);
         }
         let pc:AopPointcut = this.pointcuts.get(pointcutId);
-        pc.expressions.push(new RegExp(expression));
+        pc.expressions.push(Util.toReg(expression));
     }
 
     /**

@@ -2,6 +2,7 @@ import { AopFactory} from "./aopfactory";
 import { NoomiError } from "./errorfactory";
 import { threadId } from "worker_threads";
 import { StaticResource } from "./staticresource";
+import { Util } from "./util";
 
 /**
  * 实例工厂
@@ -302,11 +303,9 @@ class InstanceFactory{
         function handleDir(dirPath:string,fileExt:string,deep?:boolean){
             const fs = require('fs');
             const dir = fs.readdirSync(dirPath,{withFileTypes:true});
-            let reg:RegExp;
+            
             let fn:string = fileExt;
-            fn = fn.replace(/\./g,'\\.');
-            fn = fn.replace(/\*/g,'\.*');
-            reg = new RegExp('^' + fn + '$');
+            let reg:RegExp = Util.toReg(fn,3);
             
             for (const dirent of dir) {
                 if(dirent.isDirectory()){

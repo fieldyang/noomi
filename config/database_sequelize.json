@@ -1,7 +1,7 @@
 {
     "product":"sequelize",
-    "connectionmanager":"sequelizeConnectionManager",
-    "usepool":true,
+    "connection_manager":"sequelizeConnectionManager",
+    "use_pool":true,
     "options":{
         "dialect":"mysql",
         "host":"localhost",

@@ -12,11 +12,10 @@ class MysqlConnectionManager implements ConnectionManager{
     dbMdl:any;
     constructor(cfg){
         this.dbMdl = require('mysql');
-        if(cfg.usepool){
-            delete cfg.usepool;
+        if(cfg.use_pool){
+            delete cfg.use_pool;
             this.pool = this.dbMdl.createPool(cfg);
         }
-        delete cfg.usepool;
         this.options = cfg;
     }
 

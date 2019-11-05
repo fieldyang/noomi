@@ -1,0 +1,28 @@
+{
+    "web_config":{
+        "upload_tmp_dir":"/upload/tmp",
+        "upload_max_size":0,
+        "cache":true,
+        "cache_option":{
+            "save_type":0,
+            "max_age":0,
+            "expires":0,
+            "max_size":20000000,
+            "public":true,
+            "private":true,
+            "no_cache":false,
+            "no_store":false,
+            "must_revalidation":false,
+            "proxy_revalidation":false,
+            "file_type":[".html",".htm",".js",".css"],
+            "redis":"default"
+        }
+    },
+    "session":{
+        "name":"NOOMISESSIONID",
+        "timeout":30,
+        "max_size":20000000,
+        "type":0,
+        "redis":"default"
+    }
+}
