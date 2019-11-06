@@ -6,7 +6,11 @@ export class Util{
      */
     static toReg(str:string,side?:number):RegExp{
         // 转字符串为正则表达式并加入到数组
+        //替换/为\/
+        str = str.replace(/\//g,'\\/');
+        //替换.为\.
         str = str.replace(/\./g,'\\.');
+        //替换*为.*
         str = str.replace(/\*/g,'.*');
         if(side !== undefined){
             switch(side){

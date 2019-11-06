@@ -20,11 +20,8 @@ class noomi{
     port:number=3000;
     server:Server;
     constructor(port?:number,configPath?:string){
-        port = port || 8255;
+        this.port = port || 8255;
         configPath = configPath || '/config';
-        if(typeof port === 'number'){
-            this.port = port;
-        }
         this.init(configPath);
     }
 

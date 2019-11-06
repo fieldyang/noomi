@@ -31,21 +31,29 @@ class StaticResource{
             }
         }
 
-        let errCode;
+        let errCode:number;
+        let data:any;
         //禁止访问路径，直接返回404
         if(finded){
             errCode = 404;
         }else{
             const fs = require("fs");
             const pathMdl = require('path');
-            let filePath = pathMdl.join(process.cwd(),path);
-            if(!fs.existsSync(filePath)){
-                errCode = 404;
-            }else{
-                let data;
-                if(WebConfig.useServerCache){ //从缓存取
-                    data = await WebCache.load(request,response,filePath);
-                }else{ //从文件读
+            let filePath = pathMdl.posix.join(process.cwd(),path);
+            
+            if(WebConfig.useServerCache){ //从缓存取，如果用浏览器缓存数据，则返回0，不再操作
+                data = await WebCache.load(request,response,path);
+                if(data === 0){
+                    //回写没修改标志
+                    response.writeToClient({
+                        statusCode:304
+                    });
+                }
+            }
+            if(data === undefined){ //读取文件
+                if(!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()){
+                    errCode = 404;
+                }else{
                     data = await new Promise((resolve,reject)=>{
                         fs.readFile(filePath,'utf8',(err,v)=>{
                             if(err){
@@ -54,21 +62,19 @@ class StaticResource{
                             resolve(v);
                         });
                     });
-                }
-                //无数据，取文件
-                if(data === undefined){
-                    errCode = 404;
-                }else{
-                    //写到浏览器
-                    await response.writeToClient({
-                        data:data
-                    });
-                    return;
+                    //存到cache
+                    if(data && WebConfig.useServerCache){
+                        WebCache.add(path,filePath,data,response);
+                    }
                 }
             }
         }
-        //出现异常
-        if(errCode !== undefined){
+        if(data){
+            //写到浏览器
+            await response.writeToClient({
+                data:data
+            });
+        }else if(errCode !== undefined){
             let page = PageFactory.getErrorPage(errCode);
             if(page){
                 response.redirect(page);

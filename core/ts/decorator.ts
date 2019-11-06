@@ -46,10 +46,10 @@ function RouteConfig(cfg?:any){
         let instanceName:string = '_nroute_' + target.name;
         let namespace = cfg.namespace||''; 
         target.prototype.__routeconfig = {
-            namespace:namespace,
-            instanceName:instanceName
+            namespace:namespace
         }
         
+        target.prototype.__instanceName = instanceName;
         //追加到instancefactory
         InstanceFactory.addInstance({
             name:instanceName,  //实例名
@@ -75,7 +75,8 @@ function RouteConfig(cfg?:any){
 function Route(cfg:any){
     return (target:any,propertyName:string)=>{
         setImmediate(()=>{
-            RouteFactory.addRoute(target.__routeconfig.namespace + cfg.path,target.__routeconfig.instanceName,propertyName,cfg.results);
+            let ns = target.__routeconfig?target.__routeconfig.namespace:'';
+            RouteFactory.addRoute(ns + cfg.path,target.__instanceName,propertyName,cfg.results);
         });
         
     }

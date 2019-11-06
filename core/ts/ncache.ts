@@ -275,7 +275,8 @@ class MemoryCache{
         
         if(item.subKey){//子键
             if(!ci || ci.value && typeof ci.value !== 'object'){
-                throw new NoomiError('subKey必须对应存在的key，且必须为对象');
+                // throw new NoomiError('subKey必须对应存在的key，且必须为对象');
+                return;
             }
             if(!ci.value){
                 ci.value = Object.create(null);

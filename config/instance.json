@@ -6,7 +6,7 @@
             "name":"logAdvice", 	
             "class":"LogAdvice",
             "path":"advice/logadvice"
-
         }
-    ]
+    ],
+    "files":["context/action.json"]
 }

@@ -10,6 +10,7 @@ import { DataImpl } from "../service/dataimpl";
     namespace:'/user',
     path:'/'
 })
+
 class UserAction extends BaseAction{
     userName:string;
     @Inject("userService")

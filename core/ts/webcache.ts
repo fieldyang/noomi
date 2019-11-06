@@ -47,12 +47,29 @@ class WebCache{
 
     /**
      * 添加资源
-     * @param url   url
-     * @param cfg   res config
+     * @param url   url 请求url
+     * @param path  url对应路径
+     * @param data  path对应数据
      */
-    static async add(url:string,cfg:ResCfg){
-        let pathMdl = require('path');
+    static async add(url:string,path:string,data:any,response?:HttpResponse){
+        const fs = require('fs');
+        const pathMdl = require('path');
         let addFlag:boolean = false;
+
+        //获取lastmodified
+        let stat:Stats = await new Promise((resolve,reject)=>{
+            fs.stat(path,(err,data)=>{
+                resolve(data);
+            });
+        });
+
+        let lastModified:string = stat.mtime.toUTCString();
+        //计算hash
+        const crypto = require('crypto');
+        const hash = crypto.createHash('md5');
+        hash.update(data,'utf8');
+        let etag:string = hash.digest('hex');
+
         //非全部类型，需要进行类型判断
         if(this.fileTypes[0] === '*'){
             addFlag = true;
@@ -65,8 +82,15 @@ class WebCache{
         if(addFlag){
             await this.cache.set({
                 key:url,
-                value:cfg
+                value:{
+                    etag:etag,
+                    lastModified:lastModified,
+                    data:data
+                }
             });
+        }
+        if(response){
+            this.writeCacheToClient(response,etag,lastModified);
         }
     }
 
@@ -75,95 +99,48 @@ class WebCache{
      * @param request   request
      * @param response  response
      * @param url       url
-     * @return          404 或 数据
+     * @return          0不用回写数据 或 数据
      */
     static async load(request:HttpRequest,response:HttpResponse,url:string):Promise<any>{
         let rCheck:number = await this.check(request,url);
-        let needReadFile:boolean = false;
-        let data:any;
-        let lastModified:string;
-        let etag:string;
         switch(rCheck){
             case 0:
-                //回写没修改
-                response.writeToClient({
-                    statusCode:304
-                });
-                return;
+                return 0;
             case 1:
                 //从缓存获取
                 let map = await this.cache.getMap(url);
-                if(map === null || !map.data || map.data === ''){
-                    needReadFile = true;
-                }else{
-                    data = map.data;
-                    etag = map.etag;
-                    lastModified = map.lastModified
+                if(map !== null && map.data && map.data !== ''){
+                    this.writeCacheToClient(response,map.etag,map.lastModified);
+                    return map.data;
                 }
-                break;
-            case 2:
-                //读文件
-                needReadFile = true;
-                break;
         }
+    }
 
-        if(needReadFile){
-            let fs = require('fs');
-            let path = require('path').posix.join(url);
-            //读文件
-            data = await new Promise((resolve,reject)=>{
-                fs.readFile(path,'utf8',(err,v)=>{
-                    if(err){
-                        resolve();
-                    }
-                    resolve(v);
-                });
-            });
-
-            //获取lastmodified
-            let stat:Stats = await new Promise((resolve,reject)=>{
-                fs.stat(path,(err,data)=>{
-                    resolve(data);
-                });
-            });
-            lastModified = stat.mtime.toUTCString();
-            //计算hash
-            const crypto = require('crypto');
-            const hash = crypto.createHash('md5');
-            hash.update(data,'utf8');
-            etag = hash.digest('hex');
-            
-            //添加到cache
-            this.add(url,{
-                etag:etag,
-                lastModified:lastModified,
-                data:data
-            });
-            
+    /**
+     * 写cache到客户端
+     * @param response          httpresponse
+     * @param etag              etag
+     * @param lastModified      lasmodified
+     */
+    static writeCacheToClient(response:HttpResponse,etag:string,lastModified:string){
+        //设置etag
+        response.setHeader('Etag',etag);
+        //设置lastmodified
+        response.setHeader('Last-Modified',lastModified);
+        //设置expire
+        if(this.expires && this.expires>0){
+            response.setHeader('Expires',new Date(new Date().getTime() + this.expires*1000).toUTCString());
         }
-
-        if(data){
-            //设置etag
-            response.setHeader('Etag',etag);
-            //设置lastmodified
-            response.setHeader('Last-Modified',lastModified);
-            //设置expire
-            if(this.expires && this.expires>0){
-                response.setHeader('Expires',new Date(new Date().getTime() + this.expires*1000).toUTCString());
-            }
-            //设置cache-control
-            let cc:Array<string> = [];
-            this.isPublic?cc.push('public'):'';
-            this.isPrivate?cc.push('private'):'';
-            this.noCache?cc.push('no-cache'):'';
-            this.noStore?cc.push('no-store'):'';
-            this.maxAge>0?cc.push('max-age=' + this.maxAge):'';
-            this.mustRevalidation?cc.push('must-revalidation'):'';
-            this.proxyRevalidation?cc.push('proxy-revalidation'):'';
-            response.setHeader('cache-control',cc.join(','));
-            
-            return data;
-        }
+        //设置cache-control
+        let cc:Array<string> = [];
+        this.isPublic?cc.push('public'):'';
+        this.isPrivate?cc.push('private'):'';
+        this.noCache?cc.push('no-cache'):'';
+        this.noStore?cc.push('no-store'):'';
+        this.maxAge>0?cc.push('max-age=' + this.maxAge):'';
+        this.mustRevalidation?cc.push('must-revalidation'):'';
+        this.proxyRevalidation?cc.push('proxy-revalidation'):'';
+        response.setHeader('cache-control',cc.join(','));
     }
 
     /**
