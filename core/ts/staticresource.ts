@@ -64,7 +64,7 @@ class StaticResource{
                     });
                     //存到cache
                     if(data && WebConfig.useServerCache){
-                        WebCache.add(path,filePath,data,response);
+                        await WebCache.add(path,filePath,data,response);
                     }
                 }
             }

@@ -1,12 +1,12 @@
 import { HttpRequest } from "./httprequest";
 import { InstanceFactory } from "./instancefactory";
 import { SecurityFilter } from "./filter/securityfilter";
-import { Session } from "./sessionfactory";
 import { NoomiError } from "./errorfactory";
 import { NCache } from "./ncache";
-import { SessionFactory } from "./sessionfactory";
+import { Session,SessionFactory } from "./sessionfactory";
 import { DBManager } from "./database/dbmanager";
 import { ConnectionManager } from "./database/connectionmanager";
+import { RouteFactory } from "./routefactory";
 
 /**
  * 安全工厂
@@ -720,9 +720,38 @@ class SecurityFactory{
      * @param session   session
      * @return          page url
      */
-    static async getPreLoginPage(session:Session):Promise<string>{
-        let p = await session.get(this.PRELOGIN)
-        return p;
+    static async getPreLoginInfo(request:HttpRequest):Promise<string>{
+        let session:Session = await request.getSession();
+        if(!session){
+            return null;
+        }
+        let info:string = await session.get(this.PRELOGIN);
+        await session.del(this.PRELOGIN);
+        if(!info){
+            return null;
+        }
+        let json = JSON.parse(info);
+        if(!json.page){
+            return null;
+        }
+        let url = require('url').parse(json.page).pathname
+        // 处理参数
+        if(json.params){
+            let pstr:string = '';
+        
+            for(let p in json.params){
+                let o:any = json.params[p];
+                if(typeof o === 'object'){
+                    o = JSON.stringify(o);
+                }
+                pstr += p + '=' + o + '&';
+            }
+            if(pstr !== ''){
+                pstr = encodeURI(pstr);
+            }
+            url += '?' + pstr;
+        }
+        return url;
     }
 
     /**
@@ -730,9 +759,13 @@ class SecurityFactory{
      * @param session   Session
      * @param page      pageurl
      */
-    static async setPreLoginPage(session:Session,page:string){
-        await session.set(this.PRELOGIN,page);
+    static async setPreLoginInfo(session:Session,request:HttpRequest){
+        await session.set(this.PRELOGIN,JSON.stringify({
+            page:request.url,
+            params:request.parameters
+        }));
     }
+
     
     /**
      * 文件解析

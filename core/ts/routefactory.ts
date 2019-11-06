@@ -175,7 +175,7 @@ class RouteFactory{
      * @param data          数据
      * @param instance      实例
      */
-    private static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any):void{
+    static handleOneResult(res:HttpResponse,result:RouteResult,data:any,instance?:any):void{
         let url:string;
         switch(result.type){
             case "redirect": //重定向
@@ -235,6 +235,8 @@ class RouteFactory{
                     }
                 }
                 return;
+            case "none": //什么都不做
+                break;
             default: //json
                 res.writeToClient({
                     data:data,

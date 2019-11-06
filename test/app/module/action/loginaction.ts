@@ -42,7 +42,7 @@ export class LoginAction extends BaseAction{
                 
                 //添加到securityfactory
                 await SecurityFactory.addUserGroups(user.userId,ga,this.request);
-                this.toPage = await SecurityFactory.getPreLoginPage(await this.request.getSession());
+                this.toPage = await SecurityFactory.getPreLoginInfo(this.request);
             }else{
                 this.toPage = '/pages/loginfail.html';
             }

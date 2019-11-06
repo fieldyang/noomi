@@ -135,7 +135,7 @@ class HttpRequest extends IncomingMessage{
         let startField:boolean = false;     //新字段开始
         let returnObj:any = {};             //返回对象
         let writeStream:WriteStream;        //输出流
-        let oldRowChar:string;              //上一行的换行符
+        let oldRowChar:string='';              //上一行的换行符
         
         return new Promise((resolve,reject)=>{
             let lData:Buffer;
@@ -231,17 +231,18 @@ class HttpRequest extends IncomingMessage{
                 dispLineNo = 1;
                 isFile = false;
                 value = '';
+                oldRowChar = '';
                 return;
-            }else if(oldRowChar !== undefined){//写之前的换行符
+            }else if(oldRowChar !== ''){//写之前的换行符
                 //写换行符
                 if(isFile){ //文件换行符
-                    writeStream.write(rowChar);
+                    writeStream.write(oldRowChar);
                 }else{ //值换行符
-                    value += rowChar;
+                    value += oldRowChar;
                 }
-                oldRowChar = undefined;
             }
-
+            oldRowChar = '';
+            
             if(startField){
                 //buffer转utf8字符串
                 let line = lineBuffer.toString();
@@ -281,7 +282,9 @@ class HttpRequest extends IncomingMessage{
                         return;
                 }
             } else{
-                oldRowChar = rowChar;
+                if(rowChar){
+                    oldRowChar = rowChar;
+                }
                 if(isFile){  //写文件
                     writeStream.write(lineBuffer);
                 }else{  //普通字段（textarea可能有换行符）
