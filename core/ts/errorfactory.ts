@@ -36,7 +36,7 @@ class ErrorFactory{
             let iniStr = fs.readFileSync(require('path').join(process.cwd(), 'core/locales/msg_' + this.language + '.json'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
-            throw new NoomiError("0100");
+            throw new NoomiError("0100") + e;
         }
         //object 转 map
         for(let o of Object.getOwnPropertyNames(iniJson)){

@@ -236,7 +236,7 @@ class InstanceFactory{
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("1000");
+            throw new NoomiError("1000") + e;
         }
 
         if(json.module_path){
@@ -291,7 +291,7 @@ class InstanceFactory{
             }else if(p === '**'){ //所有子孙目录
                 handled=true;
                 if(i<pathArr.length-2){
-                    throw '路径错误';
+                    throw new NoomiError('1000');
                 }
                 handleDir(pa.join('/'),pathArr[pathArr.length-1],true);
             }

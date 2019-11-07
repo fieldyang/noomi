@@ -83,7 +83,7 @@ class DBManager{
             json = JSON.parse(jsonStr);
             this.init(json);    
         }catch(e){
-            throw new NoomiError("2800");
+            throw new NoomiError("2800") + e;
         }
     }
 }

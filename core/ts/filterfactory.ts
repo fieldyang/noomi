@@ -65,7 +65,7 @@ class FilterFactory{
         try{
             json = JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2200");
+            throw new NoomiError("2200") + e;
         }
 
         //处理filters

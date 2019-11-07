@@ -286,18 +286,42 @@ class SecurityFactory{
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
             try{
-                if(cfg.connection_manager){
-                    cm = DBManager.getConnectionManager();
-                    conn = cm.getConnection();
-                }else{
+                // if(cfg.connection_manager){
+                //     cm = DBManager.getConnectionManager();
+                //     conn = cm.getConnection();
+                // }else{
                     conn = await db.getConnection(cfg);
                     //组权限
-                    arr.push(await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
+                    let result = await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                    let a:Array<any> = [];
+                    for(let r of result.rows){
+                        a.push({
+                            gid:r[ids.groupId],
+                            aid:r[ids.authId]
+                        });
+                    }
+                    arr.push(a);
                     //资源
-                    arr.push(await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
+                    result = await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                    let a1:Array<any> = [];
+                    for(let r of result.rows){
+                        a1.push({
+                            rid:r[ids.resourceId],
+                            url:r[ids.resourceUrl]
+                        });
+                    }
+                    arr.push(a1);
                     //资源权限
-                    arr.push(await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
-                }
+                    result  = await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+                    let a2:Array<any> = [];
+                    for(let r of result.rows){
+                        a2.push({
+                            rid:r[ids.resourceId],
+                            aid:r[ids.authId]
+                        });
+                    }
+                    arr.push(a2);
+                // }
             }catch(e){
                 throw e;
             }finally{

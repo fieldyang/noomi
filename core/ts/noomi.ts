@@ -16,7 +16,7 @@ import { RequestQueue } from "./requestqueue";
 import { DBManager } from "./database/dbmanager";
 
 
-class noomi{
+class Noomi{
     port:number=3000;
     server:Server;
     constructor(port?:number,configPath?:string){
@@ -205,4 +205,7 @@ class noomi{
 
 }
 
+function noomi(port?:number,contextPath?:string){
+    new Noomi(port,contextPath);
+}
 export {noomi};

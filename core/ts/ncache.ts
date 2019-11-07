@@ -275,7 +275,6 @@ class MemoryCache{
         
         if(item.subKey){//子键
             if(!ci || ci.value && typeof ci.value !== 'object'){
-                // throw new NoomiError('subKey必须对应存在的key，且必须为对象');
                 return;
             }
             if(!ci.value){
@@ -293,7 +292,7 @@ class MemoryCache{
         }else{
             if(typeof item.value === 'object'){
                 if(ci){
-                    throw new NoomiError('键已存在，不能设置为object');
+                    throw new NoomiError('3010');
                 }
                 ci = new MemoryItem(timeout);
                 this.storeMap.set(item.key,ci);
@@ -553,7 +552,7 @@ class MemoryCache{
         if(this.maxSize>0 && size + this.size>this.maxSize){
             this.cleanup(size + this.size - this.maxSize);
             if(size + this.size > this.maxSize){
-                throw new NoomiError("存入值超过缓存最大值");
+                throw new NoomiError("3002");
             }
         }
     }

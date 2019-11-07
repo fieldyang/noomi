@@ -92,7 +92,7 @@ class StaticResource{
      */
     static addPath(dirPath:string){
         const fs = require('fs');
-        if(this.forbiddenMap.has(dirPath)){
+        if(!this.forbiddenMap.has(dirPath)){
             const pathMdl = require('path');
             if(fs.existsSync(pathMdl.join(process.cwd(),dirPath))){
                 this.forbiddenMap.set(dirPath,Util.toReg(dirPath,1));
