@@ -108,7 +108,8 @@ class AopFactory{
                 if(!this.pointcuts.has(item.pointcut_id)){
                     throw new NoomiError("2002",item.pointcut_id);
                 }
-                //设置实例名
+
+                //设置实例或实例名
                 item.instance = cfg.instance;
                 //添加到pointcut的aop数组(是否需要重复检测，待考虑)
                 this.addAdvice(item);
@@ -297,38 +298,41 @@ class AopFactory{
                 continue;
             }
             pointcut.advices.forEach(aop=>{
+                let ins:any = typeof aop.instance === 'string'?
+                    InstanceFactory.getInstance(aop.instance):aop.instance;
+                
                 switch(aop.type){
                     case 'before':
                         beforeArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                         return;
                     case 'after':
                         afterArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                         return;
                     case 'around':
                         beforeArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                         afterArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                         return;
                     case 'after-return':
                         returnArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                         return;
                     case 'after-throw':
                         throwArr.push({
-                            instance:aop.instance,
+                            instance:ins,
                             method:aop.method
                         });
                 }

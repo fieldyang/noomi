@@ -1,11 +1,6 @@
 {
     "filters":[
         {
-            "instance_name":"NoomiSecurityFilter",
-            "method_name":"do",
-            "url_pattern":"/*"
-        },
-        {
             "instance_name":"nodomFilter"
         },{
             "instance_name":"pathFilter",

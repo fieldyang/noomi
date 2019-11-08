@@ -8,6 +8,7 @@ interface FilterConfig{
     method_name?:string;    //方法名,默认do
     url_pattern?:any;       //正则表达式串，或数组
     instance?:any;          //实例
+    order?:number;           //优先级，越小越高
 }
 
 /**
@@ -17,6 +18,7 @@ interface Filter{
     instance:any;           //实例或实例名
     method:string;          //方法名
     patterns:Array<RegExp>; //正则表达式
+    order:number;           //优先级，越小越高，默认100000
 }
 
 
@@ -50,7 +52,12 @@ class FilterFactory{
         this.filters.push({
             instance:ins,
             method:cfg.method_name || 'do', //默认do
-            patterns:ptns
+            patterns:ptns,
+            order:cfg.order||1000
+        });
+
+        this.filters.sort((a,b)=>{
+            return a.order - b.order;
         });
     }
 

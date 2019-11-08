@@ -55,6 +55,7 @@ class UserAction extends BaseAction{
             this.userName = 'bbb';
             return 2;
         }
+        
         let ui = this.userService.getInfo(params);
         return {
             success:true,

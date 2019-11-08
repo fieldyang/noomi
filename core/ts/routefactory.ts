@@ -114,7 +114,7 @@ class RouteFactory{
             route.instance.setResponse(res);
         }
 
-        //设置response
+        //设置model
         if(typeof route.instance.setModel === 'function'){
             route.instance.setModel(params);
         }

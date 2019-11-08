@@ -1,6 +1,9 @@
-class UploadAction{
+import { BaseAction } from "../../../../core/ts/baseaction";
+
+class UploadAction extends BaseAction{
     upload(data){
-        return data;
+        
+        return this.model;
     }
 }
 

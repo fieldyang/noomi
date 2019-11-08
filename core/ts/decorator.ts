@@ -84,13 +84,15 @@ function Route(cfg:any){
 /**
  * web过滤器
  * @param pattern   过滤正则表达式串，可以为数组
+ * @param order     优先级，默认1000
  */
-function WebFilter(pattern?:any){
+function WebFilter(pattern?:any,order?:number){
     return function(target:any,name:string){
         FilterFactory.addFilter({
             instance:target,
             method_name:name,
-            url_pattern:pattern
+            url_pattern:pattern,
+            order:order
         });
     } 
 }

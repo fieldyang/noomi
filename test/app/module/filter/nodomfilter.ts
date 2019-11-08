@@ -1,9 +1,10 @@
-import { Instance } from "../../../../core/ts/decorator";
+import { Instance, WebFilter } from "../../../../core/ts/decorator";
 
 @Instance({
     name:'nodomFilter'
 })
 class NodomFilter{
+    @WebFilter('/*',1)
     do(request,response){
         const url = require("url");
         let path = url.parse(request.url).pathname;
