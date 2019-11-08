@@ -252,7 +252,7 @@ class SecurityFactory{
             }
             try{
                 //组权限
-                let result = await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                let result = await conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
                 let a:Array<any> = [];
                 for(let r of result.recordset){
                     a.push({
@@ -262,7 +262,7 @@ class SecurityFactory{
                 }
                 arr.push(a);
                 //资源
-                result = await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                result = await conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
                 let a1:Array<any> = [];
                 for(let r of result.recordset){
                     a1.push({
@@ -272,7 +272,7 @@ class SecurityFactory{
                 }
                 arr.push(a1);
                 //资源权限
-                result  = await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+                result  = await conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
 
                 let a2:Array<any> = [];
                 for(let r of result.recordset){

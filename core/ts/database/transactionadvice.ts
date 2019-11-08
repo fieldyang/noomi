@@ -18,7 +18,7 @@ export class TransactionAdvice{
             return;
         }
         tr.isBegin = true;
-        tr.begin();
+        await tr.begin();
     }
 
     /**
@@ -33,7 +33,7 @@ export class TransactionAdvice{
         tr.trIds.pop();
         //当前id为事务头，进行提交
         if(tr.trIds.length===0){
-            tr.commit();
+            await tr.commit();
             //删除事务
             TransactionManager.del(tr);
             //释放连接
@@ -52,7 +52,7 @@ export class TransactionAdvice{
         }
         if(tr){
             tr.trIds.pop();
-            tr.rollback();
+            await tr.rollback();
             //释放连接
             await TransactionManager.releaseConnection(tr);
             TransactionManager.del(tr);

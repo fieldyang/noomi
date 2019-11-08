@@ -11,6 +11,7 @@ import { TransactionProxy } from "./transactionproxy";
 import { Sequelize,Transaction as SeqTransaction } from "sequelize";
 import { OracleTransaction } from "./oracletransaction";
 import { App } from "../application";
+import { MssqlTransaction } from "./mssqltransaction";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
@@ -79,6 +80,11 @@ class TransactionManager{
                     });
                     break;
                     case "mssql":
+                        InstanceFactory.addInstance({
+                            name:tn,
+                            class:MssqlTransaction,
+                            singleton:false
+                        });
                         break;
                     case "oracle":
                         InstanceFactory.addInstance({

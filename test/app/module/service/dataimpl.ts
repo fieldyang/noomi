@@ -23,11 +23,14 @@ class DataImpl{
         // }); 
         
         //oracle
-        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
-
-        let conn = await getConnection();
-        let r = await conn.execute(sql);
+        // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+        // let conn = await getConnection();
+        // let r = await conn.execute(sql);
         
+        //mssql
+        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+        let conn = await getConnection();
+        let r = await conn.query(sql);
 
 
         //sequelize
@@ -54,12 +57,18 @@ class DataImpl{
         // });
 
         //oracle
-        //oracle
+        // let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
+        // let conn = await getConnection();
+        // let r = await conn.execute(sql);
+        
+        //mssql
         let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
-
         let conn = await getConnection();
-        conn.execute(sql);
-        let r = await conn.execute(sql);
+        try{
+            let r = await conn.query(sql);
+        }catch(e){
+            console.log(e);
+        }
         
         //sequelize
         // const res = new ResourceAuthority({

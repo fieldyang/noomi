@@ -4,7 +4,7 @@
     "max_size":10000000,
     "redis":"default",
     "dboption":{
-        "connection_manager":"mysqlConnectionManager",
+        "connection_manager":"mssqlConnectionManager",
         "tables":{
             "groupAuthority":"t_group_authority",
             "resource":"t_resource",

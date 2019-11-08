@@ -1,16 +1,25 @@
-import { Transaction } from "./transaction";
+import { Transaction, TransactionType } from "./transaction";
 import { getConnection } from "./connectionmanager";
+import { InstanceFactory } from "../instancefactory";
+import { DBManager } from "./dbmanager";
 
 /**
  * oracle 事务类
  */
 class MssqlTransaction extends Transaction{
     tr:any;
+    constructor(id:number,connection?:any,type?:TransactionType){
+        super(id,connection,type);
+        let cm = DBManager.getConnectionManager();
+        let pool = cm.pool;
+        this.tr = new cm.dbMdl.Transaction(pool);
+        
+    }
     async begin():Promise<void>{
         if(!this.connection){
             this.connection = await getConnection();
         }
-        this.tr = await this.connection.transaction();
+        await this.tr.begin();
     }
 
     async commit():Promise<void>{

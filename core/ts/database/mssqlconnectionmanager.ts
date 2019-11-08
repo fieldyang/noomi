@@ -1,5 +1,6 @@
 import { ConnectionManager } from "./connectionmanager";
 import { TransactionManager } from "./transactionmanager";
+import { MssqlTransaction } from "./mssqltransaction";
 /**
  * 连接管理器
  */
@@ -20,6 +21,9 @@ class MssqlConnectionManager implements ConnectionManager{
         delete cfg.useTransaction;
         delete cfg.usePool;
         this.options = cfg;
+        if(this.usePool){
+            this.pool = new this.dbMdl.ConnectionPool(this.options);
+        }
     }
 
     /**
@@ -31,19 +35,25 @@ class MssqlConnectionManager implements ConnectionManager{
             return conn;
         }
 
+        let tr:any = TransactionManager.get(false);
+        let co;
         if(this.usePool){
-            if(!this.pool){
-                this.pool = new this.dbMdl.ConnectionPool(this.options);
-            }
-            try{
-                return await this.pool.connect();
-            }catch(e){
-                console.log(e);
+            if(tr){
+                co = new this.dbMdl.Request(tr.tr);
+            }else{
+                let c = await this.pool.connect();
+                co = c.request();
             }
             
         }else{
-            return await this.dbMdl.connect(this.options);
+            if(tr){
+                co = new this.dbMdl.Request(tr.tr);
+            }else{
+                let c = await this.dbMdl.connect(this.options);
+                co = c.request();
+            }
         }
+        return co;
     }
 
     /**
@@ -55,10 +65,10 @@ class MssqlConnectionManager implements ConnectionManager{
             return;
         }
         if(this.pool){
-            conn.close({drop:false});
+            conn._currentRequest.connection.close({drop:false});
         }else{
             try{
-                await conn.close();
+                await conn._currentRequest.connection.close();
             }catch(e){
                 console.log(e);
             }
