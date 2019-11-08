@@ -3,8 +3,6 @@ import {RouteFactory} from "./routefactory";
 import {StaticResource} from "./staticresource";
 import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
-import { PageFactory } from "./pagefactory";
-import { SessionFactory } from "./sessionfactory";
 import { HttpRequest } from "./httprequest";
 import { Server } from "net";
 import { SecurityFactory } from "./securityfactory";
@@ -73,7 +71,7 @@ class Noomi{
             console.log('web初始化完成！');
         }
 
-        //上下文初始化
+        //实例初始化
         if(iniJson.hasOwnProperty('instance_path')){
             console.log('实例工厂初始化...');
             let ctxPath = iniJson['instance_path'];

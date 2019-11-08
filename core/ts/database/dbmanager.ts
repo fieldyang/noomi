@@ -1,19 +1,22 @@
 import { NoomiError } from "../errorfactory";
-import { ConnectionManager } from "./connectionmanager";
 import { MysqlConnectionManager } from "./mysqlconnectionmanager";
 import { InstanceFactory } from "../instancefactory";
 import { TransactionManager } from "./transactionmanager";
 import { SequelizeConnectionManager } from "./sequelizeconnectionmanager";
 import { App } from "../application";
+import { OracleConnectionManager } from "./oracleconnectionmanager";
+import { MssqlConnectionManager } from "./mssqlconnectionmanager";
 
 
 class DBManager{
     static connectionManagerName:string;    //连接管理器名
     static transactionName:string;          //事务类名
-    static product:string;                       //数据库类型
+    static product:string;                  //数据库类型
+    
     static init(cfg:any){
         //数据库默认mysql
         let product:string = cfg.product||'mysql';
+        
         this.product = product;
         //connection manager配置
         let cm:any;
@@ -25,21 +28,33 @@ class DBManager{
         if(!cm && product){
             let opt = cfg.options;
             opt.usePool = cfg.use_pool;
+            //设置是否使用transaction标志
+            opt.useTransaction = cfg.transaction?true:false;
+        
             switch(product){
                 case "mysql":
                     cm = new MysqlConnectionManager(opt);
                     InstanceFactory.addInstance({
                         name:cfg.connection_manager,
                         instance:cm,
-                        class:MysqlConnectionManager,
-                        singleton:true
+                        class:MysqlConnectionManager
                     });
                     break;
                 case "mssql":
-
+                    cm = new MssqlConnectionManager(opt);
+                    InstanceFactory.addInstance({
+                        name:cfg.connection_manager,
+                        instance:cm,
+                        class:MssqlConnectionManager
+                    });
                     break;
                 case "oracle":
-
+                    cm = new OracleConnectionManager(opt);
+                    InstanceFactory.addInstance({
+                        name:cfg.connection_manager,
+                        instance:cm,
+                        class:OracleConnectionManager
+                    });
                     break;
                 case "mongodb":
                     

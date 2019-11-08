@@ -93,8 +93,9 @@ class SecurityFactory{
         }
 
         let results:Array<any>;
+        let product:string = this.dbOptions.product || DBManager.product;
         //从表中加载数据
-        switch(this.dbOptions.product){
+        switch(product){
             case "mysql":
                 results = await handleMysql(this.dbOptions,ids);
                 break;
@@ -220,7 +221,7 @@ class SecurityFactory{
                 //关闭连接
                 if (conn) {
                     if(cm !== null){
-                        cm.release(conn);
+                        await cm.release(conn);
                     }else{
                         try {
                             conn.end();
@@ -243,19 +244,44 @@ class SecurityFactory{
             let conn;
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
+            if(cfg.connection_manager){
+                cm = DBManager.getConnectionManager();
+                conn = await cm.getConnection();
+            }else{
+                conn = await db.getConnection(cfg);
+            }
             try{
-                if(cfg.connection_manager){
-                    cm = DBManager.getConnectionManager();
-                    conn = cm.getConnection();
-                }else{
-                    conn = await db.connect(cfg);
-                }
                 //组权限
-                arr.push(await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth));
+                let result = await conn.request().query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                let a:Array<any> = [];
+                for(let r of result.recordset){
+                    a.push({
+                        gid:r[ids.groupId],
+                        aid:r[ids.authId]
+                    });
+                }
+                arr.push(a);
                 //资源
-                arr.push(await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource));
+                result = await conn.request().query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                let a1:Array<any> = [];
+                for(let r of result.recordset){
+                    a1.push({
+                        rid:r[ids.resourceId],
+                        url:r[ids.resourceUrl]
+                    });
+                }
+                arr.push(a1);
                 //资源权限
-                arr.push(await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth));
+                result  = await conn.request().query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+
+                let a2:Array<any> = [];
+                for(let r of result.recordset){
+                    a2.push({
+                        rid:r[ids.resourceId],
+                        aid:r[ids.authId]
+                    });
+                }
+                arr.push(a2);
                 
             }catch(e){
                 throw e;
@@ -263,7 +289,7 @@ class SecurityFactory{
                 //关闭连接
                 if (conn) {
                     if(cm !== null){
-                        cm.release(conn);
+                        await cm.release(conn);
                     }else{
                         try {
                             conn.close();
@@ -286,50 +312,52 @@ class SecurityFactory{
             let conn;
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
+            if(cfg.connection_manager){
+                cm = DBManager.getConnectionManager();
+                conn = await cm.getConnection();
+            }else{
+                conn = await db.getConnection(cfg);
+            }
+            
             try{
-                // if(cfg.connection_manager){
-                //     cm = DBManager.getConnectionManager();
-                //     conn = cm.getConnection();
-                // }else{
-                    conn = await db.getConnection(cfg);
-                    //组权限
-                    let result = await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
-                    let a:Array<any> = [];
-                    for(let r of result.rows){
-                        a.push({
-                            gid:r[ids.groupId],
-                            aid:r[ids.authId]
-                        });
-                    }
-                    arr.push(a);
-                    //资源
-                    result = await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
-                    let a1:Array<any> = [];
-                    for(let r of result.rows){
-                        a1.push({
-                            rid:r[ids.resourceId],
-                            url:r[ids.resourceUrl]
-                        });
-                    }
-                    arr.push(a1);
-                    //资源权限
-                    result  = await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
-                    let a2:Array<any> = [];
-                    for(let r of result.rows){
-                        a2.push({
-                            rid:r[ids.resourceId],
-                            aid:r[ids.authId]
-                        });
-                    }
-                    arr.push(a2);
-                // }
+                //组权限
+                let result = await conn.execute("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth);
+                let a:Array<any> = [];
+                for(let r of result.rows){
+                    a.push({
+                        gid:r[0],
+                        aid:r[1]
+                    });
+                }
+                arr.push(a);
+                //资源
+                result = await conn.execute("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource);
+                let a1:Array<any> = [];
+                for(let r of result.rows){
+                    a1.push({
+                        rid:r[0],
+                        url:r[1]
+                    });
+                }
+                arr.push(a1);
+                //资源权限
+                result  = await conn.execute("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth);
+
+                let a2:Array<any> = [];
+                for(let r of result.rows){
+                    a2.push({
+                        rid:r[0],
+                        aid:r[1]
+                    });
+                }
+                arr.push(a2);
             }catch(e){
                 throw e;
             }finally{
                 //关闭连接
                 if (conn) {
                     if(cm !== null){
-                        cm.release(conn);
+                        await cm.release(conn);
                     }else{
                         try {
                             await conn.close();

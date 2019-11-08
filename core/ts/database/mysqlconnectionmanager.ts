@@ -7,13 +7,16 @@ import { ConnectionManager } from "./connectionmanager";
  */
 class MysqlConnectionManager implements ConnectionManager{
     pool:any;
+    usePool:boolean;
     connection:any;
     options:object;
     dbMdl:any;
     constructor(cfg){
         this.dbMdl = require('mysql');
-        if(cfg.use_pool){
-            delete cfg.use_pool;
+        this.usePool = cfg.usePool || false;
+        if(this.usePool){
+            delete cfg.usePool;
+            delete cfg.useTransaction;
             this.pool = this.dbMdl.createPool(cfg);
         }
         this.options = cfg;

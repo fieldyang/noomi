@@ -1,0 +1,16 @@
+{
+    "product":"mssql",
+    "connection_manager":"mssqlConnectionManager",
+    "use_pool":true,
+    "options":{
+        "server":"localhost",
+        "port":1434,
+        "user":"sa",
+        "password":"field",
+        "database":"codement"
+    },
+    "transaction":{
+        "transaction":"mssqlTransaction",
+        "expressions":[]
+    }
+}

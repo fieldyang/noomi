@@ -1,11 +1,13 @@
 {
     "product":"oracle",
     "connection_manager":"oracleConnectionManager",
-    "use_pool":false,
+    "use_pool":true,
     "options":{
         "user":"codement",
         "password":"field",
-        "connectString":"192.168.1.6/codement"
+        "connectString":"localhost/codement",
+        "poolMin":5,
+        "poolMax":20
     },
     "transaction":{
         "transaction":"oracleTransaction",

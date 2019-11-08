@@ -4,10 +4,7 @@
     "max_size":10000000,
     "redis":"default",
     "dboption":{
-        "product":"mysql",
-        "user":"root",
-        "password":"field",
-        "database":"codement",
+        "connection_manager":"mysqlConnectionManager",
         "tables":{
             "groupAuthority":"t_group_authority",
             "resource":"t_resource",

@@ -22,15 +22,21 @@ class DataImpl{
         //     });
         // }); 
         
+        //oracle
+        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+
+        let conn = await getConnection();
+        let r = await conn.execute(sql);
+        
 
 
         //sequelize
             
-        const res = new Resource({
-            resourceId:13,
-            url:'/test/test'
-        })
-        let r1 = await res.save();
+        // const res = new Resource({
+        //     resourceId:13,
+        //     url:'/test/test'
+        // })
+        // let r1 = await res.save();
         return 2;
         
     }
@@ -47,12 +53,20 @@ class DataImpl{
         //     });
         // });
 
+        //oracle
+        //oracle
+        let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
+
+        let conn = await getConnection();
+        conn.execute(sql);
+        let r = await conn.execute(sql);
+        
         //sequelize
-        const res = new ResourceAuthority({
-            resourceId:13,
-            authorityId:2
-        })
-        let r1 = await res.save();
+        // const res = new ResourceAuthority({
+        //     resourceId:13,
+        //     authorityId:2
+        // })
+        // let r1 = await res.save();
         return 1;
     }
     

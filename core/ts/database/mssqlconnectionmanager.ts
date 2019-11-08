@@ -3,7 +3,7 @@ import { TransactionManager } from "./transactionmanager";
 /**
  * 连接管理器
  */
-class OracleConnectionManager implements ConnectionManager{
+class MssqlConnectionManager implements ConnectionManager{
     pool:any;
     connection:any;
     options:object;
@@ -11,13 +11,12 @@ class OracleConnectionManager implements ConnectionManager{
     usePool:boolean;
     poolAlias:string;       //pool别名
     constructor(cfg){
-        this.dbMdl = require('oracledb');
+        this.dbMdl = require('mssql');
         this.usePool = cfg.usePool || false;
-        this.poolAlias = cfg.poolAlias;
         //设置自动提交为false
-        if(cfg.useTransaction){
-            this.dbMdl.autoCommit = false;
-        }
+        // if(cfg.useTransaction){
+        //     this.dbMdl.autoCommit = false;
+        // }
         delete cfg.useTransaction;
         delete cfg.usePool;
         this.options = cfg;
@@ -34,12 +33,16 @@ class OracleConnectionManager implements ConnectionManager{
 
         if(this.usePool){
             if(!this.pool){
-                this.pool = await this.dbMdl.createPool(this.options);
+                this.pool = new this.dbMdl.ConnectionPool(this.options);
             }
-            let pool = this.poolAlias?this.dbMdl.getPool(this.poolAlias):this.dbMdl.getPool();
-            return await pool.getConnection();
+            try{
+                return await this.pool.connect();
+            }catch(e){
+                console.log(e);
+            }
+            
         }else{
-            return await this.dbMdl.createConnection(this.options);
+            return await this.dbMdl.connect(this.options);
         }
     }
 
@@ -64,4 +67,4 @@ class OracleConnectionManager implements ConnectionManager{
 }
 
 
-export{OracleConnectionManager}
+export{MssqlConnectionManager}
