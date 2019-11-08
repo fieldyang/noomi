@@ -2,6 +2,7 @@ import { NCache } from "./ncache";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { Stats } from "fs";
+import { App } from "./application";
 
 interface ResCfg{
     etag:string;            //ETag
@@ -52,8 +53,8 @@ class WebCache{
      * @param data  path对应数据
      */
     static async add(url:string,path:string,data:any,response?:HttpResponse){
-        const fs = require('fs');
-        const pathMdl = require('path');
+        const fs = App.fs;
+        const pathMdl = App.path;
         let addFlag:boolean = false;
 
         //获取lastmodified
@@ -65,8 +66,8 @@ class WebCache{
 
         let lastModified:string = stat.mtime.toUTCString();
         //计算hash
-        const crypto = require('crypto');
-        const hash = crypto.createHash('md5');
+        
+        const hash = App.crypto.createHash('md5');
         hash.update(data,'utf8');
         let etag:string = hash.digest('hex');
 

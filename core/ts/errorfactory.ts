@@ -1,3 +1,5 @@
+import { App } from "./application";
+
 class ErrorFactory{
     static errMap:Map<string,string> = new Map();
     static language:string='zh';
@@ -30,10 +32,9 @@ class ErrorFactory{
      * 异常初始化
      */
     static init(){
-        const fs = require('fs');
         let iniJson:object = null;
         try{
-            let iniStr = fs.readFileSync(require('path').join(process.cwd(), 'core/locales/msg_' + this.language + '.json'),'utf-8');
+            let iniStr = App.fs.readFileSync(App.path.join(process.cwd(), 'core/locales/msg_' + this.language + '.json'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
             throw new NoomiError("0100") + e;

@@ -1,6 +1,7 @@
 import { InstanceFactory } from "./instancefactory";
 import { NoomiError } from "./errorfactory";
 import { Util } from "./util";
+import { App } from "./application";
 
 interface FilterConfig{
     instance_name?:string;  //实例名(与instance二选一)
@@ -58,9 +59,8 @@ class FilterFactory{
      * @param path      filter的json文件
      */
     static parseFile(path:string):void{
-    
         //读取文件
-        let jsonStr:string = require("fs").readFileSync(require('path').join(process.cwd(),path),'utf-8');
+        let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:any = null;
         try{
             json = JSON.parse(jsonStr);

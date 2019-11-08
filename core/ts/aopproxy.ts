@@ -1,6 +1,7 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
 import { TransactionProxy } from "./database/transactionproxy";
+import { App } from "./application";
 
  /**
  * Aop 代理类
@@ -14,7 +15,7 @@ class AopProxy{
      * @param instance      实例
      */
     static invoke(instanceName:string,methodName:string,func:Function,instance:any):any{
-        const util = require('util');
+        const util = App.util;
         /**
          * 异步方法
          */

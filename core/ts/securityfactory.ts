@@ -7,6 +7,7 @@ import { Session,SessionFactory } from "./sessionfactory";
 import { DBManager } from "./database/dbmanager";
 import { ConnectionManager } from "./database/connectionmanager";
 import { RouteFactory } from "./routefactory";
+import { App } from "./application";
 
 /**
  * 安全工厂
@@ -663,7 +664,7 @@ class SecurityFactory{
      */
     static async check(url:string,session:Session):Promise<number>{
         //获取路径
-        url = require('url').parse(url).pathname;
+        url = App.url.parse(url).pathname;
         
         let astr:string = await this.cache.get(this.RESKEY + url);
         if(astr === null){
@@ -758,7 +759,7 @@ class SecurityFactory{
         if(!json.page){
             return null;
         }
-        let url = require('url').parse(json.page).pathname
+        let url = App.url.parse(json.page).pathname
         // 处理参数
         if(json.params){
             let pstr:string = '';
@@ -796,12 +797,10 @@ class SecurityFactory{
      * @param path 
      */
     static async parseFile(path){
-        const pathTool = require('path');
-        const fs = require("fs");
         //读取文件
         let json:any = null;
         try{
-            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
             
         }catch(e){

@@ -3,6 +3,7 @@ import { AopProxy } from "./aopproxy";
 import { NoomiError } from "./errorfactory";
 import { TransactionManager } from "./database/transactionmanager";
 import { Util } from "./util";
+import { App } from "./application";
 
 
 /**
@@ -175,7 +176,7 @@ class AopFactory{
         process.nextTick(()=>AopFactory.updMethodProxy.call(AopFactory));
 
         //读取文件
-        let jsonStr:string = require("fs").readFileSync(require('path').join(process.cwd(),path),'utf-8');
+        let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:DataJson = null;
         try{
             json = JSON.parse(jsonStr);

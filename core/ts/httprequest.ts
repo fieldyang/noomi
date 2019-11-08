@@ -3,6 +3,7 @@ import { SessionFactory, Session } from "./sessionfactory";
 import { HttpResponse } from "./httpresponse";
 import { WebConfig } from "./webconfig";
 import { WriteStream } from "fs";
+import { App } from "./application";
 
 class HttpRequest extends IncomingMessage{
     srcReq:IncomingMessage;             //源request
@@ -98,7 +99,7 @@ class HttpRequest extends IncomingMessage{
      * 初始化url查询串
      */
     initQueryString(){
-        this.parameters = require('querystring').parse(require("url").parse(this.url).query);
+        this.parameters = App.qs.parse(App.url.parse(this.url).query);
     }
     
     /**
@@ -123,9 +124,6 @@ class HttpRequest extends IncomingMessage{
             return Promise.reject( "上传内容大小超出限制");
         }
 
-        const fsMdl = require('fs');
-        const pathMdl = require('path');
-        const uuidMdl = require('uuid');
         
         let dispLineNo:number = 0;          //字段分割行号，共三行
         let isFile:boolean = false;         //是否文件字段
@@ -258,13 +256,13 @@ class HttpRequest extends IncomingMessage{
                             let a1 = arr[2].split('=');
                             let fn = a1[1].trim();
                             let fn1 = fn.substring(1,fn.length-1);
-                            let fn2 = uuidMdl.v1() + fn1.substr(fn1.lastIndexOf('.'));
-                            let filePath = pathMdl.join(process.cwd(),tmpDir,fn2);
+                            let fn2 = App.uuid.v1() + fn1.substr(fn1.lastIndexOf('.'));
+                            let filePath = App.path.join(process.cwd(),tmpDir,fn2);
                             value = {
                                 fileName:fn1,
                                 path:filePath
                             };
-                            writeStream = fsMdl.createWriteStream(filePath,'binary');
+                            writeStream = App.fs.createWriteStream(filePath,'binary');
                             isFile = true;  
                         }
                         return;

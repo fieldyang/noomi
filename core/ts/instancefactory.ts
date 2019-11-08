@@ -3,6 +3,7 @@ import { NoomiError } from "./errorfactory";
 import { threadId } from "worker_threads";
 import { StaticResource } from "./staticresource";
 import { Util } from "./util";
+import { App } from "./application";
 
 /**
  * 实例工厂
@@ -62,7 +63,7 @@ class InstanceFactory{
             console.log(cfg.name + 'is already created');
             return;
         }
-        const pathMdl = require('path');
+        
         let insObj:InstanceObj;
         let path:string;
         //单例模式，默认true
@@ -71,7 +72,7 @@ class InstanceFactory{
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
             for(let mdlPath of this.mdlBasePath){
-                mdl = require(pathMdl.join(process.cwd(),mdlPath,path));
+                mdl = require(App.path.join(process.cwd(),mdlPath,path));
                 //支持ts和js,ts编译后为{className:***},js直接输出为class
                 //找到则退出
                 if(mdl){
@@ -226,11 +227,9 @@ class InstanceFactory{
             files:Array<string>;        //引入文件
             instances:Array<any>;       //实例配置数组
         }
-        const pathTool = require('path');
-        
         
         //读取文件
-        let jsonStr:string = require("fs").readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
 
         try{
@@ -260,7 +259,7 @@ class InstanceFactory{
 
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(pathTool.join(pathTool.dirname(path),item));
+                this.parseFile(App.path.join(App.path.dirname(path),item));
             });
         }
 
@@ -301,8 +300,7 @@ class InstanceFactory{
         }
 
         function handleDir(dirPath:string,fileExt:string,deep?:boolean){
-            const fs = require('fs');
-            const dir = fs.readdirSync(dirPath,{withFileTypes:true});
+            const dir = App.fs.readdirSync(dirPath,{withFileTypes:true});
             
             let fn:string = fileExt;
             let reg:RegExp = Util.toReg(fn,3);

@@ -4,6 +4,7 @@ import { WebConfig } from "./webconfig";
 import { RouteFactory } from "./routefactory";
 import { FilterFactory } from "./filterfactory";
 import { StaticResource } from "./staticresource";
+import { App } from "./application";
 
 /**
  * request 队列
@@ -64,7 +65,7 @@ class RequestQueue{
      */
     
     static handleOne(request:HttpRequest){
-        let path = require('url').parse(request.url).pathname;
+        let path = App.url.parse(request.url).pathname;
         if(path === ''){
             return;
         }

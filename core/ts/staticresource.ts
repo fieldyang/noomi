@@ -4,6 +4,7 @@ import { WebCache } from "./webcache";
 import { WebConfig } from "./webconfig";
 import { HttpRequest } from "./httprequest";
 import { Util } from "./util";
+import { App } from "./application";
 
 /**
  * 静态资源加载器
@@ -37,9 +38,7 @@ class StaticResource{
         if(finded){
             errCode = 404;
         }else{
-            const fs = require("fs");
-            const pathMdl = require('path');
-            let filePath = pathMdl.posix.join(process.cwd(),path);
+            let filePath = App.path.posix.join(process.cwd(),path);
             
             if(WebConfig.useServerCache){ //从缓存取，如果用浏览器缓存数据，则返回0，不再操作
                 data = await WebCache.load(request,response,path);
@@ -51,11 +50,11 @@ class StaticResource{
                 }
             }
             if(data === undefined){ //读取文件
-                if(!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()){
+                if(!App.fs.existsSync(filePath) || !App.fs.statSync(filePath).isFile()){
                     errCode = 404;
                 }else{
                     data = await new Promise((resolve,reject)=>{
-                        fs.readFile(filePath,'utf8',(err,v)=>{
+                        App.fs.readFile(filePath,'utf8',(err,v)=>{
                             if(err){
                                 resolve();
                             }
@@ -88,15 +87,21 @@ class StaticResource{
 
     /**
      * 添加静态路径
-     * @param dirPath   待添加的目录 
+     * @param paths   待添加的目录或目录数组 
      */
-    static addPath(dirPath:string){
-        const fs = require('fs');
-        if(!this.forbiddenMap.has(dirPath)){
-            const pathMdl = require('path');
-            if(fs.existsSync(pathMdl.join(process.cwd(),dirPath))){
-                this.forbiddenMap.set(dirPath,Util.toReg(dirPath,1));
+    static addPath(paths:any){
+        if(!Array.isArray(paths)){
+            if(typeof paths === 'string'){
+                if(App.fs.existsSync(App.path.join(process.cwd(),paths))){
+                    this.forbiddenMap.set(paths,Util.toReg(paths,1));
+                }
             }
+        }else {
+            paths.forEach(item=>{
+                if(typeof item === 'string'){
+                    this.addPath(item);
+                }
+            });
         }
     }
 }

@@ -10,6 +10,7 @@ import { DBManager } from "./dbmanager";
 import { TransactionProxy } from "./transactionproxy";
 import { Sequelize,Transaction as SeqTransaction } from "sequelize";
 import { OracleTransaction } from "./oracletransaction";
+import { App } from "../application";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
@@ -231,9 +232,8 @@ class TransactionManager{
             files:Array<string>;        //引入文件
             instances:Array<any>;       //实例配置数组
         }
-        const pathTool = require('path');
         //读取文件
-        let jsonStr:string = require("fs").readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+        let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
         try{
             json = JSON.parse(jsonStr);

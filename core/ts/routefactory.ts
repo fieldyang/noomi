@@ -6,6 +6,7 @@ import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { NoomiError } from "./errorfactory";
 import { Util } from "./util";
+import { App } from "./application";
 interface RouteCfg{
     path:string;
     reg:RegExp;
@@ -122,11 +123,11 @@ class RouteFactory{
         if(typeof func !== 'function'){
             throw new NoomiError("1010");
         }
-        const util = require('util');
+        
         try{
             
             let re = func.call(route.instance,params);
-            if(util.types.isPromise(re)){  //返回promise
+            if(App.util.types.isPromise(re)){  //返回promise
                 re.then((data)=>{
                     this.handleResult(res,data,route.instance,route.results);
                 }).catch((e)=>{
@@ -201,10 +202,10 @@ class RouteFactory{
                 res.redirect(url);
                 return;
             case "chain": //路由器链
-                let urlMdl = require("url");
+                
                 url = handleParamUrl(instance,result.url);
-                let url1 = urlMdl.parse(url).pathname;
-                let params = require('querystring').parse(urlMdl.parse(url).query);
+                let url1 = App.url.parse(url).pathname;
+                let params = App.qs.parse(App.url.parse(url).query);
                 
                 //参数处理
                 if(result.params && Array.isArray(result.params) && result.params.length>0){
@@ -217,11 +218,11 @@ class RouteFactory{
                 }
                 const route = this.getRoute(url1);
                 if(route !== null){
-                    const util = require('util');
+                    
                     //调用
                     try{
                         let re = route.instance[route.method](params);
-                        if(util.types.isPromise(re)){
+                        if(App.util.types.isPromise(re)){
                             re.then(data=>{
                                 this.handleResult(res,data,route.instance,route.results);
                             }).catch(e=>{
@@ -298,25 +299,24 @@ class RouteFactory{
             files:Array<string>;    //引入文件
             routes:Array<any>;      //实例配置数组
         }
-        const pathTool = require('path');
-        const fs = require("fs");
+        
         //读取文件
         let json:RouteJSON = null;
         try{
-            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
         }catch(e){
             throw new NoomiError("2100");
         }
         let ns1 = json.namespace? json.namespace.trim():'';
         //设置命名空间，如果是子文件，需要连接上级文件
-        ns = ns?pathTool.posix.join(ns,ns1):ns1;
+        ns = ns?App.path.posix.join(ns,ns1):ns1;
         
         //处理本级路由
         if(Array.isArray(json.routes)){
             json.routes.forEach((item)=>{
                 //增加namespce前缀
-                let p = pathTool.posix.join(ns,item.path);
+                let p = App.path.posix.join(ns,item.path);
                 this.addRoute(p,item.instance_name,item.method,item.results);
             });
         }
@@ -324,7 +324,7 @@ class RouteFactory{
         //处理子路径路由
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(pathTool.join(pathTool.dirname(path), item),ns);
+                this.parseFile(App.path.join(App.path.dirname(path), item),ns);
             });
         }
     }

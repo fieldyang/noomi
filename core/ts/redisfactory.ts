@@ -1,5 +1,6 @@
 import { NoomiError } from "./errorfactory";
 import { resolve } from "dns";
+import { App } from "./application";
 
 interface RedisCfg{
     name?:string,
@@ -28,9 +29,7 @@ class RedisFactory{
      * @param cfg 
      */
     static addClient(cfg:RedisCfg){
-        const redis = require('redis');
-        let client = redis.createClient(cfg.port,cfg.host,cfg.options)
-        
+        let client = App.redis.createClient(cfg.port,cfg.host,cfg.options)
         client.on('error',err=>{
             throw err;
         });
@@ -225,12 +224,10 @@ class RedisFactory{
      * @param path 
      */
     static parseFile(path:string){
-        const pathTool = require('path');
-        const fs = require("fs");
         //读取文件
         let json:any = null;
         try{
-            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
         }catch(e){
             throw new NoomiError("2600");

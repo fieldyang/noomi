@@ -2,25 +2,25 @@ import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { RedisFactory } from "./redisfactory";
 import { NCache } from "./ncache";
+import { App } from "./application";
 
 
 
 interface SessionCfg{
-    name:string;
-    timeout:number;
-    max_size:number;
-    type?:number;
-    redis?:string;
+    name:string;        //session id名
+    timeout:number;     //超时时间
+    max_size:number;    //最大尺寸
+    save_type?:number;  //存储类型 0:memory 1:redis
+    redis?:string;      //redis名
 }
 
 /**
  * session 工厂类
  */
 class SessionFactory {
-    cleanTime: number;
     static sessions:Map<string,Session> = new Map();
     static sessionName:string = "NOOMISESSIONID";   //cookie中的session name
-    static timeout:number = 1800;                  //过期时间(默认30分钟)
+    static timeout:number = 1800;                   //过期时间(默认30分钟)
     static type:number=0;                           //session存储类型 0内存 1redis，默认0
     static redis:string='default';                  //redis名，type为1时需要设置，默认为default
     static cache:NCache;                            //缓存
@@ -42,11 +42,11 @@ class SessionFactory {
             this.timeout = cfg.timeout * 60;
         }
         //session类型
-        this.type = cfg.type || 0;
+        this.type = cfg.save_type || 0;
         this.cache = new NCache({
             name:'NSESSION',
             maxSize:cfg.max_size,
-            saveType:this.type,
+            saveType:cfg.save_type,
             redis:cfg.redis
         });
     }
@@ -106,8 +106,7 @@ class SessionFactory {
      * 创建sessionid
      */
     static genSessionId():string{
-        let uuid = require('uuid');
-        return uuid.v1();
+        return App.uuid.v1();
     }
     
     /**

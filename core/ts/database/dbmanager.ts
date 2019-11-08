@@ -4,6 +4,7 @@ import { MysqlConnectionManager } from "./mysqlconnectionmanager";
 import { InstanceFactory } from "../instancefactory";
 import { TransactionManager } from "./transactionmanager";
 import { SequelizeConnectionManager } from "./sequelizeconnectionmanager";
+import { App } from "../application";
 
 
 class DBManager{
@@ -74,12 +75,10 @@ class DBManager{
         return InstanceFactory.getInstance(this.connectionManagerName);
     }
     static parseFile(path:string){
-        const pathTool = require('path');
-        const fs = require("fs");
         //读取文件
         let json:any = null;
         try{
-            let jsonStr:string = fs.readFileSync(pathTool.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
             json = JSON.parse(jsonStr);
             this.init(json);    
         }catch(e){

@@ -14,6 +14,7 @@ import { NoomiError,ErrorFactory } from "./errorfactory";
 import { WebConfig } from "./webconfig";
 import { RequestQueue } from "./requestqueue";
 import { DBManager } from "./database/dbmanager";
+import { App } from "./application";
 
 
 class Noomi{
@@ -30,12 +31,9 @@ class Noomi{
      */
     async init(basePath:string){
         console.log('服务启动中...');
-        const fs = require('fs');
         let iniJson:object = null;
-        const path = require('path');
-
         try{
-            let iniStr = fs.readFileSync(path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
+            let iniStr = App.fs.readFileSync(App.path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
             iniJson = JSON.parse(iniStr);
         }catch(e){
             throw new NoomiError("1001") + e;
@@ -55,14 +53,14 @@ class Noomi{
             console.log('redis初始化...');
             let rPath = iniJson['redis_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                RedisFactory.parseFile(path.join(basePath,rPath));
+                RedisFactory.parseFile(App.path.join(basePath,rPath));
             }
             console.log('redis初始化完成！');
         }
         
         //forbidden path
         if(iniJson.hasOwnProperty('forbidden_path')){
-            this.setForbiddenPath(iniJson['forbidden_path']);
+            StaticResource.addPath(iniJson['forbidden_path']);
         }
 
         //web config
@@ -70,17 +68,17 @@ class Noomi{
             console.log('web初始化...');
             let rPath = iniJson['web_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                WebConfig.parseFile(path.join(basePath,rPath));
+                WebConfig.parseFile(App.path.join(basePath,rPath));
             }
             console.log('web初始化完成！');
         }
 
         //上下文初始化
-        if(iniJson.hasOwnProperty('context_path')){
+        if(iniJson.hasOwnProperty('instance_path')){
             console.log('实例工厂初始化...');
-            let ctxPath = iniJson['context_path'];
+            let ctxPath = iniJson['instance_path'];
             if(ctxPath !== null && (ctxPath = ctxPath.trim())!==''){
-                InstanceFactory.init(path.join(basePath,ctxPath));
+                InstanceFactory.init(App.path.join(basePath,ctxPath));
             }
             console.log('实例工厂初始化完成！');
         }
@@ -90,7 +88,7 @@ class Noomi{
             console.log('过滤器初始化...');
             let rPath = iniJson['filter_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                FilterFactory.parseFile(path.join(basePath,rPath));
+                FilterFactory.parseFile(App.path.join(basePath,rPath));
             }
             console.log('过滤器初始化完成！');
         }
@@ -100,7 +98,7 @@ class Noomi{
             console.log('路由工厂初始化...');
             let rPath = iniJson['route_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                RouteFactory.parseFile(path.join(basePath,rPath));
+                RouteFactory.parseFile(App.path.join(basePath,rPath));
             }
             console.log('路由工厂初始化完成！');
         }
@@ -110,7 +108,7 @@ class Noomi{
             console.log('数据源初始化...');
             let rPath = iniJson['db_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                DBManager.parseFile(path.join(basePath,rPath));
+                DBManager.parseFile(App.path.join(basePath,rPath));
             }
             console.log('数据源初始化完成！');
         }
@@ -120,7 +118,7 @@ class Noomi{
             console.log('aop初始化...');
             let rPath = iniJson['aop_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                AopFactory.parseFile(path.join(basePath,rPath));
+                AopFactory.parseFile(App.path.join(basePath,rPath));
             }
             console.log('aop初始化完成！');
         }
@@ -130,16 +128,11 @@ class Noomi{
             console.log('security初始化...');
             let rPath = iniJson['security_path'];
             if(rPath !== null && (rPath = rPath.trim())!==''){
-                await SecurityFactory.parseFile(path.join(basePath,rPath));
+                await SecurityFactory.parseFile(App.path.join(basePath,rPath));
             }
             console.log('security初始化完成！');
         }
 
-        //errorPage
-        if(iniJson.hasOwnProperty('error_page')){
-            this.setErrorPages(iniJson['error_page']);
-        }
-        
         //超过cpu最大使用效率时处理
         process.on('SIGXCPU',()=>{
             //请求队列置false
@@ -147,7 +140,7 @@ class Noomi{
         });
         
         //创建server
-        this.server = require("http").createServer((req:IncomingMessage,res:ServerResponse)=>{
+        this.server = App.http.createServer((req:IncomingMessage,res:ServerResponse)=>{
             // RequestQueue.add(new HttpRequest(req,res));
             RequestQueue.handleOne(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
@@ -167,42 +160,6 @@ class Noomi{
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         });
     }
-
-    /**
-     * 设置异常提示页面
-     * @param pages page配置（json数组）
-     */
-    setErrorPages(pages:Array<any>){
-        if(Array.isArray(pages)){
-            const fs = require('fs');
-            const path = require('path');
-            pages.forEach((item)=>{
-                //需要判断文件是否存在
-                if(fs.existsSync(path.join(process.cwd(),item.location))){
-                    PageFactory.addErrorPage(item.code,item.location);
-                }
-            });
-        }
-    }
-    /**
-     * 设置禁止访问路径（静态资源）
-     * @param dirPath 
-     */
-    setForbiddenPath(paths:any){
-        if(!Array.isArray(paths)){
-            if(typeof paths === 'string'){
-                StaticResource.addPath(paths);
-            }
-            
-        }else{
-            paths.forEach(item=>{
-                if(typeof item === 'string'){
-                    StaticResource.addPath(item);
-                }
-            });
-        }
-    }
-
 }
 
 function noomi(port?:number,contextPath?:string){

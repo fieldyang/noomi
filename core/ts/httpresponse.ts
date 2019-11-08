@@ -2,6 +2,7 @@ import { ServerResponse, OutgoingHttpHeaders, IncomingMessage } from "http";
 import { HttpCookie } from "./httpcookie";
 import { WebConfig } from "./webconfig";
 import { PageFactory } from "./pagefactory";
+import { App } from "./application";
 
 interface WriteCfg{
     data?:any;              //数据
@@ -78,15 +79,13 @@ export class HttpResponse extends ServerResponse{
         //设置cookie
         this.writeCookie();
 
-        const mime = require('mime');
-        const fs = require("fs");
-        const pathMdl = require('path');
         
-        let type = mime.getType(config.path);
+        
+        let type = App.mime.getType(config.path);
         let errCode:number;
         
         let data:Buffer = await new Promise((resolve,reject)=>{
-            fs.readFile(config.path,'utf8',(err,file)=>{
+            App.fs.readFile(config.path,'utf8',(err,file)=>{
                 if(err){
                     errCode = 404;
                     resolve();

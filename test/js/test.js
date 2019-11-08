@@ -56,30 +56,56 @@
 
 // foo();
 
-async function f1(){
-    throw "error";
-}
+// async function f1(){
+//     throw "error";
+// }
 
-async function f2(){
-    return 1;
-}
+// async function f2(){
+//     return 1;
+// }
 
-async function f3(){
-    let a = await f1();
-    let b = await f2();
-    console.log(a,b);
-    return b;    
-}
+// async function f3(){
+//     let a = await f1();
+//     let b = await f2();
+//     console.log(a,b);
+//     return b;    
+// }
 
-async function f4(){
-    try{
-        let v = await f3();
-        console.log(v); 
-    }catch(e){
-        console.log(e);
-    }
+// async function f4(){
+//     try{
+//         let v = await f3();
+//         console.log(v); 
+//     }catch(e){
+//         console.log(e);
+//     }
     
     
-}
+// }
 
-f4();
+// f4();
+
+const fs = require('fs');
+
+// class App{
+//     static fs = require('fs');
+//     static path = require('path');
+//     static url = require('url');
+    
+// }
+
+function test(){
+    const url = require('url');
+    const path = require('path');
+}
+fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
+function test1(){
+    const App = require('./app');
+    const path = App.path;
+    const url = App.url;
+}
+    
+for(let i=0;i<10000000;i++){
+    test();
+}
+// console.timeEnd('1');
+fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
