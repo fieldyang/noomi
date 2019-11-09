@@ -1,4 +1,4 @@
-import { BaseAction } from "../../../../core/ts/baseaction";
+import { BaseAction } from "../../../../core/baseaction";
 
 class UploadAction extends BaseAction{
     upload(data){

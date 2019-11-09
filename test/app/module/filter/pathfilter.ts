@@ -1,4 +1,4 @@
-import { Instance, WebFilter } from "../../../../core/ts/decorator";
+import { Instance, WebFilter } from "../../../../core/decorator";
 
 @Instance({
     name:'pathFilter'

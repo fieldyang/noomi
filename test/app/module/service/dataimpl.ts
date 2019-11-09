@@ -1,8 +1,8 @@
 import { Resource } from "../dao/pojosequelize/resource";
 import { ResourceAuthority } from "../dao/pojosequelize/resourceauthority";
-import { TransactionManager } from "../../../../core/ts/database/transactionmanager";
-import { Transaction, Instance } from "../../../../core/ts/decorator";
-import { getConnection } from "../../../../core/ts/database/connectionmanager";
+import { TransactionManager } from "../../../../core/database/transactionmanager";
+import { Transaction, Instance } from "../../../../core/decorator";
+import { getConnection } from "../../../../core/database/connectionmanager";
 
 @Instance({
     name:'dataImpl'

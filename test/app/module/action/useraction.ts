@@ -1,6 +1,6 @@
-import { Inject, Instance, RouteConfig, Route } from "../../../../core/ts/decorator";
+import { Inject, Instance, RouteConfig, Route } from "../../../../core/decorator";
 import { UserService } from "../service/userservice";
-import { BaseAction } from "../../../../core/ts/baseaction";
+import { BaseAction } from "../../../../core/baseaction";
 import { DataImpl } from "../service/dataimpl";
 
 /**

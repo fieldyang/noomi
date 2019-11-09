@@ -1,12 +1,11 @@
-import { BaseAction } from "../../../../core/ts/baseaction";
+import { BaseAction } from "../../../../core/baseaction";
 import { User } from "../dao/pojo/user";
-import { SecurityFactory } from "../../../../core/ts/securityfactory";
+import { SecurityFactory } from "../../../../core/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
-import { Instance } from "../../../../core/ts/decorator";
-import { getConnection, closeConnection } from "../../../../core/ts/database/connectionmanager";
-import { resolve } from "bluebird";
+import { Instance } from "../../../../core/decorator";
+import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 
 
 @Instance({

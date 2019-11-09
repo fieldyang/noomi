@@ -1,14 +1,53 @@
 {
+  "name": "noomi",
+  "version": "0.1.0",
+  "description": "一个基于node的企业即框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
+  "main":"./build/core/noomi.js",
+
+  "pre-commit": [
+    "lint"
+  ],
+  
+  "scripts": {
+    "prepare": "npm run rebuild",
+    "build": "tsc",
+    "clean": "rm -rf build",
+    "format": "prettier --write \"core/**/*.ts\" \"test/**/*.ts\" \"build/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fieldyang/noomi.git"
+  },
+  "keywords": [
+    "noomi",
+    "typescript"
+  ],
+  "author": "fieldyang <fieldyang@163.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fieldyang/noomi/issues"
+  },
+  "homepage": "http://www.noomi.cn",
+
   "dependencies": {
     "cls-hooked": "^4.2.2",
     "json5": "^2.1.1",
     "mime": "^2.4.4",
     "mssql": "^6.0.0",
     "oracledb": "^4.0.1",
+    "pre-commit": "^1.2.2",
     "redis": "^2.8.0",
     "sequelize": "^5.21.2",
     "sequelize-typescript": "^1.0.0",
-    "typeorm": "^0.2.20",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "prettier": "^1.19.0",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0"
+  },
+  "engines": {
+    "node": ">=11.0.0"
   }
 }

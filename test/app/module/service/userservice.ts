@@ -1,5 +1,5 @@
 import { DateHandler } from "../common/datehandler";
-import { Inject, Instance} from "../../../../core/ts/decorator";
+import { Inject, Instance} from "../../../../core/decorator";
 
 @Instance({
     name:'userService'
