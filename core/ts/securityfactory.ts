@@ -7,6 +7,7 @@ import { Session,SessionFactory } from "./sessionfactory";
 import { DBManager } from "./database/dbmanager";
 import { ConnectionManager } from "./database/connectionmanager";
 import { App } from "./application";
+import { FilterFactory } from "./filterfactory";
 
 /**
  * 安全工厂
@@ -42,13 +43,51 @@ class SecurityFactory{
     static redisResourceKey:string = "NOOMI_SECURITY_RESOURCES";    //resource在redis的key
     /**
      * 初始化配置
+     * @config      配置项
      */
-    static async init(){
+    static async init(config){
+
+        //鉴权失败页面
+        if(config.hasOwnProperty('auth_fail_url')){
+            this.securityPages.set('auth_fail_url',config['auth_fail_url']);
+        }
+
+        //登录页面
+        if(config.hasOwnProperty('login_url')){
+            this.securityPages.set('login_url',config['login_url']);
+        }
+
+        if(config.hasOwnProperty('auth_type')){
+            this.authType = config['auth_type'];
+        }
+
+        if(config.hasOwnProperty('save_type')){
+            this.saveType = config['save_type'];
+        }
+
+        if(config.hasOwnProperty('redis')){
+            this.redis = config['redis'];
+        }
+
+        if(config.hasOwnProperty('max_size')){
+            this.maxSize = config['max_size'];
+        }
+
+        //数据库解析
+        if(config.hasOwnProperty('dboption')){
+            this.dbOptions = config.dboption;
+        }
         //初始化security filter
         InstanceFactory.addInstance({
             name:'NoomiSecurityFilter',         //filter实例名
             instance:new SecurityFilter(),
             class:SecurityFilter
+        });
+        
+        FilterFactory.addFilter({
+            instance_name:'NoomiSecurityFilter',
+            url_pattern:config['expressions'],
+            order:1
         });
 
         //创建cache
@@ -740,11 +779,10 @@ class SecurityFactory{
         if(!json.page){
             return null;
         }
-        let url = App.url.parse(json.page).pathname
+        let url = App.url.parse(json.page).pathname;
         // 处理参数
         if(json.params){
             let pstr:string = '';
-        
             for(let p in json.params){
                 let o:any = json.params[p];
                 if(typeof o === 'object'){
@@ -754,8 +792,8 @@ class SecurityFactory{
             }
             if(pstr !== ''){
                 pstr = encodeURI(pstr);
+                url += '?' + pstr;
             }
-            url += '?' + pstr;
         }
         return url;
     }
@@ -787,37 +825,8 @@ class SecurityFactory{
         }catch(e){
             throw new NoomiError("2700") + '\n' + e;
         }
-        //鉴权失败页面
-        if(json.hasOwnProperty('auth_fail_url')){
-            this.securityPages.set('auth_fail_url',json['auth_fail_url']);
-        }
-
-        //登录页面
-        if(json.hasOwnProperty('login_url')){
-            this.securityPages.set('login_url',json['login_url']);
-        }
-
-        if(json.hasOwnProperty('auth_type')){
-            this.authType = json['auth_type'];
-        }
-
-        if(json.hasOwnProperty('save_type')){
-            this.saveType = json['save_type'];
-        }
-
-        if(json.hasOwnProperty('redis')){
-            this.redis = json['redis'];
-        }
-
-        if(json.hasOwnProperty('max_size')){
-            this.maxSize = json['max_size'];
-        }
-
-        //数据库解析
-        if(json.hasOwnProperty('dboption')){
-            this.dbOptions = json.dboption;
-        }
-        await this.init();
+        
+        await this.init(json);
     }
 }
 

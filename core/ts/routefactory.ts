@@ -125,7 +125,6 @@ class RouteFactory{
         }
         
         try{
-            
             let re = func.call(route.instance,params);
             if(App.util.types.isPromise(re)){  //返回promise
                 re.then((data)=>{
@@ -276,16 +275,15 @@ class RouteFactory{
         }
     }
 
-
     /**
      * 处理异常信息
      * @param res   response
      * @param e     异常
      */
     static handleException(res:HttpResponse,e:any){
-        let msg = e.getMessage() || e;
+        let msg = e;
         res.writeToClient({
-            data:"<h1>route access error!</h1><h3>Error Message:" + msg + "</h3>"
+            data:"<h1>" +  new NoomiError('2102') + "</h1><h3>Error Message:" + msg + "</h3>"
         });
     }
     /**

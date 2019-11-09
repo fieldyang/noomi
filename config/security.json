@@ -3,6 +3,7 @@
     "save_type":0,
     "max_size":10000000,
     "redis":"default",
+    //"expressions":["/*"], //过滤器针对的路由路径，如果不设置，则默为/*
     "dboption":{
         // "conn_cfg":{
         //     "user":"root",

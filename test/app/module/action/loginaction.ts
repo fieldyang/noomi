@@ -5,53 +5,62 @@ import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
 import { Instance } from "../../../../core/ts/decorator";
+import { getConnection, closeConnection } from "../../../../core/ts/database/connectionmanager";
+import { resolve } from "bluebird";
+
 
 @Instance({
     name:'loginAction',
     singleton:false
 })
 export class LoginAction extends BaseAction{
-    toPage:string = '/pages/loginsuccess.html';
+    toPage:string;
     async login(){
         let un = this.model.userName;
         let pwd = this.model.pwd;
-        let conn = await OrmFactory.getConnection();
+        let conn = await getConnection();
         
         try{
-            const user = await conn
-                    .getRepository(User)
-                    .createQueryBuilder("u")
-                    .where("u.userName = :name && u.userPwd = :pwd", {name:un, pwd:pwd})
-                    .getOne();
-            let result;
+            let rows:any = await new Promise((res,rej)=>{
+                conn.query('select user_id from t_user where user_name=? and user_pwd=? limit 1',[un,pwd],(err,r)=>{
+                    if(err){
+                        rej(err);
+                    }
+                    res(r);
+                });
+            });
+            let user:number;
+            if(rows.length !== 0){
+                user = rows[0].user_id;
+            }
+            
             if(user){
-                let gus = await conn.getRepository(GroupUser)
-                    .createQueryBuilder("gu")
-                    .where("gu.user.userId = :id", { id: user.userId})
-                    .getMany();
-                
-                let groupRepository = conn.getRepository(Group);
-                let groups = await groupRepository.createQueryBuilder("group")
-                            .leftJoinAndSelect("group.groupUsers","groupUser")
-                            .where("groupUser.user.userId=:id",{id:user.userId})
-                            .getMany();
-                let ga = [];
-                for(let  g of groups){
-                    ga.push(g.groupId);
+                rows = await new Promise((res,rej)=>{
+                    conn.query('select group_id from t_group_user where user_id=?',[user],(err,r)=>{
+                        if(err){
+                            rej(err);
+                        }
+                        res(r);
+                    });
+                }); 
+                let gids:Array<number> = [];
+                for(let r of rows){
+                    gids.push(r.group_id);
                 }
                 
                 //添加到securityfactory
-                await SecurityFactory.addUserGroups(user.userId,ga,this.request);
+                await SecurityFactory.addUserGroups(user,gids,this.request);
                 this.toPage = await SecurityFactory.getPreLoginInfo(this.request);
+                if(!this.toPage){
+                    this.toPage = '/pages/loginsuccess.html';
+                }
             }else{
                 this.toPage = '/pages/loginfail.html';
             }
         }catch(e){
             console.log(e);
         }finally{
-            conn.close();
+            closeConnection(conn);
         }
-        
-        
     }
 }

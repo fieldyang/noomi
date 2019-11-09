@@ -20,6 +20,18 @@ async function getConnection():Promise<any>{
     return null;
 };
 
+/**
+ * 关闭连接
+ * @param conn  待关闭的连接 
+ */
+async function closeConnection(conn:any){
+    if(!conn){
+        return;
+    }
+    let cm = DBManager.getConnectionManager();
+    if(cm){
+        cm.release(conn);
+    }
+}
 
-
-export{ConnectionManager,getConnection}
+export{ConnectionManager,getConnection,closeConnection}
