@@ -70,9 +70,9 @@ class FilterFactory{
         let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:any = null;
         try{
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2200") + e;
+            throw new NoomiError("2200") + '\n' + e;
         }
 
         //处理filters

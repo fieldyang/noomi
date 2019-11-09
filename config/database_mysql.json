@@ -1,6 +1,6 @@
 {
     "product":"mysql",
-    "connection_manager":"mysqlConnectionManager",
+    // "connection_manager":"mysqlConnectionManager",//自定义事务manager时需要配置，否则直接根据product自动产生
     "use_pool":true,
     "options":{
         "host":"localhost",
@@ -11,7 +11,8 @@
         "connectionLimit":10
     },
     "transaction":{
-        "transaction":"mysqlTransaction",
+        // "transaction":"mysqlTransaction",//自定义事务类时需要配置，否则直接根据product自动产生
+        //"isolation_level":1,//隔离级 1read uncommited 2read commited 3repeatable read 4serializable
         "expressions":[]
     }
 }

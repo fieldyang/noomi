@@ -28,7 +28,7 @@ class DataImpl{
         // let r = await conn.execute(sql);
         
         //mssql
-        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+        let sql:string = "insert into t_resource(resource_id,url) values(14,'"+url+"')";
         let conn = await getConnection();
         let r = await conn.query(sql);
 

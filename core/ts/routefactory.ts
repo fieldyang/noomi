@@ -304,9 +304,9 @@ class RouteFactory{
         let json:RouteJSON = null;
         try{
             let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2100");
+            throw new NoomiError("2100") +'\n' + e;
         }
         let ns1 = json.namespace? json.namespace.trim():'';
         //设置命名空间，如果是子文件，需要连接上级文件

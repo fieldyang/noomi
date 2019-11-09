@@ -1,6 +1,6 @@
 {
     "product":"mssql",
-    "connection_manager":"mssqlConnectionManager",
+    //"connection_manager":"mssqlConnectionManager",
     "use_pool":true,
     "options":{
         "server":"localhost",
@@ -10,7 +10,7 @@
         "database":"codement"
     },
     "transaction":{
-        "transaction":"mssqlTransaction",
+      //  "transaction":"mssqlTransaction",
         "expressions":[]
     }
 }

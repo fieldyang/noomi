@@ -233,9 +233,9 @@ class InstanceFactory{
         let json:InstanceJSON = null;
 
         try{
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("1000") + e;
+            throw new NoomiError("1000") + '\n' + e;
         }
 
         if(json.module_path){

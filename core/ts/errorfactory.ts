@@ -35,7 +35,7 @@ class ErrorFactory{
         let iniJson:object = null;
         try{
             let iniStr = App.fs.readFileSync(App.path.join(process.cwd(), 'core/locales/msg_' + this.language + '.json'),'utf-8');
-            iniJson = JSON.parse(iniStr);
+            iniJson = App.JSON.parse(iniStr);
         }catch(e){
             throw new NoomiError("0100") + e;
         }

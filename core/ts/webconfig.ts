@@ -62,9 +62,9 @@ export class WebConfig{
         let json:any;
         try{
             let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2100") + e;
+            throw new NoomiError("2100") + '\n' + e;
         }
         this.init(json);
     }

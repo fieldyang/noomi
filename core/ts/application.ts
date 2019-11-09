@@ -1,4 +1,4 @@
-export class App{
+export class App {
     static http = require('http');
     static fs = require('fs');
     static path = require('path');
@@ -9,4 +9,5 @@ export class App{
     static qs = require('querystring');
     static crypto = require('crypto');
     static redis = require('redis');
+    static JSON = require('json5');
 }

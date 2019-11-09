@@ -32,9 +32,9 @@ class Noomi{
         let iniJson:object = null;
         try{
             let iniStr = App.fs.readFileSync(App.path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
-            iniJson = JSON.parse(iniStr);
+            iniJson = App.JSON.parse(iniStr);
         }catch(e){
-            throw new NoomiError("1001") + e;
+            throw new NoomiError("1001") +'\n' +  e;
         }
 
         if(iniJson === null){

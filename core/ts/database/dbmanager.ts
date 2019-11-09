@@ -20,9 +20,10 @@ class DBManager{
         this.product = product;
         //connection manager配置
         let cm:any;
+        let cmName:string = cfg.connection_manager || 'noomi_connection_manager';
         //先查询是否有自定义的connection manager
         if(cfg.connection_manager){
-            cm = InstanceFactory.getInstance(cfg.connection_manager);
+            cm = InstanceFactory.getInstance(cmName);
         }
         //新建connection manager
         if(!cm && product){
@@ -35,7 +36,7 @@ class DBManager{
                 case "mysql":
                     cm = new MysqlConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connection_manager,
+                        name:cmName,
                         instance:cm,
                         class:MysqlConnectionManager
                     });
@@ -43,7 +44,7 @@ class DBManager{
                 case "mssql":
                     cm = new MssqlConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connection_manager,
+                        name:cmName,
                         instance:cm,
                         class:MssqlConnectionManager
                     });
@@ -51,7 +52,7 @@ class DBManager{
                 case "oracle":
                     cm = new OracleConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connection_manager,
+                        name:cmName,
                         instance:cm,
                         class:OracleConnectionManager
                     });
@@ -62,7 +63,7 @@ class DBManager{
                 case "sequelize":
                     cm = new SequelizeConnectionManager(opt);
                     InstanceFactory.addInstance({
-                        name:cfg.connection_manager,
+                        name:cfg.cmName,
                         instance:cm,
                         class:SequelizeConnectionManager,
                         singleton:true
@@ -73,12 +74,11 @@ class DBManager{
                     break;
             }
         }
-        this.connectionManagerName = cfg.connection_manager;
+        this.connectionManagerName = cmName;
         //事务配置
         if(cfg.transaction){
             let opt = cfg.transaction;
             opt.product = product;
-            opt.connection_manager = cfg.connection_manager;
             TransactionManager.init(opt);
         }
     }
@@ -94,10 +94,10 @@ class DBManager{
         let json:any = null;
         try{
             let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
             this.init(json);    
         }catch(e){
-            throw new NoomiError("2800") + e;
+            throw new NoomiError("2800") + '\n' + e;
         }
     }
 }

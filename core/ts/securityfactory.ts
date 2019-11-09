@@ -6,7 +6,6 @@ import { NCache } from "./ncache";
 import { Session,SessionFactory } from "./sessionfactory";
 import { DBManager } from "./database/dbmanager";
 import { ConnectionManager } from "./database/connectionmanager";
-import { RouteFactory } from "./routefactory";
 import { App } from "./application";
 
 /**
@@ -45,10 +44,9 @@ class SecurityFactory{
      * 初始化配置
      */
     static async init(){
-        
         //初始化security filter
         InstanceFactory.addInstance({
-            name:'NoomiSecurityFilter',           //实例名
+            name:'NoomiSecurityFilter',         //filter实例名
             instance:new SecurityFilter(),
             class:SecurityFilter
         });
@@ -62,24 +60,25 @@ class SecurityFactory{
         });
         
         //初始化表名和字段名
-        let tresource:string = "t_resource";
-        let tgroupauth:string="t_group_authority";
-        let tresourceauth:string = "t_resource_authority";
-        let authId:string = "authority_id";
-        let groupId:string = "group_id";
-        let resourceId:string = "resource_id";
-        let resourceUrl:string = "url";
+        let tresource:string;
+        let tgroupauth:string;
+        let tresourceauth:string;
+        let authId:string;
+        let groupId:string;
+        let resourceId:string;
+        let resourceUrl:string;
+
         if(this.dbOptions.tables){
-            tresource = this.dbOptions.tables['resource'] || tresource;
-            tgroupauth = this.dbOptions.tables['groupAuthority'] || tgroupauth;
-            tresourceauth = this.dbOptions.tables['resourceAuthority'] || tresourceauth; 
+            tresource = this.dbOptions.tables['resource'] || "t_resource";
+            tgroupauth = this.dbOptions.tables['groupAuthority'] || "t_group_authority";
+            tresourceauth = this.dbOptions.tables['resourceAuthority'] || "t_resource_authority"; 
         }
 
         if(this.dbOptions.columns){
-            authId = this.dbOptions.columns['authorityId'] || authId;
-            groupId = this.dbOptions.columns['groupId'] || groupId;
-            resourceId = this.dbOptions.columns['resourceId'] || resourceId;
-            resourceUrl = this.dbOptions.columns['resourceUrl'] || resourceUrl;
+            authId = this.dbOptions.columns['authorityId'] || "authority_id";
+            groupId = this.dbOptions.columns['groupId'] || "group_id";
+            resourceId = this.dbOptions.columns['resourceId'] || "resource_id";
+            resourceUrl = this.dbOptions.columns['resourceUrl'] || "url";
         }
 
         let ids = {
@@ -94,19 +93,17 @@ class SecurityFactory{
 
         let results:Array<any>;
         let product:string = this.dbOptions.product || DBManager.product;
+        let connCfg = this.dbOptions?this.dbOptions.conn_cfg:null;
         //从表中加载数据
         switch(product){
             case "mysql":
-                results = await handleMysql(this.dbOptions,ids);
+                results = await handleMysql(connCfg,ids);
                 break;
             case "mssql":
-                results = await handleMssql.call(this,this.dbOptions,ids);
+                results = await handleMssql(connCfg,ids);
                 break;
             case "oracle":
-                results = await handleOracle.call(this,this.dbOptions,ids);
-                break;
-            case "mangodb":
-                results = await handleMongo.call(this,this.dbOptions,ids);
+                results = await handleOracle(connCfg,ids);
                 break;
         }
         //组权限
@@ -147,16 +144,18 @@ class SecurityFactory{
          * @param cfg 
          */
         async function handleMysql(cfg:any,ids:any):Promise<Array<any>>{
-            const db = require('mysql');
             let conn;
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
             try{
-                if(cfg.connection_manager){
+                if(!cfg){ //cfg为空，直接使用dbmanager的connection manager
                     cm = DBManager.getConnectionManager();
+                    if(!cm){
+                        throw new NoomiError("2800");
+                    }
                     conn = await cm.getConnection();
                 }else{    
-                    conn = db.createConnection(cfg);
+                    conn = require('mysql').createConnection(cfg);
                     await conn.connect();
                 }
                 //组权限
@@ -240,15 +239,17 @@ class SecurityFactory{
          * @param ids 
          */
         async function handleMssql(cfg:any,ids:any):Promise<Array<any>>{
-            const db = require('mssql');
             let conn;
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
-            if(cfg.connection_manager){
+            if(!cfg){
                 cm = DBManager.getConnectionManager();
+                if(!cm){
+                    throw new NoomiError("2800");
+                }
                 conn = await cm.getConnection();
             }else{
-                conn = await db.getConnection(cfg);
+                conn = await require('mssql').getConnection(cfg);
             }
             try{
                 //组权限
@@ -308,15 +309,17 @@ class SecurityFactory{
          * @param ids 
          */
         async function handleOracle(cfg:any,ids:any):Promise<Array<any>>{
-            const db = require('oracledb');
             let conn;
             let arr:Array<any> = [];
             let cm:ConnectionManager = null;
-            if(cfg.connection_manager){
+            if(!cfg){
                 cm = DBManager.getConnectionManager();
+                if(!cm){
+                    throw new NoomiError("2800");
+                }
                 conn = await cm.getConnection();
             }else{
-                conn = await db.getConnection(cfg);
+                conn = await require('oracledb').getConnection(cfg);
             }
             
             try{
@@ -367,56 +370,6 @@ class SecurityFactory{
                     }
                 }
             }
-            return arr;
-        }
-
-        /**
-         * 处理mongo
-         * @param cfg 
-         * @param ids 
-         */
-        async function handleMongo(cfg:any,ids:any):Promise<Array<any>>{
-            const db = require('mongodb').MongoClient;
-            let dbUrl = 'mongodb://';
-            if(cfg.user && cfg.pwd){
-                dbUrl += cfg.user + ':' + cfg.pwd
-            }
-            dbUrl += cfg.host;
-            if(cfg.port){
-                dbUrl += ':' + cfg.port;
-            }
-            dbUrl += '/' + cfg.database;
-            let arr:Array<any> = [];
-            db.connect(dbUrl,async (err,client)=>{
-                if(err){
-                    throw err;
-                }
-                let db1 = client.db(cfg.database);
-                let coll = db1.collection(ids.tgroupauth);
-                arr.push(await new Promise((resolve,reject)=>{
-                    coll.find({}).toArray(async (err,results)=>{
-                        resolve(results);
-                    });
-                }));
-
-                //资源
-                coll = db1.collection(ids.tresource);
-                arr.push(await new Promise((resolve,reject)=>{
-                    coll.find({}).toArray(async (err,results)=>{
-                        resolve(results);
-                    });
-                }));
-
-                //资源权限
-                coll = db1.collection(ids.tresourceauth);
-                arr.push(await new Promise((resolve,reject)=>{
-                    coll.find({}).toArray(async (err,results)=>{
-                        resolve(results);
-                    });
-                }));
-
-                client.close();
-            });
             return arr;
         }
     }
@@ -829,10 +782,10 @@ class SecurityFactory{
         let json:any = null;
         try{
             let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
             
         }catch(e){
-            throw new NoomiError("2700");
+            throw new NoomiError("2700") + '\n' + e;
         }
         //鉴权失败页面
         if(json.hasOwnProperty('auth_fail_url')){

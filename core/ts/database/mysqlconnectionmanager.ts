@@ -53,7 +53,9 @@ class MysqlConnectionManager implements ConnectionManager{
             return;
         }
         if(this.pool){
-            conn.release();
+            conn.release(err=>{
+                console.log(err);
+            });
         }else{
             conn.end(err=>{
                 console.log(err);

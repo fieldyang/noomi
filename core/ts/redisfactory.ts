@@ -228,9 +228,9 @@ class RedisFactory{
         let json:any = null;
         try{
             let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2600");
+            throw new NoomiError("2600") + '\n' + e;
         }
         //可以为数组，也可以为单个对象
         if(Array.isArray(json)){

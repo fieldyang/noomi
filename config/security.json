@@ -4,7 +4,12 @@
     "max_size":10000000,
     "redis":"default",
     "dboption":{
-        "connection_manager":"mysqlConnectionManager",
+        // "conn_cfg":{
+        //     "user":"root",
+        //     "password":"field",
+        //     "host":"localhost",
+        //     "database":"codement"
+        // },
         "tables":{
             "groupAuthority":"t_group_authority",
             "resource":"t_resource",

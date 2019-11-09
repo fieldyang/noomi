@@ -1,10 +1,9 @@
 import { Transaction, TransactionType } from "./transaction";
 import { getConnection } from "./connectionmanager";
-import { InstanceFactory } from "../instancefactory";
 import { DBManager } from "./dbmanager";
 
 /**
- * oracle 事务类
+ * mssql 事务类
  */
 class MssqlTransaction extends Transaction{
     tr:any;
@@ -13,8 +12,8 @@ class MssqlTransaction extends Transaction{
         let cm = DBManager.getConnectionManager();
         let pool = cm.pool;
         this.tr = new cm.dbMdl.Transaction(pool);
-        
     }
+    
     async begin():Promise<void>{
         if(!this.connection){
             this.connection = await getConnection();
@@ -30,6 +29,5 @@ class MssqlTransaction extends Transaction{
         await this.tr.rollback();
     }
 }
-
 
 export {MssqlTransaction};

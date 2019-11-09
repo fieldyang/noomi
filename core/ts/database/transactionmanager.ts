@@ -25,7 +25,8 @@ class TransactionManager{
     static isolationLevel:number=0;                             //隔离级 1read uncommited 2read commited 3repeatable read 4serializable
     static transactionOption:any;                               //事务配置项
     static init(cfg:any){
-        this.transactionMdl = cfg.transaction;
+        //transaction 模块实例名
+        this.transactionMdl = cfg.transaction||'noomi_transaction';
         //隔离级
         if(cfg.isolation_level && typeof cfg.isolation_level === 'number'){
             this.isolationLevel = cfg.isolation_level;
@@ -67,7 +68,7 @@ class TransactionManager{
         });
         
         //添加transaction到实例工厂，已存在则不再添加
-        let tn:string = cfg.transaction;
+        let tn:string = this.transactionMdl;
         if(tn){
             let ins = InstanceFactory.getInstance(tn);
             if(ins === null){
@@ -169,21 +170,6 @@ class TransactionManager{
         return tr;
     }
 
-    /**
-     * 获取transaction
-     * @param id        asyncid
-     * @param parentId  父id
-     * @return          transacton
-     */
-    // static bindTransaction(id:number,parentId:number):void{
-    //     if(!parentId || !this.transactionMap.has(parentId)){
-    //         return;
-    //     }
-    //     let tr:Transaction = this.transactionMap.get(parentId);
-    //     tr.asyncIds.push(id);
-    //     this.transactionMap.set(id,tr);
-    // }
-
     static setIdToLocal(){
         try{
             this.namespace.set('tr_id',this.transactionId++);
@@ -242,9 +228,9 @@ class TransactionManager{
         let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
         try{
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2800");
+            throw new NoomiError("2800") + '\n' + e;
         }
         this.init(json);
     }

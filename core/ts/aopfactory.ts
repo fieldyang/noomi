@@ -180,9 +180,9 @@ class AopFactory{
         let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:DataJson = null;
         try{
-            json = JSON.parse(jsonStr);
+            json = App.JSON.parse(jsonStr);
         }catch(e){
-            throw new NoomiError("2000");
+            throw new NoomiError("2000") + '\n' + e;
         }
 
         //切点数组

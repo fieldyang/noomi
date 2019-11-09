@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "cls-hooked": "^4.2.2",
+    "json5": "^2.1.1",
     "mime": "^2.4.4",
     "mssql": "^6.0.0",
     "oracledb": "^4.0.1",
