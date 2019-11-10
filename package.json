@@ -4,9 +4,9 @@
   "description": "一个基于node的企业即框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
   "main":"./build/core/noomi.js",
 
-  "pre-commit": [
-    "lint"
-  ],
+  // "pre-commit": [
+  //   "lint"
+  // ],
   
   "scripts": {
     "prepare": "npm run rebuild",

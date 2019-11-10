@@ -35,6 +35,18 @@ interface AopAspect{
     advices:Array<AopAdvice>;
 }
 
+//切点json数据
+interface PointcutJson{
+    id:string;
+    expressions:Array<string>;
+}
+//数据json
+interface DataJson{
+    files:Array<string>;            //引入文件
+    pointcuts:Array<PointcutJson>;   //切点
+    aspects:Array<AopAspect>;       //切面
+}
+
  /**
   * aop 切点
   */
@@ -162,20 +174,7 @@ class AopFactory{
      * @param path  文件路径 
      */
     static parseFile(path:string):void{
-        //切点json数据
-        interface PointcutJson{
-            id:string;
-            expressions:Array<string>;
-        }
-        //数据json
-        interface DataJson{
-            files:Array<string>;            //引入文件
-            pointcuts:Array<PointcutJson>;   //切点
-            aspects:Array<AopAspect>;       //切面
-        }
-        //延迟处理method aop代理，避免某些实例尚未加载
-        process.nextTick(()=>AopFactory.updMethodProxy.call(AopFactory));
-
+        
         //读取文件
         let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
         let json:DataJson = null;
@@ -185,16 +184,26 @@ class AopFactory{
             throw new NoomiError("2000") + '\n' + e;
         }
 
+        this.init(json);
+    }
+
+    /**
+     * 初始化
+     * @param config 
+     */
+    static init(config){
+        //延迟处理method aop代理，避免某些实例尚未加载
+        setImmediate(()=>AopFactory.updMethodProxy.call(AopFactory));
         //切点数组
-        if(Array.isArray(json.pointcuts)){
-            json.pointcuts.forEach((item:PointcutJson)=>{
+        if(Array.isArray(config.pointcuts)){
+            config.pointcuts.forEach((item:PointcutJson)=>{
                 this.addPointcut(item.id,item.expressions);
             });
         }
 
         //切面数组
-        if(Array.isArray(json.aspects)){
-            json.aspects.forEach((item:AopAspect)=>{
+        if(Array.isArray(config.aspects)){
+            config.aspects.forEach((item:AopAspect)=>{
                 this.addAspect(item);
             });
         }
@@ -204,6 +213,9 @@ class AopFactory{
      * 更新aop匹配的方法代理，为所有aop匹配的方法设置代理
      */
     static updMethodProxy():void{
+        if(!this.pointcuts || this.pointcuts.size === 0){
+            return;
+        }
         //遍历instance factory设置aop代理
         let insFac = InstanceFactory.getFactory();
         //处理过的实例名数组

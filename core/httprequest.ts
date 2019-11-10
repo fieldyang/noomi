@@ -116,15 +116,29 @@ class HttpRequest extends IncomingMessage{
      * @param stream 
      */ 
     formHandle(req:IncomingMessage):Promise<any>{
-        //不能大于max size
+        //非文件multipart/form-data方式
+        if(req.headers['content-type'].indexOf('multipart/form-data') === -1){
+            return new Promise((resolve,reject)=>{
+                let lData:Buffer = Buffer.from('');
+                req.on('data',(chunk:Buffer)=>{
+                    lData = Buffer.concat([lData,chunk]);
+                });
+                req.on('end',()=>{
+                    let r = App.qs.parse(lData.toString('utf8'))
+                    resolve(r);
+                });
+            });
+        }
+
         let contentLen:number = parseInt(req.headers['content-length']);
         let maxSize:number = WebConfig.get('upload_max_size');
         let tmpDir:number = WebConfig.get('upload_tmp_dir');
+        
+        //不能大于max size
         if(maxSize > 0 && contentLen > maxSize){
             return Promise.reject( "上传内容大小超出限制");
         }
 
-        
         let dispLineNo:number = 0;          //字段分割行号，共三行
         let isFile:boolean = false;         //是否文件字段
         let dataKey:string;                 //字段名
@@ -148,6 +162,7 @@ class HttpRequest extends IncomingMessage{
                 //最后一行数据
                 if(lData){
                     handleLine(lData);
+                    console.log(lData.toString('utf8'));
                 }
                 resolve(returnObj);
             });

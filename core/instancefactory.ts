@@ -17,6 +17,12 @@ interface InstanceProperty{
     ref:string;     //引用实例名
 }
 
+interface InstanceJSON{
+    module_path:any;            //模块基础路径(数组或单个字符串)
+    files:Array<string>;        //引入文件
+    instances:Array<any>;       //实例配置数组
+}
+
 /**
  * 实例配置
  */
@@ -46,8 +52,13 @@ class InstanceFactory{
     static mdlBasePath:Array<string> = [];
     static injectList:Array<any> = [];
 
-    static init(path:string){
-        this.parseFile(path);
+    static init(config:any){
+        if(typeof config === 'object'){
+            this.handleJson(config);
+        }else{
+            this.parseFile(config);
+        }
+        
         //延迟注入
         process.nextTick(()=>{
             InstanceFactory.finishInject();
@@ -222,11 +233,7 @@ class InstanceFactory{
      * @param path      文件路径
      */
     static parseFile(path:string){
-        interface InstanceJSON{
-            module_path:any;            //模块基础路径(数组或单个字符串)
-            files:Array<string>;        //引入文件
-            instances:Array<any>;       //实例配置数组
-        }
+        
         
         //读取文件
         let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
@@ -238,6 +245,14 @@ class InstanceFactory{
             throw new NoomiError("1000") + '\n' + e;
         }
 
+        this.handleJson(json);
+    }
+
+    /**
+     * 处理配置对象
+     * @param json      inistance object
+     */
+    private static handleJson(json:InstanceJSON){
         if(json.module_path){
             if(Array.isArray(json.module_path)){
                 json.module_path.forEach((item)=>{
@@ -257,12 +272,14 @@ class InstanceFactory{
             }
         }
 
+        //子文件
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(App.path.join(App.path.dirname(path),item));
+                this.parseFile(App.path.resolve(App.configPath,item));
             });
         }
 
+        //实例数组
         if(Array.isArray(json.instances)){
             json.instances.forEach((item)=>{
                 if(typeof item === 'string'){ //模块在路径中

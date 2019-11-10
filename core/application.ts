@@ -10,4 +10,5 @@ export class App {
     static crypto = require('crypto');
     static redis = require('redis');
     static JSON = require('json5');
+    static configPath:string;
 }

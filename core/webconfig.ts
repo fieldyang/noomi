@@ -3,6 +3,7 @@ import { NoomiError } from "./errorfactory";
 import { SessionFactory } from "./sessionfactory";
 import { App } from "./application";
 import { PageFactory } from "./pagefactory";
+import { StaticResource } from "./staticresource";
 
 /**
  * web 配置
@@ -25,6 +26,10 @@ export class WebConfig{
     static init(config:any){
         if(config.hasOwnProperty('web_config')){
             let cfg:any = config['web_config'];
+            //forbidden_path
+            if(cfg.hasOwnProperty('forbidden_path')){
+                StaticResource.addPath(config['forbidden_path']);
+            }
             this.config = cfg;
             //cache
             if(cfg.cache === true){

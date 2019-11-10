@@ -1,5 +1,4 @@
 import { HttpRequest } from "./httprequest";
-import { HttpResponse } from "./httpresponse";
 import { WebConfig } from "./webconfig";
 import { RouteFactory } from "./routefactory";
 import { FilterFactory } from "./filterfactory";

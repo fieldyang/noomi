@@ -2,7 +2,8 @@
     "web_config":{
         "upload_tmp_dir":"/upload/tmp",
         "upload_max_size":0,
-        "cache":true,
+        "forbidden_path":["/test/app"],
+	    "cache":true,
         "cache_option":{
             "save_type":0,
             "max_size":20000000,

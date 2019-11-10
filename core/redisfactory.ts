@@ -232,10 +232,18 @@ class RedisFactory{
         }catch(e){
             throw new NoomiError("2600") + '\n' + e;
         }
+        this.init(json);
+    }
+
+    /**
+     * 初始化
+     * @param config    rdis配置 
+     */
+    static init(config){
         //可以为数组，也可以为单个对象
-        if(Array.isArray(json)){
+        if(Array.isArray(config)){
             let index = 0;
-            for(let jo of json){
+            for(let jo of config){
                 //设置名字
                 if(!jo.name){
                     if(index === 0){
@@ -248,10 +256,10 @@ class RedisFactory{
                 this.addClient(jo);
             }
         }else{
-            if(!json.name){
-                json.name = 'default'
+            if(!config.name){
+                config.name = 'default'
             }
-            this.addClient(json);
+            this.addClient(config);
         }
     }
 }

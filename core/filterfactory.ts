@@ -74,10 +74,17 @@ class FilterFactory{
         }catch(e){
             throw new NoomiError("2200") + '\n' + e;
         }
+        this.init(json);
+    }
 
+    /**
+     * 初始化
+     * @param config 
+     */
+    static init(config){
         //处理filters
-        if(Array.isArray(json.filters)){
-            json.filters.forEach((item:FilterConfig)=>{
+        if(Array.isArray(config.filters)){
+            config.filters.forEach((item:FilterConfig)=>{
                 this.addFilter(item);
             });
         }
