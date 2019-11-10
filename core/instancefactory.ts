@@ -83,7 +83,7 @@ class InstanceFactory{
         //从路径加载模块
         if(cfg.path && typeof cfg.path === 'string' && (path=cfg.path.trim()) !== ''){  
             for(let mdlPath of this.mdlBasePath){
-                mdl = require(App.path.join(process.cwd(),mdlPath,path));
+                mdl = require(App.path.posix.join(process.cwd(),mdlPath,path));
                 //支持ts和js,ts编译后为{className:***},js直接输出为class
                 //找到则退出
                 if(mdl){
@@ -233,10 +233,8 @@ class InstanceFactory{
      * @param path      文件路径
      */
     static parseFile(path:string){
-        
-        
         //读取文件
-        let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
+        let jsonStr:string = App.fs.readFileSync(App.path.posix.join(process.cwd(),path),'utf-8');
         let json:InstanceJSON = null;
 
         try{
@@ -244,7 +242,6 @@ class InstanceFactory{
         }catch(e){
             throw new NoomiError("1000") + '\n' + e;
         }
-
         this.handleJson(json);
     }
 

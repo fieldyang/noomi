@@ -92,7 +92,7 @@ class StaticResource{
     static addPath(paths:any){
         if(!Array.isArray(paths)){
             if(typeof paths === 'string'){
-                if(App.fs.existsSync(App.path.join(process.cwd(),paths))){
+                if(App.fs.existsSync(App.path.posix.join(process.cwd(),paths))){
                     this.forbiddenMap.set(paths,Util.toReg(paths,1));
                 }
             }

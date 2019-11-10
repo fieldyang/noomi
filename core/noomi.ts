@@ -32,7 +32,7 @@ class Noomi{
         console.log('服务启动中...');
         let iniJson:object = null;
         try{
-            let iniStr = App.fs.readFileSync(App.path.join(process.cwd(),basePath,'noomi.ini'),'utf-8');
+            let iniStr = App.fs.readFileSync(App.path.posix.join(process.cwd(),basePath,'noomi.json'),'utf-8');
             iniJson = App.JSON.parse(iniStr);
         }catch(e){
             throw new NoomiError("1001") +'\n' +  e;
@@ -53,7 +53,7 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 RedisFactory.init(cfg);    
             }else{          //配置为路径
-                RedisFactory.parseFile(App.path.join(basePath,cfg));
+                RedisFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
             console.log('redis初始化完成！');
         }
@@ -65,7 +65,7 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 WebConfig.init(cfg);    
             }else{          //配置为路径
-                WebConfig.parseFile(App.path.join(basePath,cfg));
+                WebConfig.parseFile(App.path.posix.join(basePath,cfg));
             }
             console.log('web初始化完成！');
         }
@@ -74,7 +74,10 @@ class Noomi{
         if(iniJson.hasOwnProperty('instance')){
             console.log('实例工厂初始化...');
             let cfg = iniJson['instance'];
-            InstanceFactory.init(App.path.join(basePath,cfg));
+            if(typeof cfg === 'string'){
+                cfg = App.path.posix.join(basePath,cfg);
+            }
+            InstanceFactory.init(cfg);
             console.log('实例工厂初始化完成！');
         }
 
@@ -82,11 +85,10 @@ class Noomi{
         if(iniJson.hasOwnProperty('filter')){
             console.log('过滤器初始化...');
             let cfg = iniJson['filter'];
-
             if(typeof cfg === 'object'){  //配置为对象
                 FilterFactory.init(cfg);    
             }else{          //配置为路径
-                FilterFactory.parseFile(App.path.join(basePath,cfg));
+                FilterFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
             console.log('过滤器初始化完成！');
         }
@@ -98,9 +100,8 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 RouteFactory.init(cfg);    
             }else{          //配置为路径
-                RouteFactory.parseFile(App.path.join(basePath,cfg));
+                RouteFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            
             console.log('路由工厂初始化完成！');
         }
 
@@ -112,7 +113,7 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 DBManager.init(cfg);    
             }else{          //配置为路径
-                DBManager.parseFile(App.path.join(basePath,cfg));
+                DBManager.parseFile(App.path.posix.join(basePath,cfg));
             }
             
             console.log('数据源初始化完成！');
@@ -125,9 +126,8 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 AopFactory.init(cfg);    
             }else{          //配置为路径
-                AopFactory.parseFile(App.path.join(basePath,cfg));
+                AopFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            
             console.log('aop初始化完成！');
         }
 
@@ -138,9 +138,8 @@ class Noomi{
             if(typeof cfg === 'object'){  //配置为对象
                 await SecurityFactory.init(cfg);    
             }else{          //配置为路径
-                await SecurityFactory.parseFile(App.path.join(basePath,cfg));
+                await SecurityFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            
             console.log('security初始化完成！');
         }
 

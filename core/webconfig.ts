@@ -66,7 +66,7 @@ export class WebConfig{
         //读取文件
         let json:any;
         try{
-            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.posix.join(process.cwd(),path),'utf-8');
             json = App.JSON.parse(jsonStr);
         }catch(e){
             throw new NoomiError("2100") + '\n' + e;
@@ -82,7 +82,7 @@ export class WebConfig{
         if(Array.isArray(pages)){
             pages.forEach((item)=>{
                 //需要判断文件是否存在
-                if(App.fs.existsSync(App.path.join(process.cwd(),item.location))){
+                if(App.fs.existsSync(App.path.posix.join(process.cwd(),item.location))){
                     PageFactory.addErrorPage(item.code,item.location);
                 }
             });

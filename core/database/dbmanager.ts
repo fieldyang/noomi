@@ -93,7 +93,7 @@ class DBManager{
         //读取文件
         let json:any = null;
         try{
-            let jsonStr:string = App.fs.readFileSync(App.path.join(process.cwd(),path),'utf-8');
+            let jsonStr:string = App.fs.readFileSync(App.path.posix.join(process.cwd(),path),'utf-8');
             json = App.JSON.parse(jsonStr);
             this.init(json);    
         }catch(e){

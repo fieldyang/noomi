@@ -1,2 +1,2 @@
 import {noomi} from "../../core/noomi";
-noomi(3000);
+noomi(3000)

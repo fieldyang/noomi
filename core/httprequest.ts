@@ -272,7 +272,7 @@ class HttpRequest extends IncomingMessage{
                             let fn = a1[1].trim();
                             let fn1 = fn.substring(1,fn.length-1);
                             let fn2 = App.uuid.v1() + fn1.substr(fn1.lastIndexOf('.'));
-                            let filePath = App.path.join(process.cwd(),tmpDir,fn2);
+                            let filePath = App.path.posix.join(process.cwd(),tmpDir,fn2);
                             value = {
                                 fileName:fn1,
                                 path:filePath
