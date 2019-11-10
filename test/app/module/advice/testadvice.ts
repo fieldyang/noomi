@@ -2,7 +2,7 @@ import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn, Insta
 @Instance({
     name:'testAdvice'
 })
-@Aspect
+@Aspect()
 class TestAdvice{
     @Pointcut(["userService\\.getInfo","dataImpl\\.*"])
     testPointcut(){}
