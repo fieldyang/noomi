@@ -12,6 +12,7 @@ import { Sequelize,Transaction as SeqTransaction } from "sequelize";
 import { OracleTransaction } from "./oracletransaction";
 import { App } from "../application";
 import { MssqlTransaction } from "./mssqltransaction";
+import { Instance } from "../decorator";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
@@ -129,16 +130,31 @@ class TransactionManager{
 
     /**
      * 添加为事务
-     * @param instance      实例 
+     * @param instance      实例 或 类
      * @param methodName    方法名
      */
     static addTransaction(instance:any,methodName:any){
         let pc = AopFactory.getPointcutById(this.pointcutId);
         if(pc){ //pointcut存在，直接加入表达式
             //instance还未初始化，放在初始化完成后执行
-            setImmediate(()=>AopFactory.addExpression(this.pointcutId,instance.__name + '.' + methodName));
+            setImmediate(()=>{
+                //传入参数为实例名，需要处理
+                if(typeof instance === 'string'){
+                    instance = InstanceFactory.getInstance(instance);
+                }
+                AopFactory.addExpression(this.pointcutId,instance.__name + '.' + methodName)
+                
+            });
         }else{  //pointcut不存在，加入待处理队列
-            this.addToAopExpressions.push([instance,methodName]);
+            //传入为类
+            if(typeof instance === 'string'){
+                setImmediate(()=>{
+                    instance = InstanceFactory.getInstance(instance);
+                    this.addToAopExpressions.push([instance,methodName]);
+                });
+            }else{
+                this.addToAopExpressions.push([instance,methodName]);
+            }
         }
     }
 

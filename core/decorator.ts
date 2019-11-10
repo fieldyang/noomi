@@ -6,6 +6,7 @@ import { AopFactory } from './aopfactory';
 import { FilterFactory } from './filterfactory';
 import { TransactionManager } from './database/transactionmanager';
 import { RouteFactory } from './routefactory';
+import { Util } from './util';
 
 
 /**
@@ -41,14 +42,13 @@ function Inject(instanceName:string){
  * route config 路由类
  * @param cfg 
  */
-function RouteConfig(cfg?:any){
+function Router(cfg?:any){
     return (target)=>{
         let instanceName:string = '_nroute_' + target.name;
-        let namespace = cfg.namespace||''; 
+        let namespace = cfg&&cfg.namespace?cfg.namespace:''; 
         target.prototype.__routeconfig = {
             namespace:namespace
         }
-        
         target.prototype.__instanceName = instanceName;
         //追加到instancefactory
         InstanceFactory.addInstance({
@@ -58,12 +58,14 @@ function RouteConfig(cfg?:any){
         });
 
         //如果配置了path，则追加到路由，对所有方法有效
-        let path:string = cfg.path;
-        if(typeof path==='string' && (path=path.trim()) !== ''){
-            setImmediate(()=>{
-                //延迟到Route注解后，便于先处理非*的路由
-                RouteFactory.addRoute(namespace + path+'*',instanceName,null,cfg.results);
-            });
+        if(cfg && cfg.path){
+            let path:string = cfg.path;
+            if(typeof path==='string' && (path=path.trim()) !== ''){
+                setImmediate(()=>{
+                    //延迟到Route注解后，便于先处理非*的路由
+                    RouteFactory.addRoute(namespace + path+'*',instanceName,null,cfg.results);
+                });
+            }
         }
     }
 }
@@ -188,7 +190,37 @@ function AfterThrow(pointcutId:string){
     }
 }
 
-
+/**
+ * 事务类装饰器
+ * 该装饰器必须放在Instance装饰器之前使用
+ * 把符合条件的方法装饰为事务方法
+ * @param methodReg 数组或字符串，方法名表达式，可以使用*通配符，默认为*，表示所有方法
+ */
+function Transactioner(methodReg?:any){
+    return (target)=>{
+        if(!methodReg){ //默认所有方法
+            methodReg = ['*'];
+        }else if(!Array.isArray(methodReg)){
+            methodReg = [methodReg];
+        }
+        let methods:Array<string> = Object.getOwnPropertyNames(target.prototype);
+        for(let mn of methodReg){
+            if(typeof mn !== 'string'){
+                continue;
+            }
+            let reg:RegExp = Util.toReg(mn);
+            for(let m of methods){
+                if(m === 'constructor' || typeof target.prototype[m] !== 'function'){
+                    continue;
+                }
+                //符合的方法加入事务管理器
+                if(reg.test(m)){
+                    TransactionManager.addTransaction(target.prototype.__instanceName,m);
+                }
+            }
+        }
+    }
+}
 /**
  * 事务装饰器
  */ 
@@ -197,4 +229,4 @@ function Transaction(){
         TransactionManager.addTransaction(target,name);    
     }
 }
-export {Instance,RouteConfig,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transaction}
+export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction}

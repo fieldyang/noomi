@@ -1,26 +1,27 @@
 import { Resource } from "../dao/pojosequelize/resource";
 import { ResourceAuthority } from "../dao/pojosequelize/resourceauthority";
 import { TransactionManager } from "../../../../core/database/transactionmanager";
-import { Transaction, Instance } from "../../../../core/decorator";
+import { Transaction, Instance, Transactioner } from "../../../../core/decorator";
 import { getConnection } from "../../../../core/database/connectionmanager";
 
+@Transactioner('add*')
 @Instance({
     name:'dataImpl'
 })
 class DataImpl{
-    @Transaction()
+    //@Transaction()
     async addRes(url:string){
         //mysql
-        // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
-        // let r = await new Promise(async (resolve,reject)=>{
-        //     let conn = await getConnection();
-        //     conn.query(sql,(err,result)=>{
-        //         if(err){
-        //             reject(err);
-        //         }
-        //         resolve(result);
-        //     });
-        // }); 
+        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+        let r = await new Promise(async (resolve,reject)=>{
+            let conn = await getConnection();
+            conn.query(sql,(err,result)=>{
+                if(err){
+                    reject(err);
+                }
+                resolve(result);
+            });
+        }); 
         
         //oracle
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -28,9 +29,9 @@ class DataImpl{
         // let r = await conn.execute(sql);
         
         //mssql
-        let sql:string = "insert into t_resource(resource_id,url) values(14,'"+url+"')";
-        let conn = await getConnection();
-        let r = await conn.query(sql);
+        // let sql:string = "insert into t_resource(resource_id,url) values(14,'"+url+"')";
+        // let conn = await getConnection();
+        // let r = await conn.query(sql);
 
 
         //sequelize
@@ -43,18 +44,19 @@ class DataImpl{
         return 2;
         
     }
-    @Transaction()
+    // @Transaction()
     async addResAuth(){
-        // let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
-        // let r = await new Promise(async (resolve,reject)=>{
-        //     let conn = await getConnection();
-        //     conn.query(sql,(err,result)=>{
-        //         if(err){
-        //             reject(err);
-        //         }
-        //         resolve(result);
-        //     });
-        // });
+        //mysql
+        let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
+        let r = await new Promise(async (resolve,reject)=>{
+            let conn = await getConnection();
+            conn.query(sql,(err,result)=>{
+                if(err){
+                    reject(err);
+                }
+                resolve(result);
+            });
+        });
 
         //oracle
         // let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
@@ -62,13 +64,13 @@ class DataImpl{
         // let r = await conn.execute(sql);
         
         //mssql
-        let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
-        let conn = await getConnection();
-        try{
-            let r = await conn.query(sql);
-        }catch(e){
-            console.log(e);
-        }
+        // let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
+        // let conn = await getConnection();
+        // try{
+        //     let r = await conn.query(sql);
+        // }catch(e){
+        //     console.log(e);
+        // }
         
         //sequelize
         // const res = new ResourceAuthority({
@@ -79,7 +81,7 @@ class DataImpl{
         return 1;
     }
     
-    @Transaction()
+    // @Transaction()
     async add(){
         let r1 = await this.addResAuth();
         let r2 = await this.addRes('/testtran');

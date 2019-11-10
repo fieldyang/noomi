@@ -1,4 +1,4 @@
-import { Inject, Instance, RouteConfig, Route } from "../../../../core/decorator";
+import { Inject, Instance, Router, Route } from "../../../../core/decorator";
 import { UserService } from "../service/userservice";
 import { BaseAction } from "../../../../core/baseaction";
 import { DataImpl } from "../service/dataimpl";
@@ -6,7 +6,7 @@ import { DataImpl } from "../service/dataimpl";
 /**
  * 测试用户
  */
-@RouteConfig({
+@Router({
     namespace:'/user',
     path:'/'
 })

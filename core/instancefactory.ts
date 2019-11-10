@@ -194,6 +194,41 @@ class InstanceFactory{
     }
 
     /**
+     * 通过类获取实例
+     * @param clazz     类
+     * @param param     参数数组
+     * @return          实例化的对象  
+     */
+    static getInstanceByClass(clazz:any,param?:Array<any>):any{
+        let ins:InstanceObj;
+        for(let ins of this.factory.keys()){
+            if(ins.class === clazz){
+                ins = this.factory.get(ins);
+            }
+        }
+        if(!ins){
+            return null;
+        }
+        
+        if(ins.singleton){
+            return ins.instance;
+        }else{
+            let mdl = ins.class;
+            param = param || ins.params || [];
+            // let instance = new mdl(param);
+            let instance = Reflect.construct(mdl,param);
+            
+            //注入属性
+            if(ins.properties && ins.properties.length>0){
+                ins.properties.forEach((item)=>{
+                    this.addInject(instance,item.name,item.ref);
+                });
+            }
+            return instance;
+        }
+    }
+
+    /**
      * 获取instance object
      * @param name instance name
      */

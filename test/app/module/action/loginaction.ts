@@ -4,16 +4,16 @@ import { SecurityFactory } from "../../../../core/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
-import { Instance } from "../../../../core/decorator";
+import { Instance, Router, Route } from "../../../../core/decorator";
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 
 
-@Instance({
-    name:'loginAction',
-    singleton:false
+@Router({
+    namespace:'/user'
 })
 export class LoginAction extends BaseAction{
     toPage:string;
+    @Route('/login')
     async login(){
         let un = this.model.userName;
         let pwd = this.model.pwd;
