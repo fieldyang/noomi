@@ -7,9 +7,10 @@ import { HttpResponse } from "./httpresponse";
 import { NoomiError } from "./errorfactory";
 import { Util } from "./util";
 import { App } from "./application";
+
 interface RouteCfg{
-    path:string;
-    reg:RegExp;
+    path?:string;
+    reg?:RegExp;
     instanceName:string;
     method?:string;
     results?:Array<RouteResult>;
@@ -34,7 +35,10 @@ interface Route{
 }
 
 class RouteFactory{
-    static routes:RouteCfg[] = new Array();
+    //带通配符的路由
+    static dynaRouteArr:RouteCfg[] = new Array();
+    //不带通配符的路由
+    static staticRouteMap:Map<string,RouteCfg> = new Map();
     /**
      * 添加路由
      * @param path      路由路径，支持通配符*，需要method支持
@@ -44,7 +48,7 @@ class RouteFactory{
     static addRoute(path:string,clazz:string,method?:string,results?:Array<RouteResult>){
         if(results && results.length>0){
             for(let r of results){
-                if((r.type === 'jump' || r.type === 'redirect') && (!r.url || typeof r.url !=='string' || (r.url = r.url.trim())=== '')){
+                if((r.type === 'chain' || r.type === 'redirect') && (!r.url || typeof r.url !=='string' || (r.url = r.url.trim())=== '')){
                     throw new NoomiError("2101");
                 }
             }
@@ -52,14 +56,23 @@ class RouteFactory{
         if(method){
             method = method.trim();
         }
-        let r:RouteCfg = {
-            path:path,
-            reg:Util.toReg(path,3),
-            instanceName:clazz.trim(),
-            method:method,
-            results:results
-        };
-        this.routes.push(r);
+        
+        //没有通配符
+        if(path.indexOf('*') === -1){
+            this.staticRouteMap.set(path,{
+                instanceName:clazz.trim(),
+                method:method,
+                results:results
+            });
+        }else{ //有通配符
+            this.dynaRouteArr.push({
+                path:path,
+                reg:Util.toReg(path,3),
+                instanceName:clazz.trim(),
+                method:method,
+                results:results
+            });
+        }
     }
 
     /**
@@ -68,23 +81,36 @@ class RouteFactory{
      * @return          {instance:**,method:**,results?:**}
      */
     static getRoute(path:string):Route{
-        for(let i=0;i<this.routes.length;i++){
-            let item = this.routes[i];
-            //路径测试通过
-            if(item.reg.test(path)){
-                let method = item.method;
-                let index = item.path.indexOf("*");
-                //通配符处理
-                if(index !== -1){
-                    //通配符方法
-                    method = path.substr(index);
+        let item:RouteCfg;
+        let method:string; //方法名
+        //下查找非通配符map
+        if(this.staticRouteMap.has(path)){
+            item = this.staticRouteMap.get(path);
+            method = item.method;
+        }else{
+            for(let i=0;i<this.dynaRouteArr.length;i++){
+                item = this.dynaRouteArr[i];
+                //路径测试通过
+                if(item.reg.test(path)){
+                    method = item.method;
+                    if(!method){
+                        let index = item.path.indexOf("*");
+                        //通配符处理
+                        if(index !== -1){
+                            //通配符方法
+                            method = path.substr(index);
+                        }
+                    }
+                    break;
                 }
-                let instance = InstanceFactory.getInstance(item.instanceName);
-                if(instance && method && typeof instance[method] === 'function'){
-                    return {instance:instance,method:method,results:item.results};
-                }    
-                break;
             }
+        }
+        //找到匹配的则返回
+        if(item && method){
+            let instance = InstanceFactory.getInstance(item.instanceName);
+            if(instance && typeof instance[method] === 'function'){
+                return {instance:instance,method:method,results:item.results};
+            }    
         }
         return null;
     }

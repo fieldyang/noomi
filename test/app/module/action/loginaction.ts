@@ -9,7 +9,7 @@ import { getConnection, closeConnection } from "../../../../core/database/connec
 
 
 @Router({
-    namespace:''
+    namespace:'/user'
 })
 export class LoginAction extends BaseAction{
     toPage:string;

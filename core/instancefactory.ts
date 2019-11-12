@@ -307,7 +307,7 @@ class InstanceFactory{
         //子文件
         if(Array.isArray(json.files)){
             json.files.forEach((item)=>{
-                this.parseFile(App.path.resolve(App.configPath,item));
+                this.parseFile(App.path.posix.resolve(App.configPath,item));
             });
         }
 

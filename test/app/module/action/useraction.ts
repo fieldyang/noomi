@@ -8,7 +8,7 @@ import { DataImpl } from "../service/dataimpl";
  */
 @Router({
     namespace:'/user',
-    // path:'/'
+    path:'/'
 })
 
 class UserAction extends BaseAction{
