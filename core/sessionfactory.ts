@@ -4,8 +4,6 @@ import { RedisFactory } from "./redisfactory";
 import { NCache } from "./ncache";
 import { App } from "./application";
 
-
-
 interface SessionCfg{
     name:string;        //session id名
     timeout:number;     //超时时间
@@ -19,7 +17,7 @@ interface SessionCfg{
  */
 class SessionFactory {
     static sessions:Map<string,Session> = new Map();
-    static sessionName:string = "NOOMISESSIONID";   //cookie中的session name
+    static sessionName:string = "NSESSIONID";   //cookie中的session name
     static timeout:number = 1800;                   //过期时间(默认30分钟)
     static type:number=0;                           //session存储类型 0内存 1redis，默认0
     static redis:string='default';                  //redis名，type为1时需要设置，默认为default
@@ -117,7 +115,7 @@ class SessionFactory {
         let cookies = {};
         let cook = req.getHeader('cookie');
         cook && cook.split(';').forEach(parms => {
-            let parts = parms.split(':');
+            let parts = parms.split('=');
             cookies[parts[0].trim()] = (parts[1] || '').trim();
         });
         return cookies[this.sessionName];

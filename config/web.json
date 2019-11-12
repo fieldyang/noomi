@@ -20,7 +20,7 @@
         }
     },
     "session":{
-        "name":"NOOMISESSIONID",
+        "name":"NSESSIONID",
         "timeout":30,
         "save_type":0,
         "max_size":20000000,

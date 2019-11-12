@@ -141,7 +141,7 @@ class WebCache{
         this.maxAge>0?cc.push('max-age=' + this.maxAge):'';
         this.mustRevalidation?cc.push('must-revalidation'):'';
         this.proxyRevalidation?cc.push('proxy-revalidation'):'';
-        response.setHeader('cache-control',cc.join(','));
+        response.setHeader('Cache-Control',cc.join(','));
     }
 
     /**
@@ -155,7 +155,7 @@ class WebCache{
             return 2;
         }
         //检测 lastmodified
-        let modiSince:string = request.getHeader('If-Modified_Since');
+        let modiSince:string = request.getHeader('if-modified-since');
         let r:boolean = false;
         if(modiSince){
             let result = await this.cache.get(url,'lastModified');
@@ -165,7 +165,7 @@ class WebCache{
             }
         }
         //检测etag
-        let etag = request.getHeader('If-None-Match');
+        let etag = request.getHeader('if-none-match');
         if(etag){
             let result = await this.cache.get(url,'etag');
             r = (result === etag);
@@ -173,7 +173,6 @@ class WebCache{
                 return 1;
             }
         }
-        
         return r?0:1;
     }
 }

@@ -21,10 +21,13 @@
     </style>
 </head>
 <body>
-    <form action='/login' method='post'>
+    <form action='/login'>
         <div><label>用户名:</label><input type='text' name='userName'></div>
         <div><label>密&nbsp;&nbsp;码:</label><input type='text' name='pwd'></div>
         <input type='submit'>
     </form>
+    <script>
+        console.log(document.cookie);
+    </script>
 </body>
 </html>

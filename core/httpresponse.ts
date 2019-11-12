@@ -13,9 +13,9 @@ interface WriteCfg{
 }
 
 export class HttpResponse extends ServerResponse{
-    srcRes:ServerResponse;              //源response
-    request:IncomingMessage;            //源request
-    cookie:HttpCookie = new HttpCookie();       //cookie
+    srcRes:ServerResponse;                  //源response
+    request:IncomingMessage;                //源request
+    cookie:HttpCookie = new HttpCookie();   //cookie
     
     init(req,res){
         this.request = req;
@@ -79,8 +79,6 @@ export class HttpResponse extends ServerResponse{
         //设置cookie
         this.writeCookie();
 
-        
-        
         let type = App.mime.getType(config.path);
         let errCode:number;
         
@@ -102,9 +100,7 @@ export class HttpResponse extends ServerResponse{
         let headers:OutgoingHttpHeaders = {};
         //数据长度
         headers['Content-Length'] = Buffer.byteLength(data);
-        headers['Cache-Control'] = 'public, max-age=' + WebConfig.get('cache_time');
-        headers['Last-Modified'] = new Date().toUTCString();
-       
+        
         //contenttype 和 字符集
         headers['Content-Type'] = type + ';charset=' + charset;
         this.srcRes.writeHead(status, headers);
@@ -136,10 +132,12 @@ export class HttpResponse extends ServerResponse{
         let kvs = this.cookie.getAll();
         let str = '';
         for(let kv of kvs){
-            str += kv[0] + ':' + kv[1] + ';';
+            str += kv[0] + '=' + kv[1] + ';';
         }
         if(str !== ''){
+            str += 'Path=/';
             this.srcRes.setHeader('Set-Cookie',str);
         }
+        return str;
     }
 }

@@ -8,7 +8,7 @@ import { DataImpl } from "../service/dataimpl";
  */
 @Router({
     namespace:'/user',
-    path:'/'
+    // path:'/'
 })
 
 class UserAction extends BaseAction{
@@ -63,9 +63,7 @@ class UserAction extends BaseAction{
         }
     }
 
-    @Route({
-        path:'/showinfo'
-    })
+    @Route('/showinfo')
     async showinfo(params){
         return await new Promise((resolve,reject)=>{
             if(params.userName === 'aaa'){
@@ -82,9 +80,7 @@ class UserAction extends BaseAction{
         });
     }
 
-    @Route({
-        path:'/last'
-    })
+    @Route('/last')
     last(params){
         return params.type;
         // return {

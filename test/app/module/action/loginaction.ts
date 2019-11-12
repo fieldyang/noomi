@@ -9,11 +9,17 @@ import { getConnection, closeConnection } from "../../../../core/database/connec
 
 
 @Router({
-    namespace:'/user'
+    namespace:''
 })
 export class LoginAction extends BaseAction{
     toPage:string;
-    @Route('/login')
+    @Route({
+        "path":"/login",
+        "results":[{
+            "type":"redirect",
+            "url":"${toPage}"
+        }]
+    })
     async login(){
         let un = this.model.userName;
         let pwd = this.model.pwd;

@@ -18,7 +18,6 @@ interface CacheCfg{
     saveType:number;    //存储类型 0内存，1redis，默认1
     redis?:string;      //redis名
     maxSize?:number;    //最大空间，默认为0，如果saveType=1，设置无效
-    cleanNum?:number;   //单次清除最大数量，默认100，如果saveType=1，设置无效
 }
 
 export class NCache{
@@ -35,7 +34,6 @@ export class NCache{
      * @param name 
      * @param saveType 
      * @param maxSize 
-     * @param cleanNum 
      */
     constructor(cfg:CacheCfg){
         this.saveType = cfg.saveType || 0;
@@ -256,7 +254,6 @@ class MemoryItem{
 class MemoryCache{
     
     maxSize:number;             //最大size
-    cleanNum:number;            //每次清理数量
     extraSize:number;           //附加size（对象）
     storeMap:Map<string,any>;   //存储总map
     size:number;                //当前尺寸
@@ -268,36 +265,52 @@ class MemoryCache{
     }
 
     set(item:CacheItem,timeout?:number){
-        let size:number = this.getRealSize(item.value);
         //检查空间并清理
         this.checkAndClean(item);
         let ci:MemoryItem = this.storeMap.get(item.key);
-        
+        if(ci === undefined){
+            ci = new MemoryItem(timeout);
+            this.storeMap.set(item.key,ci);
+        }
         if(item.subKey){//子键
-            if(!ci || ci.value && typeof ci.value !== 'object'){
-                return;
-            }
-            if(!ci.value){
+            if(ci.value){
+                //如果key的value不是对象，不能设置subkey
+                if(typeof ci.value !== 'object'){
+                    throw new NoomiError("3010");
+                }
+            }else{
                 ci.value = Object.create(null);
             }
+            let v:string;
+            let size:number = this.getRealSize(v);
+            //转字符串
+            if(typeof item.value === 'object'){
+                v = JSON.stringify(item.value);
+            }else{
+                v = item.value + '';
+            }
+            
             //保留原size
             let si:number = ci.size;
             if(ci.value[item.subKey]){
                 ci.size -= this.getRealSize(ci.value[item.subKey]);
             }
-            ci.value[item.subKey] = item.value;
+            ci.value[item.subKey] = v;
             ci.size += this.getRealSize(item.value);
             //更新cache size
             this.size += ci.size - si;
         }else{
+            let size:number = this.getRealSize(item.value);
             if(typeof item.value === 'object'){
-                if(ci){
-                    throw new NoomiError('3010');
-                }
-                ci = new MemoryItem(timeout);
-                this.storeMap.set(item.key,ci);
                 ci.size = size;
-                ci.value = item.value;
+                //新建value object
+                if(!ci.value){
+                    ci.value = Object.create(null);
+                }
+                //追加属性
+                for(let k of Object.getOwnPropertyNames(item.value)){
+                    ci.value[k] = item.value[k];
+                }
                 this.size += size;
             }else{
                 let si:number = 0;

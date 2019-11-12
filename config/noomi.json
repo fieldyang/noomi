@@ -26,7 +26,7 @@
 		},
 		//session配置(可选配置)
 		"session":{
-			"name":"NOOMISESSIONID", 		//set-cookie中的sessionId名，默认为NOOMISESSIONID
+			"name":"NSESSIONID", 		//set-cookie中的sessionId名，默认为NOOMISESSIONID
 			"timeout":30,					//session超时时间，单位:分钟
 			"save_type":0,					//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
 			"max_size":20000000,			//缓存最大字节数，save_type为0时有效
@@ -136,7 +136,7 @@
 		]
 	},*/
 	//路由配置，文件方式
-	"route":"route.json",
+	// "route":"route.json",
 	//aop配置，如果为注解方式，则不用配置
 	"aop":{
 		"files":[],  		//子文件列表，表示可以加载的子aop文件

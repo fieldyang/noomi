@@ -74,7 +74,7 @@ function Router(cfg?:any){
 
 /**
  * 路由装饰器，装饰方法
- * @param cfg:object
+ * @param cfg:object|string             如果为string，则为路由路径，默认type json
  *          path:string                 路由路径，必填
  *          results:Array<object>       结果数组，可选，如果results未设置或数组长度为0，则按json处理，单个结果元素包含:
  *              value:any               方法返回结果，如果return值与value相同，则使用该结果
@@ -89,7 +89,11 @@ function Route(cfg:any){
     return (target:any,propertyName:string)=>{
         setImmediate(()=>{
             let ns = target.__routeconfig?target.__routeconfig.namespace:'';
-            RouteFactory.addRoute(ns + cfg.path,target.__instanceName,propertyName,cfg.results);
+            if(typeof cfg === 'string'){ //直接配置路径，默认type json
+                RouteFactory.addRoute(ns + cfg,target.__instanceName,propertyName);    
+            }else{
+                RouteFactory.addRoute(ns + cfg.path,target.__instanceName,propertyName,cfg.results);
+            }
         });
     }
 }

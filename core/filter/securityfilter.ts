@@ -15,7 +15,7 @@ export class SecurityFilter{
                 //未登录
                 page = SecurityFactory.getSecurityPage('login_url');
                 //保存登录前信息
-                SecurityFactory.setPreLoginInfo(session,request);
+                await SecurityFactory.setPreLoginInfo(session,request);
                 break;
             case 2:
                 // 无权限
