@@ -7,23 +7,38 @@ import { FilterFactory } from './filterfactory';
 import { TransactionManager } from './database/transactionmanager';
 import { RouteFactory } from './routefactory';
 import { Util } from './util';
+import { NoomiError } from './errorfactory';
 
 
 /**
  * instance装饰器，添加实例到实例工厂，装饰类
- * @param cfg:object
+ * @param cfg:object|string 如果为string，则表示实例名
  *          name:string     实例名，必填
  *          singleton:bool  是否单例，默认false
  */
 function Instance(cfg){
     return (target) =>{
+        let instanceName:string;
+        let singleton:boolean;
+        let params:any;
+        if(typeof cfg === 'string'){
+            instanceName = cfg;
+            singleton = true;
+        }else if(typeof cfg === 'object'){
+            instanceName = cfg.name;
+            singleton = cfg.singleton;
+            params = cfg.params;
+        }
+        if(!instanceName){
+            throw new NoomiError("1011");
+        }
         //设置实例名
-        target.prototype.__instanceName = cfg.name;
+        target.prototype.__instanceName = instanceName;
         InstanceFactory.addInstance({
-            name:cfg.name,  //实例名
+            name:instanceName,  //实例名
             class:target,
-            params:cfg.params,
-            singleton:cfg.singleton || true
+            params:params,
+            singleton:singleton || true
         });
     }
 }
@@ -243,9 +258,9 @@ function Transactioner(methodReg?:any){
 /**
  * 事务装饰器，装饰方法
  */ 
-function Transaction(){
+function Transactional(){
     return (target:any,name:string,desc:any)=>{
         TransactionManager.addTransaction(target,name);    
     }
 }
-export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction}
+export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transactional}

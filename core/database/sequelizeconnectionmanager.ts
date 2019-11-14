@@ -1,8 +1,5 @@
 import {Sequelize as SequelizeOrigin} from 'sequelize';
 import { Sequelize } from "sequelize-typescript";
-import { Resource } from "../../test/app/module/dao/pojosequelize/resource";
-import { ResourceAuthority } from "../../test/app/module/dao/pojosequelize/resourceauthority";
-import { Authority } from "../../test/app/module/dao/pojosequelize/authority";
 import { TransactionManager } from "./transactionmanager";
 
 /**
@@ -20,7 +17,6 @@ class SequelizeConnectionManager{
         // sequelize-typescript不支持cls，要用sequelize
         SequelizeOrigin.useCLS(TransactionManager.namespace);
         this.sequelize = new Sequelize(cfg);
-        this.sequelize.addModels([Resource,Authority,ResourceAuthority]);
     }
 
     /**
@@ -35,9 +31,6 @@ class SequelizeConnectionManager{
      * @param conn 
      */
     async release(conn?:any){
-        // if(this.sequelize){
-        //     this.sequelize.close();
-        // }
     }
 }
 

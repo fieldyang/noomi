@@ -1,6 +1,4 @@
 import { HttpRequest } from "./httprequest";
-import { HttpResponse } from "./httpresponse";
-import { RedisFactory } from "./redisfactory";
 import { NCache } from "./ncache";
 import { App } from "./application";
 

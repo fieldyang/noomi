@@ -4,7 +4,7 @@ import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn, Insta
 })
 @Aspect()
 class TestAdvice{
-    @Pointcut(["userService\\.getInfo","dataImpl\\.*"])
+    @Pointcut(["userService.getInfo","dataImpl.*"])
     testPointcut(){}
 
     @Before("testPointcut()")

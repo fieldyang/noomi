@@ -16,7 +16,7 @@ class BaseAction{
         this.request = req;
     }
 
-    setReponse(res:HttpResponse):void{
+    setResponse(res:HttpResponse):void{
         this.response = res;
     }
 }

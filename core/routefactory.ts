@@ -1,6 +1,3 @@
-/**
- * route 管理
- */
 import {InstanceFactory} from "./instancefactory";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
@@ -8,6 +5,9 @@ import { NoomiError } from "./errorfactory";
 import { Util } from "./util";
 import { App } from "./application";
 
+/**
+ * route 管理
+ */
 interface RouteCfg{
     path?:string;
     reg?:RegExp;

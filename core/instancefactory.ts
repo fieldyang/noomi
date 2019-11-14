@@ -1,6 +1,4 @@
-import { AopFactory} from "./aopfactory";
 import { NoomiError } from "./errorfactory";
-import { threadId } from "worker_threads";
 import { StaticResource } from "./staticresource";
 import { Util } from "./util";
 import { App } from "./application";
@@ -70,8 +68,7 @@ class InstanceFactory{
      */
     static addInstance(cfg:InstanceCfg):any{
         if(this.factory.has(cfg.name)){
-            //throw new NoomiError("1002",cfg.name);
-            console.log(cfg.name + 'is already created');
+            console.log(new NoomiError("1002",cfg.name));
             return;
         }
         

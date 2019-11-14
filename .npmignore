@@ -1,9 +1,12 @@
 /.git/
 /.vscode/
-/build/test/
+/dist/test/
+/dist/types/
 /config/
 /node_modules/
 /pages/
+/config/
+/core/
 /test/
 /upload/
 .editorconfig
@@ -16,3 +19,7 @@ package-lock.json
 package.json
 tsconfig.json
 tslint.json
+Gruntfile.js
+dump.rdb
+.DS_Store
+index.d.ts

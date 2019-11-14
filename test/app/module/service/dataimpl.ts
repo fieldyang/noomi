@@ -1,15 +1,10 @@
-import { Resource } from "../dao/pojosequelize/resource";
-import { ResourceAuthority } from "../dao/pojosequelize/resourceauthority";
-import { TransactionManager } from "../../../../core/database/transactionmanager";
-import { Transaction, Instance, Transactioner } from "../../../../core/decorator";
 import { getConnection } from "../../../../core/database/connectionmanager";
+import { Transactional, Instance } from "../../../../core/decorator";
 
-@Transactioner('add*')
-@Instance({
-    name:'dataImpl'
-})
+// @Transactioner('add*')
+@Instance('dataImpl')
 class DataImpl{
-    //@Transaction()
+    //@Transactional()
     async addRes(url:string){
         //mysql
         let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -44,7 +39,7 @@ class DataImpl{
         return 2;
         
     }
-    // @Transaction()
+    @Transactional()
     async addResAuth(){
         //mysql
         let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
@@ -81,7 +76,7 @@ class DataImpl{
         return 1;
     }
     
-    // @Transaction()
+    // @Transactional()
     async add(){
         let r1 = await this.addResAuth();
         let r2 = await this.addRes('/testtran');

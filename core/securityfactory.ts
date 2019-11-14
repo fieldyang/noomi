@@ -99,35 +99,37 @@ class SecurityFactory{
         });
         
         //初始化表名和字段名
-        let tresource:string;
-        let tgroupauth:string;
-        let tresourceauth:string;
+        let tResource:string;
+        let tGroupAuth:string;
+        let tResourceAuth:string;
         let authId:string;
         let groupId:string;
         let resourceId:string;
         let resourceUrl:string;
 
-        if(this.dbOptions.tables){
-            tresource = this.dbOptions.tables['resource'] || "t_resource";
-            tgroupauth = this.dbOptions.tables['groupAuthority'] || "t_group_authority";
-            tresourceauth = this.dbOptions.tables['resourceAuthority'] || "t_resource_authority"; 
+        if(this.dbOptions){
+            if(this.dbOptions.tables){
+                tResource = this.dbOptions.tables['resource'];
+                tGroupAuth = this.dbOptions.tables['groupAuthority'] ;
+                tResourceAuth = this.dbOptions.tables['resourceAuthority']; 
+            }
+    
+            if(this.dbOptions.columns){
+                authId = this.dbOptions.columns['authorityId'];
+                groupId = this.dbOptions.columns['groupId'];
+                resourceId = this.dbOptions.columns['resourceId'];
+                resourceUrl = this.dbOptions.columns['resourceUrl'];
+            }
         }
-
-        if(this.dbOptions.columns){
-            authId = this.dbOptions.columns['authorityId'] || "authority_id";
-            groupId = this.dbOptions.columns['groupId'] || "group_id";
-            resourceId = this.dbOptions.columns['resourceId'] || "resource_id";
-            resourceUrl = this.dbOptions.columns['resourceUrl'] || "url";
-        }
-
+        
         let ids = {
-            tgroupauth:tgroupauth,
-            tresource:tresource,
-            tresourceauth:tresourceauth,
-            authId:authId,
-            groupId:groupId,
-            resourceId:resourceId,
-            resourceUrl:resourceUrl
+            tGroupAuth:tGroupAuth || "t_group_authority",
+            tResource:tResource || "t_resource",
+            tResourceAuth:tResourceAuth || "t_resource_authority",
+            authId:authId || "authority_id",
+            groupId:groupId || "group_id",
+            resourceId:resourceId || "resource_id",
+            resourceUrl:resourceUrl || "url"
         }
 
         let results:Array<any>;
@@ -199,7 +201,7 @@ class SecurityFactory{
                 }
                 //组权限
                 let results:Array<any> = await new Promise((resolve,reject)=>{
-                    conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tgroupauth,
+                    conn.query("select " + ids.groupId + "," + ids.authId + " from " + ids.tGroupAuth,
                     (error,results,fields)=>{
                         if(error){
                             reject(error);
@@ -218,7 +220,7 @@ class SecurityFactory{
 
                 //资源
                 results = await new Promise((resolve,reject)=>{
-                    conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tresource,
+                    conn.query("select " + ids.resourceId + "," + ids.resourceUrl + " from " + ids.tResource,
                     (error,results,fields)=>{
                         if(error){
                             reject(error);
@@ -237,7 +239,7 @@ class SecurityFactory{
                 
                 //资源权限
                 results = await new Promise((resolve,reject)=>{
-                    conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tresourceauth,
+                    conn.query("select " + ids.resourceId + "," + ids.authId + " from " + ids.tResourceAuth,
                     (error,results,fields)=>{
                         if(error){
                             reject(error);

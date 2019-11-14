@@ -1,4 +1,5 @@
-import { App } from "./application";
+import { NoomiErrorTip_zh } from "./locales/msg_zh";
+import { NoomiErrorTip_en } from "./locales/msg_en";
 
 class ErrorFactory{
     static errMap:Map<string,string> = new Map();
@@ -31,17 +32,23 @@ class ErrorFactory{
     /**
      * 异常初始化
      */
-    static init(){
-        let iniJson:object = null;
-        try{
-            let iniStr = App.fs.readFileSync(App.path.posix.join(process.cwd(), 'core/locales/msg_' + this.language + '.json'),'utf-8');
-            iniJson = App.JSON.parse(iniStr);
-        }catch(e){
-            throw new NoomiError("0100") + e;
+    static init(language){
+        this.language = language;
+        let json:object;
+        switch(language){
+            case 'zh':
+                json = NoomiErrorTip_zh;
+                break;
+            case 'en':
+                json = NoomiErrorTip_en;
+                break;
         }
-        //object 转 map
-        for(let o of Object.getOwnPropertyNames(iniJson)){
-            this.errMap.set(o,iniJson[o]);
+        
+        if(json !== undefined){
+            //object 转 map
+            for(let o of Object.getOwnPropertyNames(json)){
+                this.errMap.set(o,json[o]);
+            }
         }
     }
 }

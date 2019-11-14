@@ -1,7 +1,5 @@
 import { ServerResponse, OutgoingHttpHeaders, IncomingMessage } from "http";
 import { HttpCookie } from "./httpcookie";
-import { WebConfig } from "./webconfig";
-import { PageFactory } from "./pagefactory";
 import { App } from "./application";
 
 interface WriteCfg{

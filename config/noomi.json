@@ -49,14 +49,14 @@
 	//实例配置，用于IoC
 	"instance":{
 		//模块基础路径(可选配置)，模块从该路径中加载，配置该路径后，模块路径采用相对路径配置，注：该路径为js路径，而不是ts路径
-		"module_path":["/build/test/app/module"],
+		// "module_path":["/dist/test/app/module"],
 		//实例数组，两种配置方式，如果数组元素为字符串，则加载符合路径规则的所有模块，
 		//如果为对象，则单个加载模块
 		//所有模块必须为class
 		"instances":[
 			//字符串模式，加载/build/test/app/module/目录及其子孙目录下的js文件，**表示自己及所有子孙目录
 			//模块类必须用@Instance或@RouteConfig注解
-			"/build/test/app/module/**/*.js",
+			"/dist/test/app/module/**/*.js",
 			//对象模式，加载单个模块
 			/*{
 				"name":"logAdvice", 			//实例名，不可重复，必填
@@ -67,7 +67,7 @@
 		],
 		//配置子路径(可选配置)，相对与初始的application的context路径(该路径在noomi初始化时传入，默认/context)
 		//当模块过多时，可采用该方式分路径配置
-		"files":["context/action.json"]
+		// "files":["context/action.json"]
 	},
 	//实例配置，文件方式
 	//"instance":"instance.json", 
@@ -213,16 +213,16 @@
 				"resourceAuthority":"t_resource_authority"	//资源权限表名，默认t_resource_authority
 			},*/
 			//鉴权相关字段名映射，如果与默认值相同，则不用配置
-			"columns":{
-				"resourceId":"resource_id",					//资源id字段名，默认resource_id
-				"authorityId":"authority_id",				//权限id字段名，默认authority_id
-				"resourceUrl":"url",						//资源url字段名，默认url
-				"groupId":"group_id"						//组id字段名，默认group_id
-			}
+			// "columns":{
+			// 	"resourceId":"resource_id",					//资源id字段名，默认resource_id
+			// 	"authorityId":"authority_id",				//权限id字段名，默认authority_id
+			// 	"resourceUrl":"url",						//资源url字段名，默认url
+			// 	"groupId":"group_id"						//组id字段名，默认group_id
+			// }
 		},
 		"auth_fail_url":"/pages/error/403.html",			//鉴权失败页面路径，必填
 		"login_url":"/pages/login.html"						//登录页面，必填
 	},
 	//安全框架，文件方式
-	"security":"security.json"
+	// "security":"security.json"
 }

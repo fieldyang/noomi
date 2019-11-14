@@ -2,15 +2,18 @@
   "compilerOptions": {
     "module":"commonjs",
     "target": "es2017",
-    // "target":"es6",
-
-    // "lib":["es7"],
     "sourceMap": true,
+    "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir":"./build"
+    "outDir":"./dist",
+    "declarationDir":"./dist/types",
+    // "declarationMap":true,
   },
   "include":[
     "**/*.ts"
   ],
+  "exclude": [
+    // "./index.ts"
+  ]
 }

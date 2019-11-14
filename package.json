@@ -1,35 +1,34 @@
 {
-  "name": "noomi",
-  "version": "0.1.0",
-  "description": "一个基于node的企业即框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
-  "main":"./build/core/noomi.js",
-
-  // "pre-commit": [
-  //   "lint"
-  // ],
-  
+  "name": "noomitest",
+  "version": "0.0.5",
+  "description": "一个基于node的企业级框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "core",
+    "dist/index.js",
+    "dist/types/index.d.ts",
+    "dist/core/**/*.js",
+    "dist/types/core/**/*.d.ts"
+  ],
   "scripts": {
-    "prepare": "npm run rebuild",
     "build": "tsc",
-    "clean": "rm -rf build",
-    "format": "prettier --write \"core/**/*.ts\" \"test/**/*.ts\" \"build/**/*.js\"",
-    "lint": "tslint -p tsconfig.json"
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fieldyang/noomi.git"
+    "url": "git+https://github.com/noomijs/noomi.git"
   },
   "keywords": [
     "noomi",
     "typescript"
   ],
   "author": "fieldyang <fieldyang@163.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fieldyang/noomi/issues"
+    "url": "https://github.com/noomijs/noomi/issues"
   },
-  "homepage": "http://www.noomi.cn",
-
+  "homepage": "https://github.com/noomijs/noomi#readme",
   "dependencies": {
     "cls-hooked": "^4.2.2",
     "json5": "^2.1.1",
@@ -43,11 +42,26 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-jshint": "^0.6.5",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-uglify": "^0.2.7",
     "prettier": "^1.19.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0"
   },
   "engines": {
     "node": ">=11.0.0"
-  }
+  },
+  "contributors": [
+    {
+      "name": "杨雷",
+      "email": "fieldyang@163.com"
+    },
+    {
+      "name": "唐榜",
+      "email": "244750596@qq.com"
+    }
+  ]
 }

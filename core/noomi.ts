@@ -1,6 +1,5 @@
 import {InstanceFactory} from "./instancefactory";
 import {RouteFactory} from "./routefactory";
-import {StaticResource} from "./staticresource";
 import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "./filterfactory";
 import { HttpRequest } from "./httprequest";
@@ -13,6 +12,8 @@ import { WebConfig } from "./webconfig";
 import { RequestQueue } from "./requestqueue";
 import { DBManager } from "./database/dbmanager";
 import { App } from "./application";
+import { NoomiTip_zh } from "./locales/msg_zh";
+import { NoomiTip_en } from "./locales/msg_en";
 
 
 class Noomi{
@@ -41,73 +42,81 @@ class Noomi{
         if(iniJson === null){
             throw new NoomiError("1001");
         }
-
+        let language:string = iniJson['language'] || 'zh';
+        let msgTip:object;
+        switch(language){
+            case 'zh':
+                msgTip = NoomiTip_zh;
+                break;
+            case 'en':
+                msgTip = NoomiTip_en;
+                break;
+        }
         //异常
-        ErrorFactory.language = iniJson['language'] || 'zh';  //默认中文
-        ErrorFactory.init();
+        ErrorFactory.init(language);
 
         //redis初始化
         if(iniJson.hasOwnProperty('redis')){
-            console.log('redis初始化...');
+            console.log(msgTip["0100"]);
             let cfg = iniJson['redis'];
             if(typeof cfg === 'object'){  //配置为对象
                 RedisFactory.init(cfg);    
             }else{          //配置为路径
                 RedisFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('redis初始化完成！');
+            console.log(msgTip["0101"]);
         }
         
         //web config
         if(iniJson.hasOwnProperty('web')){
-            console.log('web初始化...');
+            console.log(msgTip["0102"]);
             let cfg = iniJson['web'];
             if(typeof cfg === 'object'){  //配置为对象
                 WebConfig.init(cfg);    
             }else{          //配置为路径
                 WebConfig.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('web初始化完成！');
+            console.log(msgTip["0103"]);
         }
 
         //实例初始化
         if(iniJson.hasOwnProperty('instance')){
-            console.log('实例工厂初始化...');
+            console.log(msgTip["0104"]);
             let cfg = iniJson['instance'];
             if(typeof cfg === 'string'){
                 cfg = App.path.posix.join(basePath,cfg);
             }
             InstanceFactory.init(cfg);
-            console.log('实例工厂初始化完成！');
+            console.log(msgTip["0105"]);
         }
 
         //filter初始化
         if(iniJson.hasOwnProperty('filter')){
-            console.log('过滤器初始化...');
+            console.log(msgTip["0106"]);
             let cfg = iniJson['filter'];
             if(typeof cfg === 'object'){  //配置为对象
                 FilterFactory.init(cfg);    
             }else{          //配置为路径
                 FilterFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('过滤器初始化完成！');
+            console.log(msgTip["0107"]);
         }
 
         //路由初始化
         if(iniJson.hasOwnProperty('route')){
-            console.log('路由工厂初始化...');
+            console.log(msgTip["0108"]);
             let cfg = iniJson['route'];
             if(typeof cfg === 'object'){  //配置为对象
                 RouteFactory.init(cfg);    
             }else{          //配置为路径
                 RouteFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('路由工厂初始化完成！');
+            console.log(msgTip["0109"]);
         }
 
         //数据源初始化
         if(iniJson.hasOwnProperty('database')){
-            console.log('数据源初始化...');
+            console.log(msgTip["0110"]);
             let cfg = iniJson['database'];
 
             if(typeof cfg === 'object'){  //配置为对象
@@ -116,31 +125,31 @@ class Noomi{
                 DBManager.parseFile(App.path.posix.join(basePath,cfg));
             }
             
-            console.log('数据源初始化完成！');
+            console.log(msgTip["0111"]);
         }
         
         //aop初始化
         if(iniJson.hasOwnProperty('aop')){
-            console.log('aop初始化...');
+            console.log(msgTip["0112"]);
             let cfg = iniJson['aop'];
             if(typeof cfg === 'object'){  //配置为对象
                 AopFactory.init(cfg);    
             }else{          //配置为路径
                 AopFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('aop初始化完成！');
+            console.log(msgTip["0113"]);
         }
 
         //security初始化
         if(iniJson.hasOwnProperty('security')){
-            console.log('security初始化...');
+            console.log(msgTip["0114"]);
             let cfg = iniJson['security'];
             if(typeof cfg === 'object'){  //配置为对象
                 await SecurityFactory.init(cfg);    
             }else{          //配置为路径
                 await SecurityFactory.parseFile(App.path.posix.join(basePath,cfg));
             }
-            console.log('security初始化完成！');
+            console.log(msgTip["0115"]);
         }
 
         //超过cpu最大使用效率时处理
@@ -154,12 +163,12 @@ class Noomi{
             // RequestQueue.add(new HttpRequest(req,res));
             RequestQueue.handleOne(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
-            console.log(`服务启动成功，端口${this.port}已监听！！！`);
+            console.log(msgTip["0116"]);
             //启动队列执行
             // RequestQueue.handle();
         }).on('error',(err)=>{
             if (err.code === 'EADDRINUSE') {
-                console.log('地址正被使用，重试中...');
+                console.log(msgTip["0117"]);
                 //1秒后重试
                 setTimeout(() => {
                   this.server.close();
@@ -175,4 +184,4 @@ class Noomi{
 function noomi(port?:number,contextPath?:string){
     return new Noomi(port,contextPath);
 }
-export {noomi};
+export {noomi,Noomi};

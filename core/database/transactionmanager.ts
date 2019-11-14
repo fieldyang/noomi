@@ -12,7 +12,6 @@ import { Sequelize,Transaction as SeqTransaction } from "sequelize";
 import { OracleTransaction } from "./oracletransaction";
 import { App } from "../application";
 import { MssqlTransaction } from "./mssqltransaction";
-import { Instance } from "../decorator";
 
 class TransactionManager{
     static transactionMap:Map<number,Transaction> = new Map();  //transaction map
