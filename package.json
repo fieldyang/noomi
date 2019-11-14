@@ -1,6 +1,6 @@
 {
   "name": "noomitest",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "一个基于node的企业级框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -30,27 +30,18 @@
   },
   "homepage": "https://github.com/noomijs/noomi#readme",
   "dependencies": {
-    "cls-hooked": "^4.2.2",
     "json5": "^2.1.1",
     "mime": "^2.4.4",
-    "mssql": "^6.0.0",
-    "oracledb": "^4.0.1",
-    "pre-commit": "^1.2.2",
-    "redis": "^2.8.0",
-    "sequelize": "^5.21.2",
-    "sequelize-typescript": "^1.0.0",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-concat": "^0.5.1",
-    "grunt-contrib-jshint": "^0.6.5",
-    "grunt-contrib-sass": "^1.0.0",
-    "grunt-contrib-uglify": "^0.2.7",
-    "prettier": "^1.19.0",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0"
-  },
+    "cls-hooked": "^4.2.2",
+    "mssql": "^6.0.0",
+    "oracledb": "^4.0.1",
+    "redis": "^2.8.0",
+    "sequelize": "^5.21.2",
+    "sequelize-typescript": "^1.0.0"
+    },
   "engines": {
     "node": ">=11.0.0"
   },

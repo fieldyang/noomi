@@ -5,7 +5,6 @@ import { TransactionManager } from "./database/transactionmanager";
 import { Util } from "./util";
 import { App } from "./application";
 
-
 /**
  * AOP 工厂
  */
@@ -107,6 +106,8 @@ class AopPointcut{
 class AopFactory{
     static aspects:any = new Map();
     static pointcuts:any = new Map();
+    //是否需要开启更新proxy
+    static needToUpdateProxy:boolean = true;
     /**
      * 添加切面
      */
@@ -142,6 +143,14 @@ class AopFactory{
             throw new NoomiError("2003",id);
         }
         this.pointcuts.set(id,new AopPointcut(id,expressions,proxyClass));
+        //延迟处理method aop代理，避免某些实例尚未加载，只加一次
+        if(this.needToUpdateProxy){
+            setImmediate(()=>{
+                AopFactory.updMethodProxy.call(AopFactory);
+                this.needToUpdateProxy = true;
+            });
+            this.needToUpdateProxy = false;
+        }
     }
 
     /**
@@ -192,8 +201,6 @@ class AopFactory{
      * @param config 
      */
     static init(config){
-        //延迟处理method aop代理，避免某些实例尚未加载
-        setImmediate(()=>AopFactory.updMethodProxy.call(AopFactory));
         //切点数组
         if(Array.isArray(config.pointcuts)){
             config.pointcuts.forEach((item:PointcutJson)=>{
@@ -241,8 +248,6 @@ class AopFactory{
                             }
                             //实例名+方法符合aop正则表达式
                             if(reg.test(insName + '.' + key)){
-                                // instance[key] = Reflect.apply('invoke',pc.proxyClass,[insName,key,instance[key],instance]);
-                                // instance[key] = pc.proxyClass.invoke(insName,key,instance[key],instance);
                                 instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
                                 instances.push(insName);
                             }

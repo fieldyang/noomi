@@ -138,7 +138,7 @@
 	//路由配置，文件方式
 	// "route":"route.json",
 	//aop配置，如果为注解方式，则不用配置
-	"aop":{
+	/*"aop":{
 		"files":[],  		//子文件列表，表示可以加载的子aop文件
 		//切点，可以配置多个
 		"pointcuts":[{
@@ -178,9 +178,9 @@
 				]
 			}
 		]
-	},
+	},*/
 	//aop文件配置方式
-	"aop":"aop.json",
+	// "aop":"aop.json",
 	//redis配置，当缓存、session、security采用存储方式为1时，必须设置
 	//请参考npm redis中的redis设置
 	"redis":[{
