@@ -33,7 +33,7 @@ class MysqlTransaction extends Transaction{
     async rollback():Promise<void>{
         return new Promise((resolve,reject)=>{
             this.connection.rollback((err)=>{
-                if(!err){
+                if(err){
                     reject(err);
                 }
                 resolve();

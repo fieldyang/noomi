@@ -21,7 +21,7 @@ class TransactionManager{
                 .createNamespace('NOOMI_TX_NAMESPACE');         //cls namespace
     static transactionId:number=1;                              //transaction id;
     static pointcutId:string = 'NOOMI_TX_POINTCUT';             //切点名
-    static addToAopExpressions:Array<any> = [];                 //待添加到transaction aop的表达式串
+    static addToAopExpressions:Array<string> = [];              //待添加到transaction aop的表达式串
     static isolationLevel:number=0;                             //隔离级 1read uncommited 2read commited 3repeatable read 4serializable
     static transactionOption:any;                               //事务配置项
     static init(cfg:any){
@@ -37,13 +37,12 @@ class TransactionManager{
             instance:new TransactionAdvice(),
             class:TransactionAdvice
         });
-
-        //增加pointcut
-        let exprs:Array<string> = Array.isArray(cfg.expressions)?cfg.expressions:[];
-        this.addToAopExpressions.forEach(item=>{
-            exprs.push(item[0].__instanceName,item[1]);
+        AopFactory.addPointcut(this.pointcutId,[]);
+        //增加pointcut expression
+        setImmediate(()=>{
+            AopFactory.addExpression(TransactionManager.pointcutId,TransactionManager.addToAopExpressions);
         });
-        AopFactory.addPointcut(this.pointcutId,exprs,TransactionProxy);
+        
 
         //增加advice
         AopFactory.addAdvice({
@@ -134,26 +133,12 @@ class TransactionManager{
      */
     static addTransaction(instance:any,methodName:any){
         let pc = AopFactory.getPointcutById(this.pointcutId);
+        let name:string = typeof instance === 'string'?instance:instance.__name;
+        let expr:string = name + '.' + methodName;
         if(pc){ //pointcut存在，直接加入表达式
-            //instance还未初始化，放在初始化完成后执行
-            setImmediate(()=>{
-                //传入参数为实例名，需要处理
-                if(typeof instance === 'string'){
-                    instance = InstanceFactory.getInstance(instance);
-                }
-                AopFactory.addExpression(this.pointcutId,instance.__name + '.' + methodName)
-                
-            });
+            AopFactory.addExpression(this.pointcutId,expr);
         }else{  //pointcut不存在，加入待处理队列
-            //传入为类
-            if(typeof instance === 'string'){
-                setImmediate(()=>{
-                    instance = InstanceFactory.getInstance(instance);
-                    this.addToAopExpressions.push([instance,methodName]);
-                });
-            }else{
-                this.addToAopExpressions.push([instance,methodName]);
-            }
+            this.addToAopExpressions.push(expr);
         }
     }
 

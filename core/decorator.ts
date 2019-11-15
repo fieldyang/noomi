@@ -232,27 +232,10 @@ function AfterThrow(pointcutId:string){
  */
 function Transactioner(methodReg?:any){
     return (target)=>{
-        if(!methodReg){ //默认所有方法
-            methodReg = ['*'];
-        }else if(!Array.isArray(methodReg)){
-            methodReg = [methodReg];
+        if(!methodReg){
+            methodReg = '*';
         }
-        let methods:Array<string> = Object.getOwnPropertyNames(target.prototype);
-        for(let mn of methodReg){
-            if(typeof mn !== 'string'){
-                continue;
-            }
-            let reg:RegExp = Util.toReg(mn);
-            for(let m of methods){
-                if(m === 'constructor' || typeof target.prototype[m] !== 'function'){
-                    continue;
-                }
-                //符合的方法加入事务管理器
-                if(reg.test(m)){
-                    TransactionManager.addTransaction(target.prototype.__instanceName,m);
-                }
-            }
-        }
+        TransactionManager.addTransaction(target.prototype.__instanceName,methodReg);
     }
 }
 /**

@@ -1,10 +1,10 @@
 import { getConnection } from "../../../../core/database/connectionmanager";
-import { Transactional, Instance } from "../../../../core/decorator";
+import { Transactional, Instance, Transactioner } from "../../../../core/decorator";
 
-// @Transactioner('add*')
+@Transactioner('add*')
 @Instance('dataImpl')
 class DataImpl{
-    //@Transactional()
+    // @Transactional()
     async addRes(url:string){
         //mysql
         let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -39,7 +39,7 @@ class DataImpl{
         return 2;
         
     }
-    @Transactional()
+    // @Transactional()
     async addResAuth(){
         //mysql
         let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";

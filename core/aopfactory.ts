@@ -135,7 +135,7 @@ class AopFactory{
      * 添加切点
      * @param id            切点id 
      * @param expressions   方法匹配表达式数组
-     * @param proxyClass   特定代理类
+     * @param proxyClass    特定代理类
      */
     static addPointcut(id:string,expressions:Array<string>,proxyClass?:any):void{
         //切点
@@ -155,15 +155,22 @@ class AopFactory{
 
     /**
      * 为pointcut添加expression
-     * @param pointcutId 
-     * @param expression 
+     * @param pointcutId    切点id
+     * @param expression    表达式或数组
      */
-    static addExpression(pointcutId:string,expression:string){
-        if(this.pointcuts.has(pointcutId)){
+    static addExpression(pointcutId:string,expression:string|Array<string>){
+        if(!this.pointcuts.has(pointcutId)){
             throw new NoomiError("2002",pointcutId);
         }
         let pc:AopPointcut = this.pointcuts.get(pointcutId);
-        pc.expressions.push(Util.toReg(expression));
+        if(!Array.isArray(expression)){
+            pc.expressions.push(Util.toReg(expression));
+        }else{
+            expression.forEach(item=>{
+                pc.expressions.push(Util.toReg(item));
+            });
+        }
+        
     }
 
     /**
