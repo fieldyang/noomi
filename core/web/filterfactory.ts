@@ -1,7 +1,7 @@
-import { InstanceFactory } from "./instancefactory";
-import { NoomiError } from "./errorfactory";
-import { Util } from "./util";
-import { App } from "./application";
+import { InstanceFactory } from "../main/instancefactory";
+import { NoomiError } from "../tools/errorfactory";
+import { Util } from "../tools/util";
+import { App } from "../tools/application";
 
 interface FilterConfig{
     instance_name?:string;  //实例名(与instance二选一)

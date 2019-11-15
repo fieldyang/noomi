@@ -1,11 +1,11 @@
 /**
  * 装饰器（注解类）
  */
-import{InstanceFactory} from './instancefactory';
-import { AopFactory } from './aopfactory';
-import { FilterFactory } from './filterfactory';
-import { TransactionManager } from './database/transactionmanager';
-import { RouteFactory } from './routefactory';
+import{InstanceFactory} from '../main/instancefactory';
+import { AopFactory } from '../main/aopfactory';
+import { FilterFactory } from '../web/filterfactory';
+import { TransactionManager } from '../database/transactionmanager';
+import { RouteFactory } from '../main/route/routefactory';
 import { NoomiError } from './errorfactory';
 
 

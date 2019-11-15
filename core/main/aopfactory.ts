@@ -1,9 +1,9 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopProxy } from "./aopproxy";
-import { NoomiError } from "./errorfactory";
-import { TransactionManager } from "./database/transactionmanager";
-import { Util } from "./util";
-import { App } from "./application";
+import { NoomiError } from "../tools/errorfactory";
+import { TransactionManager } from "../database/transactionmanager";
+import { Util } from "../tools/util";
+import { App } from "../tools/application";
 
 /**
  * AOP 工厂
@@ -164,10 +164,16 @@ class AopFactory{
         }
         let pc:AopPointcut = this.pointcuts.get(pointcutId);
         if(!Array.isArray(expression)){
-            pc.expressions.push(Util.toReg(expression));
+            let reg:RegExp = Util.toReg(expression);
+            pc.expressions.push(reg);
+            //加入代理
+            this.addProxyByExpression(reg);
         }else{
             expression.forEach(item=>{
-                pc.expressions.push(Util.toReg(item));
+                let reg:RegExp = Util.toReg(item);
+                pc.expressions.push(reg);
+                //加入代理
+                this.addProxyByExpression(reg);
             });
         }
         
@@ -240,27 +246,40 @@ class AopFactory{
             let reg:RegExp;
             //遍历expression
             for(reg of pc.expressions){
-                for(let insName of insFac.keys()){
-                    //该实例处理过，不再处理
-                    if(instances.includes(insName)){
-                        continue;
+                this.addProxyByExpression(reg,instances);
+            }
+        }
+    }
+
+    /**
+     * 通过正则式给方法加代理
+     * @param expr          表达式正则式
+     * @param instances     处理过的instance name
+     */
+    static addProxyByExpression(expr:RegExp,instances?:Array<string>){
+        //遍历instance factory设置aop代理
+        let insFac = InstanceFactory.getFactory();
+        for(let insName of insFac.keys()){
+            //该实例处理过，不再处理
+            if(instances && instances.includes(insName)){
+                continue;
+            }
+            //先检测instanceName
+            let instance = InstanceFactory.getInstance(insName);
+            if(instance){
+                Object.getOwnPropertyNames(instance.__proto__).forEach(key=>{
+                    //给方法设置代理，constructor 不需要代理
+                    if(key === 'constructor' || typeof(instance[key]) !== 'function'){
+                        return;
                     }
-                    //先检测instanceName
-                    let instance = InstanceFactory.getInstance(insName);
-                    if(instance){
-                        Object.getOwnPropertyNames(instance.__proto__).forEach(key=>{
-                            //给方法设置代理，constructor 不需要代理
-                            if(key === 'constructor' || typeof(instance[key]) !== 'function'){
-                                return;
-                            }
-                            //实例名+方法符合aop正则表达式
-                            if(reg.test(insName + '.' + key)){
-                                instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
-                                instances.push(insName);
-                            }
-                        });
+                    //实例名+方法符合aop正则表达式
+                    if(expr.test(insName + '.' + key)){
+                        instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                        if(instances){
+                            instances.push(insName);
+                        }
                     }
-                }
+                });
             }
         }
     }

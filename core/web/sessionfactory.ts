@@ -1,6 +1,6 @@
 import { HttpRequest } from "./httprequest";
-import { NCache } from "./ncache";
-import { App } from "./application";
+import { NCache } from "../tools/ncache";
+import { App } from "../tools/application";
 
 interface SessionCfg{
     name:string;        //session id名

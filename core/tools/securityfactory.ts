@@ -1,13 +1,13 @@
-import { HttpRequest } from "./httprequest";
-import { InstanceFactory } from "./instancefactory";
-import { SecurityFilter } from "./filter/securityfilter";
+import { HttpRequest } from "../web/httprequest";
+import { InstanceFactory } from "../main/instancefactory";
+import { SecurityFilter } from "../web/filter/securityfilter";
 import { NoomiError } from "./errorfactory";
 import { NCache } from "./ncache";
-import { Session,SessionFactory } from "./sessionfactory";
-import { DBManager } from "./database/dbmanager";
-import { ConnectionManager } from "./database/connectionmanager";
+import { Session,SessionFactory } from "../web/sessionfactory";
+import { DBManager } from "../database/dbmanager";
+import { ConnectionManager } from "../database/connectionmanager";
 import { App } from "./application";
-import { FilterFactory } from "./filterfactory";
+import { FilterFactory } from "../web/filterfactory";
 
 /**
  * 安全工厂

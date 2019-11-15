@@ -1,7 +1,7 @@
 import { InstanceFactory } from "./instancefactory";
 import { AopFactory } from "./aopfactory";
-import { TransactionProxy } from "./database/transactionproxy";
-import { App } from "./application";
+import { TransactionProxy } from "../database/transactionproxy";
+import { App } from "../tools/application";
 
  /**
  * Aop 代理类

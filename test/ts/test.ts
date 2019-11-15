@@ -1,5 +1,5 @@
-import { NCache } from "../../core/ncache";
-import { RedisFactory } from "../../core/redisfactory";
+import { NCache } from "../../core/tools/ncache";
+import { RedisFactory } from "../../core/tools/redisfactory";
 
 RedisFactory.init([{
     "name":"default",

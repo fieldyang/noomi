@@ -1,8 +1,8 @@
 import { WebCache } from "./webcache";
-import { NoomiError } from "./errorfactory";
+import { NoomiError } from "../tools/errorfactory";
 import { SessionFactory } from "./sessionfactory";
-import { App } from "./application";
-import { PageFactory } from "./pagefactory";
+import { App } from "../tools/application";
+import { PageFactory } from "../tools/pagefactory";
 import { StaticResource } from "./staticresource";
 
 /**

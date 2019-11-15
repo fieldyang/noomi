@@ -1,18 +1,29 @@
+//aop配置，如果为注解方式，则不用配置
 {
-    "files":[],
-    
+    //子文件列表，表示可以加载的子aop文件
+    "files":[],  
+    //切点，可以配置多个
     "pointcuts":[{
+        //切点id，必填，不可重复
         "id":"pointcut1",
-        "expressions":["userService.getInfo"]      
+        //表达式，必填，符合该表达式的方法会被拦截，可以采用通配符
+        //如下，第一个表示拦截实例名为userService的getInfo方法
+        //第二个表示拦截实例名以service开头的所有实例的所有方法（实例必须加入实例工厂，即用注解或在instance中配置）
+        "expressions":["userService.getInfo","service*.*"]   
     }],
-
+    //切面，可以多个
     "aspects":[
         {
+            //切面对应的实例名，必填
             "instance":"logAdvice",
+            //通知，必填
             "advices":[
                 {
-                    "pointcut_id":"pointcut1",
+                    //通知对应的切点
+                    "pointcut_id":"pointcut1",	
+                    //通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(return),after-throw(抛出异常),around(环绕，即前后置)
                     "type":"before",
+                    //切面对应实例的方法名，字符串，必填
                     "method":"before"
                 },{
                     "pointcut_id":"pointcut1",
@@ -30,9 +41,8 @@
                     "pointcut_id":"pointcut1",
                     "type":"around",
                     "method":"around"
-                }
+                }	
             ]
         }
-
     ]
 }

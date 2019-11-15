@@ -1,20 +1,19 @@
 import {InstanceFactory} from "./instancefactory";
-import {RouteFactory} from "./routefactory";
+import {RouteFactory} from "./route/routefactory";
 import { AopFactory } from "./aopfactory";
-import { FilterFactory } from "./filterfactory";
-import { HttpRequest } from "./httprequest";
+import { FilterFactory } from "../web/filterfactory";
+import { HttpRequest } from "../web/httprequest";
 import { Server } from "net";
-import { SecurityFactory } from "./securityfactory";
+import { SecurityFactory } from "../tools/securityfactory";
 import { IncomingMessage, ServerResponse } from "http";
-import { RedisFactory } from "./redisfactory";
-import { NoomiError,ErrorFactory } from "./errorfactory";
-import { WebConfig } from "./webconfig";
-import { RequestQueue } from "./requestqueue";
-import { DBManager } from "./database/dbmanager";
-import { App } from "./application";
-import { NoomiTip_zh } from "./locales/msg_zh";
-import { NoomiTip_en } from "./locales/msg_en";
-
+import { RedisFactory } from "../tools/redisfactory";
+import { NoomiError,ErrorFactory } from "../tools/errorfactory";
+import { WebConfig } from "../web/webconfig";
+import { RequestQueue } from "../web/requestqueue";
+import { DBManager } from "../database/dbmanager";
+import { App } from "../tools/application";
+import { NoomiTip_zh } from "../locales/msg_zh";
+import { NoomiTip_en } from "../locales/msg_en";
 
 class Noomi{
     port:number=3000;
@@ -30,7 +29,7 @@ class Noomi{
      * 初始化
      */
     async init(basePath:string){
-        console.log('服务启动中...');
+        console.log('Server is startup ...');
         let iniJson:object = null;
         try{
             let iniStr = App.fs.readFileSync(App.path.posix.join(process.cwd(),basePath,'noomi.json'),'utf-8');
@@ -153,19 +152,17 @@ class Noomi{
         }
 
         //超过cpu最大使用效率时处理
-        process.on('SIGXCPU',()=>{
-            //请求队列置false
-            RequestQueue.setCanHandle(false);
-        });
+        // process.on('SIGXCPU',()=>{
+        //     //请求队列置false
+        //     // RequestQueue.setCanHandle(false);
+        // });
         
         //创建server
         this.server = App.http.createServer((req:IncomingMessage,res:ServerResponse)=>{
-            // RequestQueue.add(new HttpRequest(req,res));
             RequestQueue.handleOne(new HttpRequest(req,res));
         }).listen(this.port,(e)=>{
-            console.log(msgTip["0117"]);
+            console.log(`Server is running,listening port ${this.port}`);
             //启动队列执行
-            // RequestQueue.handle();
         }).on('error',(err)=>{
             if (err.code === 'EADDRINUSE') {
                 console.log(msgTip["0118"]);

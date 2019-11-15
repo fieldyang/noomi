@@ -1,4 +1,4 @@
-import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn, Instance } from "../../../../core/decorator";
+import { Aspect, Pointcut, Before, Around, AfterThrow, After, AfterReturn, Instance } from "../../../../core/tools/decorator";
 @Instance({
     name:'testAdvice'
 })

@@ -1,9 +1,9 @@
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "../tools/errorfactory";
 import { MysqlConnectionManager } from "./mysqlconnectionmanager";
-import { InstanceFactory } from "../instancefactory";
+import { InstanceFactory } from "../main/instancefactory";
 import { TransactionManager } from "./transactionmanager";
 import { SequelizeConnectionManager } from "./sequelizeconnectionmanager";
-import { App } from "../application";
+import { App } from "../tools/application";
 import { OracleConnectionManager } from "./oracleconnectionmanager";
 import { MssqlConnectionManager } from "./mssqlconnectionmanager";
 

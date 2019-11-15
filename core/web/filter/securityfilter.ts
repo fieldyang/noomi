@@ -1,7 +1,7 @@
-import { HttpRequest } from "../web/httprequest";
-import { HttpResponse } from "../web/httpresponse";
-import { SecurityFactory } from "../tools/securityfactory";
-import { Session } from "../web/sessionfactory";
+import { HttpRequest } from "../httprequest";
+import { HttpResponse } from "../httpresponse";
+import { SecurityFactory } from "../../tools/securityfactory";
+import { Session } from "../sessionfactory";
 
 export class SecurityFilter{
     async do(request:HttpRequest,response:HttpResponse){

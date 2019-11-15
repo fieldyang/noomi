@@ -1,7 +1,7 @@
-import { NoomiError } from "./errorfactory";
-import { StaticResource } from "./staticresource";
-import { Util } from "./util";
-import { App } from "./application";
+import { NoomiError } from "../tools/errorfactory";
+import { StaticResource } from "../web/staticresource";
+import { Util } from "../tools/util";
+import { App } from "../tools/application";
 
 /**
  * 实例工厂

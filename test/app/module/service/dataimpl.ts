@@ -1,5 +1,5 @@
 import { getConnection } from "../../../../core/database/connectionmanager";
-import { Transactional, Instance, Transactioner } from "../../../../core/decorator";
+import { Transactional, Instance, Transactioner } from "../../../../core/tools/decorator";
 
 @Transactioner()
 @Instance('dataImpl')

@@ -1,10 +1,10 @@
-import { BaseAction } from "../../../../core/baseaction";
+import { BaseAction } from "../../../../core/main/route/baseaction";
 import { User } from "../dao/pojo/user";
-import { SecurityFactory } from "../../../../core/securityfactory";
+import { SecurityFactory } from "../../../../core/tools/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
 import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
-import { Instance, Router, Route } from "../../../../core/decorator";
+import { Instance, Router, Route } from "../../../../core/tools/decorator";
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 
 

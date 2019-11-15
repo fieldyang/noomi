@@ -1,8 +1,8 @@
-import { NCache } from "./ncache";
+import { NCache } from "../tools/ncache";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { Stats } from "fs";
-import { App } from "./application";
+import { App } from "../tools/application";
 
 interface ResCfg{
     etag:string;            //ETag

@@ -1,4 +1,4 @@
-import { Instance } from "../../../../core/decorator";
+import { Instance } from "../../../../core/tools/decorator";
 
 @Instance({
     name:'logService'

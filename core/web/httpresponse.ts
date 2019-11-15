@@ -1,6 +1,6 @@
 import { ServerResponse, OutgoingHttpHeaders, IncomingMessage } from "http";
 import { HttpCookie } from "./httpcookie";
-import { App } from "./application";
+import { App } from "../tools/application";
 
 interface WriteCfg{
     data?:any;              //数据

@@ -1,10 +1,10 @@
 import { HttpResponse } from "./httpresponse";
-import { PageFactory } from "./pagefactory";
+import { PageFactory } from "../tools/pagefactory";
 import { WebCache } from "./webcache";
 import { WebConfig } from "./webconfig";
 import { HttpRequest } from "./httprequest";
-import { Util } from "./util";
-import { App } from "./application";
+import { Util } from "../tools/util";
+import { App } from "../tools/application";
 
 /**
  * 静态资源加载器

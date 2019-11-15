@@ -1,5 +1,5 @@
-import { NoomiErrorTip_zh } from "./locales/msg_zh";
-import { NoomiErrorTip_en } from "./locales/msg_en";
+import { NoomiErrorTip_zh } from "../locales/msg_zh";
+import { NoomiErrorTip_en } from "../locales/msg_en";
 
 class ErrorFactory{
     static errMap:Map<string,string> = new Map();

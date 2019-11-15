@@ -1,7 +1,7 @@
-import { InstanceFactory } from "../instancefactory";
-import { AopFactory } from "../aopfactory";
+import { InstanceFactory } from "../main/instancefactory";
+import { AopFactory } from "../main/aopfactory";
 import { TransactionAdvice } from "./transactionadvice";
-import { NoomiError } from "../errorfactory";
+import { NoomiError } from "../tools/errorfactory";
 import { MysqlTransaction } from "./mysqltransaction";
 import { SequelizeTransaction } from "./sequelizetransaction";
 import { Transaction } from "./transaction";
@@ -10,7 +10,7 @@ import { DBManager } from "./dbmanager";
 import { TransactionProxy } from "./transactionproxy";
 import { Sequelize,Transaction as SeqTransaction } from "sequelize";
 import { OracleTransaction } from "./oracletransaction";
-import { App } from "../application";
+import { App } from "../tools/application";
 import { MssqlTransaction } from "./mssqltransaction";
 
 class TransactionManager{

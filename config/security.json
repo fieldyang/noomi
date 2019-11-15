@@ -1,27 +1,32 @@
 {
-    "save_type":0,
-    "max_size":10000000,
-    "redis":"default",
-    //"expressions":["/*"], //过滤器针对的路由路径，如果不设置，则默为/*
+    "save_type":0,				//同session配置
+    "max_size":10000000,		//同session配置
+    "redis":"default",			//同session配置
+    //过滤器针对的路由路径，如果不设置，则默为/*，表示拦截所有请求(只针对路由)
+    //"expressions":["/*"], 
+    //数据库相关设置
     "dboption":{
-        // "conn_cfg":{
-        //     "user":"root",
-        //     "password":"field",
-        //     "host":"localhost",
-        //     "database":"codement"
-        // },
-        "tables":{
-            "groupAuthority":"t_group_authority",
-            "resource":"t_resource",
-            "resourceAuthority":"t_resource_authority"
+        //数据库连接设置，如果没有配置database，则此项必填，否则使用数据库配置中的数据库connection manager
+        "conn_cfg":{
+            "user":"root",
+            "password":"field",
+            "host":"localhost",
+            "database":"codement"
         },
-        "columns":{
-            "resourceId":"resource_id",
-            "authorityId":"authority_id",
-            "resourceUrl":"url",
-            "groupId":"group_id"
-        }
+        //鉴权相关数据表名字映射，如果与默认值相同，则不用配置，数据表结构详情请参考安全管理器节
+        "tables":{
+            "groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority
+            "resource":"t_resource",					//资源表名，默认t_resource
+            "resourceAuthority":"t_resource_authority"	//资源权限表名，默认t_resource_authority
+        },
+        //鉴权相关字段名映射，如果与默认值相同，则不用配置
+        // "columns":{
+        // 	"resourceId":"resource_id",					//资源id字段名，默认resource_id
+        // 	"authorityId":"authority_id",				//权限id字段名，默认authority_id
+        // 	"resourceUrl":"url",						//资源url字段名，默认url
+        // 	"groupId":"group_id"						//组id字段名，默认group_id
+        // }
     },
-    "auth_fail_url":"/pages/error/403.html",
-    "login_url":"/pages/login.html"
+    "auth_fail_url":"/pages/error/403.html",			//鉴权失败页面路径，必填
+    "login_url":"/pages/login.html"						//登录页面，必填
 }

@@ -3,7 +3,7 @@ import { SessionFactory, Session } from "./sessionfactory";
 import { HttpResponse } from "./httpresponse";
 import { WebConfig } from "./webconfig";
 import { WriteStream } from "fs";
-import { App } from "./application";
+import { App } from "../tools/application";
 
 class HttpRequest extends IncomingMessage{
     srcReq:IncomingMessage;             //源request

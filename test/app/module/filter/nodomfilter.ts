@@ -1,4 +1,4 @@
-import { Instance, WebFilter } from "../../../../core/decorator";
+import { Instance, WebFilter } from "../../../../core/tools/decorator";
 
 @Instance({
     name:'nodomFilter'

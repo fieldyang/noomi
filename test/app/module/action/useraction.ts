@@ -1,6 +1,6 @@
-import { Inject, Instance, Router, Route } from "../../../../core/decorator";
+import { Inject, Instance, Router, Route } from "../../../../core/tools/decorator";
 import { UserService } from "../service/userservice";
-import { BaseAction } from "../../../../core/baseaction";
+import { BaseAction } from "../../../../core/main/route/baseaction";
 import { DataImpl } from "../service/dataimpl";
 
 /**
@@ -56,11 +56,11 @@ class UserAction extends BaseAction{
             return 2;
         }
         
-        let ui = this.userService.getInfo(params);
-        return {
-            success:true,
-            result:ui
-        }
+        // let ui = this.userService.getInfo(params);
+        // return {
+        //     success:true,
+        //     result:ui
+        // }
     }
 
     @Route('/showinfo')
@@ -88,25 +88,14 @@ class UserAction extends BaseAction{
         // }
     }
 
-    async foo1(){
-        let v = await this.userService.foo1();
-        console.log(v);
-    }
 
-    async foo2(){
-        let v = await this.userService.foo2();
-        console.log(v);
-    }
-
-    async getfile(){
-        let re = await this.userService.getFile();
-        re.next();
-        /*try{
-            let re = this.userService.getFile();
-            return re;
+    async addtwo(){
+        try{
+            let r = await this.userService.addTwoUser(this.model.id,this.model.name,this.model.age,this.model.mobile);
+            return {success:true}
         }catch(e){
-            return {success:false,result:e};
-        }*/
+            return {success:false,msg:e};
+        }
     }
 }
 

@@ -103,7 +103,7 @@
 	//数据库配置，文件方式
 	//"database":"database_mysql.json",
 	//路由配置(可选配置)，如果采用注解方式设置路由，则不用配置
-	/*"route":{
+	"route":{
 		"namespace":"",        				//路由命名空间
 		"files":["route/subroute.json"],    //子文件，相对于app的configPath路径
 		"routes":[              			//路由配置
@@ -115,7 +115,7 @@
 				"instance_name":"uploadAction",	//实例名，字符串，必填
 				"method":"upload",      		//方法，字符串，可选，当path中带
 				//路由结果集，如果不填，则默认为json，方法return值（必须为json格式）将回写到请求端
-				results:[{
+				"results":[{
 					//方法返回值，如果return 1，则调用该路由结果
 					"value":1, 					
 					//返回类型，字符串，可选值：redirect(重定向),chain(路由链),none(什么都不做),json(回写json到请求端)，默认json
@@ -134,15 +134,16 @@
 				}]
 			}
 		]
-	},*/
+	},
 	//路由配置，文件方式
 	// "route":"route.json",
 	//aop配置，如果为注解方式，则不用配置
-	/*"aop":{
+	"aop":{
 		"files":[],  		//子文件列表，表示可以加载的子aop文件
 		//切点，可以配置多个
 		"pointcuts":[{
-			"id":"pointcut1",								//切点id，必填，不可重复
+			//切点id，必填，不可重复
+			"id":"pointcut1",
 			//表达式，必填，符合该表达式的方法会被拦截，可以采用通配符
 			//如下，第一个表示拦截实例名为userService的getInfo方法
 			//第二个表示拦截实例名以service开头的所有实例的所有方法（实例必须加入实例工厂，即用注解或在instance中配置）
@@ -151,13 +152,17 @@
 		//切面，可以多个
 		"aspects":[
 			{
-				"instance":"logAdvice",				//切面对应的实例名，必填
-				"advices":[							//通知，必填
+				//切面对应的实例名，必填
+				"instance":"logAdvice",
+				//通知，必填
+				"advices":[
 					{
-						"pointcut_id":"pointcut1",	//通知对应的切点
+						//通知对应的切点
+						"pointcut_id":"pointcut1",	
 						//通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(return),after-throw(抛出异常),around(环绕，即前后置)
-						"type":"before",			
-						"method":"before" 			//切面对应实例的方法名，字符串，必填
+						"type":"before",
+						//切面对应实例的方法名，字符串，必填
+						"method":"before"
 					},{
 						"pointcut_id":"pointcut1",
 						"type":"after",
@@ -178,7 +183,7 @@
 				]
 			}
 		]
-	},*/
+	},
 	//aop文件配置方式
 	// "aop":"aop.json",
 	//redis配置，当缓存、session、security采用存储方式为1时，必须设置
@@ -189,7 +194,7 @@
 		"port":"6379"
 	}],
 	//redis文件配置方式
-	"redis":"redis.json",
+	// "redis":"redis.json",
 	//安全框架配置，当需要使用noomi的安全框架时，需要配置
 	"security":{
 		"save_type":0,				//同session配置
@@ -200,18 +205,18 @@
 		//数据库相关设置
 		"dboption":{
 			//数据库连接设置，如果没有配置database，则此项必填，否则使用数据库配置中的数据库connection manager
-			/*"conn_cfg":{
+			"conn_cfg":{
 			    "user":"root",
 			    "password":"field",
 			    "host":"localhost",
 			    "database":"codement"
-			},*/
+			},
 			//鉴权相关数据表名字映射，如果与默认值相同，则不用配置，数据表结构详情请参考安全管理器节
-			/*"tables":{
+			"tables":{
 				"groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority
 				"resource":"t_resource",					//资源表名，默认t_resource
 				"resourceAuthority":"t_resource_authority"	//资源权限表名，默认t_resource_authority
-			},*/
+			},
 			//鉴权相关字段名映射，如果与默认值相同，则不用配置
 			// "columns":{
 			// 	"resourceId":"resource_id",					//资源id字段名，默认resource_id

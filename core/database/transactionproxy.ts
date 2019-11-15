@@ -1,7 +1,7 @@
 import { DBManager } from "./dbmanager";
 import { TransactionManager } from "./transactionmanager";
 import { getConnection } from "./connectionmanager";
-import { InstanceFactory } from "../instancefactory";
+import { InstanceFactory } from "../main/instancefactory";
 import { Sequelize } from "sequelize";
 
 

@@ -1,5 +1,5 @@
-import { HttpRequest} from "./httprequest";
-import { HttpResponse } from "./httpresponse";
+import { HttpRequest} from "../../web/httprequest";
+import { HttpResponse } from "../../web/httpresponse";
 /**
  * base action
  */

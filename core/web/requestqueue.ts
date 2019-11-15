@@ -1,9 +1,9 @@
 import { HttpRequest } from "./httprequest";
 import { WebConfig } from "./webconfig";
-import { RouteFactory } from "./routefactory";
+import { RouteFactory } from "../main/route/routefactory";
 import { FilterFactory } from "./filterfactory";
 import { StaticResource } from "./staticresource";
-import { App } from "./application";
+import { App } from "../tools/application";
 
 /**
  * request 队列
