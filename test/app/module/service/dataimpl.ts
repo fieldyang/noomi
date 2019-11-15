@@ -1,13 +1,13 @@
 import { getConnection } from "../../../../core/database/connectionmanager";
 import { Transactional, Instance, Transactioner } from "../../../../core/decorator";
 
-@Transactioner('add*')
+@Transactioner()
 @Instance('dataImpl')
 class DataImpl{
     // @Transactional()
     async addRes(url:string){
         //mysql
-        let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
+        let sql:string = "insert into t_resource(resource_id,url) values(15,'"+url+"')";
         let r = await new Promise(async (resolve,reject)=>{
             let conn = await getConnection();
             conn.query(sql,(err,result)=>{

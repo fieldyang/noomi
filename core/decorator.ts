@@ -6,7 +6,6 @@ import { AopFactory } from './aopfactory';
 import { FilterFactory } from './filterfactory';
 import { TransactionManager } from './database/transactionmanager';
 import { RouteFactory } from './routefactory';
-import { Util } from './util';
 import { NoomiError } from './errorfactory';
 
 
