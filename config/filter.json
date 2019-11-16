@@ -1,14 +1,9 @@
 {
     "filters":[
         {
-            "instance_name":"nodomFilter"
-        },{
-            "instance_name":"pathFilter",
-            "url_pattern":"/*",
-            "method_name":"do2"
-        },{
-            "instance_name":"uploadFilter",
-            "url_pattern":"/*"
+            "instance_name":"pathFilter",   //实例名，必填
+            "url_pattern":"/*",             //过滤url，支持通配符*，默认 "/*"
+            "method_name":"do2"             //实例中的方法名，默认do
         } 
     ]
 }
