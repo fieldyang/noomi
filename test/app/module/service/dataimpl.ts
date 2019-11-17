@@ -1,4 +1,4 @@
-import { getConnection } from "../../../../core/database/connectionmanager";
+import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 import { Transactional, Instance, Transactioner } from "../../../../core/tools/decorator";
 
 @Transactioner()

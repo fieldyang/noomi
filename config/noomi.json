@@ -28,7 +28,7 @@
 		},
 		//session配置(可选配置)
 		"session":{
-			"name":"NSESSIONID", 			//set-cookie中的sessionId名，默认为NOOMISESSIONID
+			"name":"NSESSIONID", 			//set-cookie中的sessionId名，默认为NSESSIONID
 			"timeout":30,					//session超时时间，单位:分钟
 			"save_type":0,					//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
 			"max_size":20000000,			//缓存最大字节数，save_type为0时有效
@@ -52,27 +52,88 @@
 	//实例配置，用于IoC
 	"instance":{
 		//模块基础路径(可选配置)，模块从该路径中加载，配置该路径后，模块路径采用相对路径配置，
-		// 注：该路径为js路径，而不是ts路径
+		// 注：该路径为js路径，而不是ts路径，相对于项目根目录
 		"module_path":["/dist/test/app/module"],
 		//实例数组，两种配置方式，如果数组元素为字符串，则加载符合路径规则的所有模块，
 		//如果为对象，则单个加载模块
 		//所有模块必须为class
 		"instances":[
-			//字符串模式，加载/build/test/app/module/目录及其子孙目录下的js文件，**表示自己及所有子孙目录
-			//模块类必须用@Instance或@RouteConfig注解
+			//字符串模式，加载符合路径规则的js文件，该路径相对于项目根目录，
+			//支持通配符*，**表示自己及所有子孙目录。
+			//采用该方式，模块类必须用@Instance或@Router注解
 			"/dist/test/app/module/**/*.js",
 			//对象模式，加载单个模块
 			{
 				"name":"logAdvice", 			//实例名，不可重复，必填
 				"class":"LogAdvice",			//类名，必填
 				"path":"advice/logadvice",		//模块路径，相对于module_path中的路径，必填
-				"singleton":true				//是否单例，布尔型，默认true
+				"singleton":true,				//是否单例，布尔型，默认true,
+				"properties":[                  //注入对象
+					{
+						"name":"commonTool",    //属性名
+						"ref":"commInstanceTool"//引用实例名
+					}
+				]
 			}
 		],
-		//配置子路径(可选配置)，相对与初始的application的context路径(该路径在noomi初始化时传入，默认/context)
+		//实例配置子路径(可选配置)，路径相对于初始的config路径(该路径在noomi初始化时传入，默认/config)
 		//当模块过多时，可采用该方式分路径配置
-		// "files":["context/action.json"]
+		"files":["context/action.json"]
 	},
+	//aop配置，如果为注解方式，则不用配置
+	/*"aop":{
+		//子文件列表，表示可以加载的子aop文件
+		"files":[],  
+		//切点，可以配置多个
+		"pointcuts":[{
+			//切点id，必填，不可重复
+			"id":"pointcut1",
+			//表达式，必填，符合该表达式的方法会被拦截，可以采用通配符
+			//如下，第一个表示拦截实例名为userService的getInfo方法
+			//第二个表示拦截实例名以service开头的所有实例的所有方法（实例必须加入实例工厂，即用注解或在instance中配置）
+			"expressions":["userService.getInfo","service*.*"]   
+		}],
+		//切面，可以多个
+		"aspects":[
+			{
+				//切面对应的实例名，必填
+				"instance":"logAdvice",
+				//通知，必填
+				//所有通知对应的方法，传入参数为被拦截方法的相关信息，格式为{instanceName:实例名,methodName:方法名,params:参数数组}
+				//after-return增加 returnValue:结果
+				//sfter-throw增加 throwValue:异常信息
+				"advices":[
+					{
+						//通知对应的切点
+						"pointcut_id":"pointcut1",	
+						//通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(正常return),after-throw(抛出异常),around(环绕，即前后置)
+						"type":"before",
+						//该切面的方法名，字符串，必填
+						"method":"before"
+					},{
+						"pointcut_id":"pointcut1",
+						"type":"after",
+						"method":"after"
+					},{
+						"pointcut_id":"pointcut1",
+						"type":"after-return",
+						"method":"afterReturn"
+					},{
+						"pointcut_id":"pointcut1",
+						"type":"after-throw",
+						"method":"throw"
+					},{
+						"pointcut_id":"pointcut1",
+						"type":"around",
+						"method":"around"
+					}	
+				]
+			}
+		]
+	},*/
+	//aop文件配置方式
+	// "aop":"aop.json",
+
 	//实例配置，文件方式
 	//"instance":"instance.json", 
 	//数据库配置，如果不需要使用数据库，则不用配置
@@ -98,34 +159,32 @@
 		//事务设置，当存在该项时，noomi开启事务嵌套能力
 		"transaction":{
 			//事务实例名，如果不设置，则根据product自动生成，如果自定义事务，请继承Transaction接口
-		  	"transaction":"mssqlTransaction",
+		  	// "transaction":"mssqlTransaction",
 			//隔离级, 针对sequelzie，如果为数据库，则执行数据库的隔离级 
 			//取值: 1 read uncommited, 2 read commited, 3 repeatable read, 4 serializable
-			"isolation_level":2,
+			// "isolation_level":2,
 			//方法表达式，符合表达式条件的方法会被设置为事务方法，调用时该方法涉及的数据库操作会加入事务执行，当出现异常时，会进行事务回滚
 			//如下所示，如果实例名以service开头，其下所有方法都将作为事务方法
-			"expressions":["service*.*"]
+			// "expressions":["service*.*"]
 		}
 	},
 	//数据库配置，文件方式
 	//"database":"database_mysql.json",
 	//路由配置(可选配置)，如果采用注解方式设置路由，则不用配置
-	"route":{
-		//路由命名空间
+	/*"route":{
+		//路由命名空间，命名空间+路由路径=实际路由路径
 		"namespace":"",
-		//子文件，相对于app的configPath路径
-		"files":["route/subroute.json"], 
+		//子文件，相对于configPath路径
+		"files":["route/subroute.json"],    
 		//路由配置
-		"routes":[
+		"routes":[              			
 			{
 				//路径（通过浏览器访问的路径），字符串，必填，以/开头
 				//如果路径最后为*，表示该实例下的方法匹配
 				//如 /upload_*，则/upload_add表示调用uploadAction实例的add方法
 				"path":"/upload",				
-				//实例名，字符串，必填
-				"instance_name":"uploadAction",	
-				//方法，字符串，可选，当path中带
-				"method":"upload", 
+				"instance_name":"uploadAction",	//实例名，字符串，必填
+				"method":"upload",      		//方法，字符串，可选，当path中带
 				//路由结果集，如果不填，则默认为json，方法return值（必须为json格式）将回写到请求端
 				"results":[{
 					//方法返回值，如果return 1，则调用该路由结果
@@ -134,8 +193,9 @@
 					"type":"redirect",		
 					//如果type为redirect和chain，则此项必填
 					//为redirect，则为页面或路由路径，为chain时，必须为路由路径
+					//url支持参数，如 ${page}，则表示用当前路由对应的实例中的page属性值作为url
 					"url":"/user/showinfo",
-					//参数列表，如果url为路由路径，则会从现路由对应的实例中取参数列表对应的属性并作为参数传递到下个路由
+					//参数列表，如果url为路由路径，则会从现路由对应的实例中取参数列表对应的属性值并作为参数传递到下个路由
 					"params":["userName"]
 				},{
 					//方法返回值，如果return 2，则调用该路由结果
@@ -146,59 +206,13 @@
 				}]
 			}
 		]
-	},
+	},*/
 	//路由配置，文件方式
 	// "route":"route.json",
-	//aop配置，如果为注解方式，则不用配置
-	"aop":{
-		//子文件列表，表示可以加载的子aop文件
-		"files":[], 
-		//切点，可以配置多个
-		"pointcuts":[{
-			//切点id，必填，不可重复
-			"id":"pointcut1",
-			//表达式，必填，符合该表达式的方法会被拦截，可以采用通配符
-			//如下，第一个表示拦截实例名为userService的getInfo方法
-			//第二个表示拦截实例名以service开头的所有实例的所有方法（实例必须加入实例工厂，即用注解或在instance中配置）
-			"expressions":["userService.getInfo","service*.*"]
-		}],
-		//切面，可以多个
-		"aspects":[
-			{
-				//切面对应的实例名，必填
-				"instance":"logAdvice",
-				//通知，必填
-				"advices":[
-					{
-						//通知对应的切点
-						"pointcut_id":"pointcut1",	
-						//通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(return),after-throw(抛出异常),around(环绕，即前后置)
-						"type":"before",
-						//切面对应实例的方法名，字符串，必填
-						"method":"before"
-					},{
-						"pointcut_id":"pointcut1",
-						"type":"after",
-						"method":"after"
-					},{
-						"pointcut_id":"pointcut1",
-						"type":"after-return",
-						"method":"afterReturn"
-					},{
-						"pointcut_id":"pointcut1",
-						"type":"after-throw",
-						"method":"throw"
-					},{
-						"pointcut_id":"pointcut1",
-						"type":"around",
-						"method":"around"
-					}	
-				]
-			}
-		]
-	},
+	
+	
 	//过滤器配置
-	"filter":{
+	/*"filter":{
 		"filters":[
 			{
 				"instance_name":"pathFilter",   //实例名，必填
@@ -206,11 +220,9 @@
 				"method_name":"do2"             //实例中的方法名，默认do
 			} 
 		]
-	},
+	},*/
 	//过滤器文件配置方式
 	// "filter":"filter.json",
-	//aop文件配置方式
-	// "aop":"aop.json",
 	//redis配置，当缓存、session、security采用存储方式为1时，必须设置
 	//请参考npm redis中的redis设置
 	"redis":[{
@@ -230,12 +242,12 @@
 		//数据库相关设置
 		"dboption":{
 			//数据库连接设置，如果没有配置database，则此项必填，否则使用数据库配置中的数据库connection manager
-			"conn_cfg":{
-			    "user":"root",
-			    "password":"field",
-			    "host":"localhost",
-			    "database":"codement"
-			},
+			// "conn_cfg":{
+			//     "user":"root",
+			//     "password":"field",
+			//     "host":"localhost",
+			//     "database":"codement"
+			// },
 			//鉴权相关数据表名字映射，如果与默认值相同，则不用配置，数据表结构详情请参考安全管理器节
 			"tables":{
 				"groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority

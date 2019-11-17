@@ -1,7 +1,7 @@
-//实例配置，用于IoC
-"instance":{
-    //模块基础路径(可选配置)，模块从该路径中加载，配置该路径后，模块路径采用相对路径配置，注：该路径为js路径，而不是ts路径
-    // "module_path":["/dist/test/app/module"],
+{
+    //模块基础路径(可选配置)，模块从该路径中加载，配置该路径后，模块路径采用相对路径配置，
+    // 注：该路径为js路径，而不是ts路径
+    "module_path":["/dist/test/app/module"],
     //实例数组，两种配置方式，如果数组元素为字符串，则加载符合路径规则的所有模块，
     //如果为对象，则单个加载模块
     //所有模块必须为class
@@ -14,15 +14,10 @@
             "name":"logAdvice", 			//实例名，不可重复，必填
             "class":"LogAdvice",			//类名，必填
             "path":"advice/logadvice",		//模块路径，相对于module_path中的路径，必填
-            "singleton":true,				//是否单例，布尔型，默认true
-            "params":[],                    //参数数组值，按照构造器参数序列设置
-            "properties":[{                 //依赖属性数组    
-                "name":"propName",          //属性名
-                "ref":"instanceName"        //属性依赖的实例名
-            }]
+            "singleton":true				//是否单例，布尔型，默认true
         }
     ],
     //配置子路径(可选配置)，相对与初始的application的context路径(该路径在noomi初始化时传入，默认/context)
     //当模块过多时，可采用该方式分路径配置
-    // "files":["context/action.json"]
+    "files":["context/action.json"]
 }
