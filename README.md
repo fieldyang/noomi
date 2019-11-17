@@ -82,7 +82,7 @@ npm install noomi --save
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir":"./dist/module"
+    "outDir":"./dist"
   },
   "include":[
      "**/*.ts"
@@ -105,13 +105,13 @@ npm install noomi --save
 
 #### 模块编写
 
-项目根目录下新建module目录,新建app.ts文件，内容如下：
+项目根目录下新建app.ts文件，内容如下：
 
 ```typescript
 import { noomi } from "noomi";
 noomi(3000);
 ```
-
+项目根目录下新建module目录。    
 新建目录route，/module/route，新建文件hello.ts，内容如下：
 
 ```typescript
@@ -124,10 +124,17 @@ export class Hello{
     }
 }
 ```
-
 #### 执行和测试
 
 切换到app.js文件，按F5执行 切换到浏览器，输入localhost:3000/hello，浏览器显示hello world!
+
+#### 发布
+1. 新建一个目录，如:publishme；
+2. 把dist目录下的app.js文件拷贝到publishme；
+3. 把config目录拷贝到publishme；
+4. 把dist目录拷贝到publishme，删除dist下的app.js目录；
+5. 切换到该目录，执行node app.js
+
 
 ### <a id='示例2'>示例2-IoC</a>
 
@@ -1214,8 +1221,8 @@ class NodomFilter{
 ###### 功能描述
 添加用户和用户组信息到安全框架，该方法一般在用户登录时使用。  
 登录流程：
-1.获取浏览器提供的用户名和密码进行数据库用户验证；
-2.验证成功后，获取用户Id和其关联的组id，调用SecurityFactory.addUserGroups添加到安全框架框架中。
+1. 获取浏览器提供的用户名和密码进行数据库用户验证；
+2. 验证成功后，获取用户Id和其关联的组id，调用SecurityFactory.addUserGroups添加到安全框架框架中。
 ###### 参数
 + userId<number> 用户id
 + groups<Array<number>> 组id数组，一个用户可能存在在多个用户组中
