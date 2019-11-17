@@ -9,6 +9,7 @@
     - [示例3-Aop](#示例3) 
     - [示例4-数据库操作](#示例4) 
     - [示例5-事务（嵌套）](#示例5) 
+    - [发布](#发布)
 - [使用说明](#使用说明)
     - [初始化函数-noomi](#noomi函数)
     - [初始化配置-noomi.json](#noomi.json)
@@ -37,10 +38,12 @@
 所有实例在vscode下执行，其它ide工具请相应调整。
 
 ### 安装
-
-npm install noomi -g  
+#### 全局安装
+npm install noomi -g
+#### 本地安装  
 npm install noomi  
-npm install noomi --save  
+
+***其它安装方式请参考 npm install***
 
 ### 项目初始化
 
@@ -128,14 +131,6 @@ export class Hello{
 
 切换到app.js文件，按F5执行 切换到浏览器，输入localhost:3000/hello，浏览器显示hello world!
 
-#### 发布
-1. 新建一个目录，如:publishme；
-2. 把dist目录下的app.js文件拷贝到publishme；
-3. 把config目录拷贝到publishme；
-4. 把dist目录拷贝到publishme，删除dist下的app.js目录；
-5. 切换到该目录，执行node app.js
-
-
 ### <a id='示例2'>示例2-IoC</a>
 
 为hello增加一个大写转换器。 切换到module目录，新建/service目录，/module/service, 新建文件charchange.ts，内容如下：
@@ -185,7 +180,7 @@ export class LogAdvice{
     @Before("testPointcut()")
     before(){
         let o = arguments[0];
-        console.log(`前置通知:"实例名:${o.instanceName};方法名:${o.methodName};参数:${o.params}`);
+        console.log(`前置通知:实例名:${o.instanceName};方法名:${o.methodName};参数:${o.params}`);
     }
     @After("testPointcut()")
     after(){
@@ -212,7 +207,7 @@ export class LogAdvice{
 切换到浏览器，输入localhost:3000/hello，控制台输出如下：
 
 ```typescript
-前置通知:"实例名:charChange;方法名:toUpper;参数:hello world!  
+前置通知:实例名:charChange;方法名:toUpper;参数:hello world!   
 注释环绕通知 toUpper 
 这是返回通知 toUpper 
 注释后置通知 toUpper 
@@ -238,10 +233,10 @@ use noomi;
 ```sql
 create table t_userinfo(
     id int(11) not null auto_increment,
-	name varchar(32),
-	age int(11),
-	mobile char(11),
-	primary key(id)
+    name varchar(32),
+    age int(11),
+    mobile char(11),
+    primary key(id)
 );
 ```
 
@@ -446,13 +441,21 @@ export class UserService{
 切换到浏览器，输入网址：http://localhost:3000/user/addtwo?id=5&name=nodom&age=3&mobile=13800000000 。
  ***当t_userinfo表中有id为5的数据记录时，addUserWithId方法会抛出异常，导致addUser方法回滚，一条记录都不会加入，否则会增加两条记录。***
 
+### <a id='发布'>发布</a>
+noomi框架支持typescript开发，开发后ts文件编译成js文件，部署流程如下（目录结构按示例中编排）：
+1. 新建一个目录，如:publishme；
+2. 把dist目录下的app.js文件拷贝到publishme；
+3. 把config目录拷贝到publishme；
+4. 把dist目录拷贝到publishme，删除dist下的app.js文件；
+5. 切换到该目录，执行node app.js。
+
 ## <a id='使用说明'>使用说明</a>
 
 ***注:参数为[]时，代表可选参数***
 ### <a id='noomi函数'>初始化函数-noomi</a>
 函数用于创建应用(app)，用于启动文件中。  
 #### 用法：  
-    noomi([port:number,[configPath:string]])  
+    noomi([port:number[,configPath:string]])  
 #### 参数：  
 - port <number> web服务器端口号，可选，默认3000。
 - configPath <string> 配置文件目录，可选，默认'/config'。路径相对于项目根目录。
@@ -465,7 +468,7 @@ export class UserService{
 - route: 路由配置，string|object, 可选，用于配置路由信息。
 - filter: 过滤器配置，string|object，可选，用于配置过滤器信息。
 - database:数据哭配置，string|object，可选，用于配置数据库连接和事务信息，noomi将同意管理连接。
-- redis: redis配置，string|object，如果应用采用集群模式，或webcache、security、session save_type(存储方式)设置为1，则需要配置。
+- redis: redis配置，string|object，如果应用采用集群模式，或webcache、security、session或自定义缓存的save_type(存储方式)设置为1，则需要配置。
 - security:安全配置，string|object，可选，用于配置鉴权机制。
 
 ### <a id='依赖注入IoC'>依赖注入 IoC</a>
@@ -487,10 +490,10 @@ noomi对实例进行统一管理，支持IoC，提供配置文件和注解两种
         "/dist/test/app/module/**/*.js",
         //对象模式，加载单个模块
         {
-            "name":"logAdvice", 			//实例名，不可重复，必填
-            "class":"LogAdvice",			//类名，必填
-            "path":"advice/logadvice",		//模块路径，相对于module_path中的路径，必填
-            "singleton":true,				//是否单例，布尔型，默认true,
+            "name":"logAdvice",             //实例名，不可重复，必填
+            "class":"LogAdvice",            //类名，必填
+            "path":"advice/logadvice",      //模块路径，相对于module_path中的路径，必填
+            "singleton":true,               //是否单例，布尔型，默认true,
             "properties":[                  //注入对象
                 {
                     "name":"commonTool",    //属性名
@@ -610,15 +613,15 @@ class TestService{
 /* 
  *  pointcutId:string    切点id
  */
-@Before(pointcutId) //前置
+@Before(pointcutId)     //前置
 
-@After(pointcutId)  // 后置
+@After(pointcutId)      //后置
 
-@Around(pointcutId) //环绕
+@Around(pointcutId)     //环绕
 
 @AfterThrow(pointcutId) //异常
 
-@AfterReturn(pointcutId) //返回
+@AfterReturn(pointcutId)//返回
 ```
 
 例:
@@ -854,11 +857,11 @@ console.log(await n.has('mytest1'));
 ```js
 //session配置(可选配置)
 {
-    "name":"NSESSIONID", //set-cookie中的sessionId名，默认为NSESSIONID
-    "timeout":30,		 //session超时时间，单位:分钟
-    "save_type":0,		 //存储类型 0 memory, 1 redis，需要安装redis服务器并配置noomi.json中的redis配置项
-    "max_size":20000000, //缓存最大字节数，save_type为0时有效
-    "redis":"default"	 //redis client名，与redis配置保持一致，save_type为1时必须设置，默认default
+    "name":"NSESSIONID",    //set-cookie中的sessionId名，默认为NSESSIONID
+    "timeout":30,           //session超时时间，单位:分钟
+    "save_type":0,          //存储类型 0 memory, 1 redis，需要安装redis服务器并配置noomi.json中的redis配置项
+    "max_size":20000000,    //缓存最大字节数，save_type为0时有效
+    "redis":"default"       //redis client名，与redis配置保持一致，save_type为1时必须设置，默认default
 }
 ```
 
@@ -912,7 +915,7 @@ session中key对应的值
 ```typescript
 async getdata(){
     let session = await SessionFactory.getSession(this.request); //获取session
-    await session.set('name','tom');   //session设置值
+    await session.set('name','tom');        //session设置值
     let value = await session.get('name');  //获取session的值
     return {
         success:true,
@@ -1138,19 +1141,19 @@ class NodomFilter{
 
 ```js
 {
-    "cache":true,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
-    "cache_option":{				//静态资源缓存配置
-        "save_type":0,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
-        "max_size":20000000,		//缓存最大字节数，save_type为0时有效
-        "file_type":[".html",".htm",".js",".css"],	//缓存静态资源类型，默认['*']，缓存所有静态资源，不建议使用*
-        "redis":"default",			//redis client名，与redis配置保持一直，默认default
-        "expires":0,				//页面缓存 expires 属性
-        "max_age":0,				//cache-control中的max-age属性
-        "public":true,				//cache-control中的public属性，优先级高于private配置，即public和private同时为true时，设置public
-        "private":true,				//cache-control中的private属性
-        "no_cache":false,			//cache-control中的no-cache属性
-        "no_store":false,			//cache-control中的no-store属性
-        "must_revalidation":false,	//cache-control中的must-revalidation属性
+    "cache":true,                   //是否启用静态资源缓存，如果为false，则cache_option无效，默认false
+    "cache_option":{                //静态资源缓存配置
+        "save_type":0,              //存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
+        "max_size":20000000,        //缓存最大字节数，save_type为0时有效
+        "file_type":[".html",".htm",".js",".css"],  //缓存静态资源类型，默认['*']，缓存所有静态资源，不建议使用*
+        "redis":"default",          //redis client名，与redis配置保持一直，默认default
+        "expires":0,                //页面缓存 expires 属性
+        "max_age":0,                //cache-control中的max-age属性
+        "public":true,              //cache-control中的public属性，优先级高于private配置，即public和private同时为true时，设置public
+        "private":true,             //cache-control中的private属性
+        "no_cache":false,           //cache-control中的no-cache属性
+        "no_store":false,           //cache-control中的no-store属性
+        "must_revalidation":false,  //cache-control中的must-revalidation属性
         "proxy_revalidation":false  //cache-control中的proxy-revalidation属性
     }
 }
@@ -1172,9 +1175,9 @@ class NodomFilter{
 ```js
 //安全框架配置，当需要使用noomi的安全框架时，需要配置
 "security":{
-    "save_type":0,				//存储类型 0内存，1redis
-    "max_size":10000000,		//缓存最大size，save_type=0时有效
-    "redis":"default",			//redis名，save_type=1时必须配置
+    "save_type":0,              //存储类型 0内存，1redis
+    "max_size":10000000,        //缓存最大size，save_type=0时有效
+    "redis":"default",	        //redis名，save_type=1时必须配置
     //过滤器针对的路由路径，如果不设置，则默为/*，表示拦截所有请求(只针对路由访问)
     "expressions":["/*"], 
     //数据库相关设置
@@ -1189,20 +1192,20 @@ class NodomFilter{
         },
         //鉴权相关数据表名字映射，如果与默认值相同，则不用配置
         "tables":{
-            "groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority
-            "resource":"t_resource",					//资源表名，默认t_resource
-            "resourceAuthority":"t_resource_authority"	//资源权限表名，默认t_resource_authority
+            "groupAuthority":"t_group_authority",       //组权限表名，默认t_group_authority
+            "resource":"t_resource",                    //资源表名，默认t_resource
+            "resourceAuthority":"t_resource_authority"  //资源权限表名，默认t_resource_authority
         },
         //鉴权相关字段名映射，如果与默认值相同，则不用配置
         "columns":{
-            "resourceId":"resource_id",					//资源id字段名，默认resource_id
-            "authorityId":"authority_id",				//权限id字段名，默认authority_id
-            "resourceUrl":"url",						//资源url字段名，默认url
-            "groupId":"group_id"						//组id字段名，默认group_id
+            "resourceId":"resource_id",	        //资源id字段名，默认resource_id
+            "authorityId":"authority_id",       //权限id字段名，默认authority_id
+            "resourceUrl":"url",                //资源url字段名，默认url
+            "groupId":"group_id"                //组id字段名，默认group_id
         }
     },
-    "auth_fail_url":"/pages/error/403.html",			//鉴权失败页面路径，必填，当鉴权失败时，需要跳转到该页面
-    "login_url":"/pages/login.html"						//登录页面，必填，当检测到需要登录时，需要跳转到该页面
+    "auth_fail_url":"/pages/error/403.html",    //鉴权失败页面路径，必填，当鉴权失败时，需要跳转到该页面
+    "login_url":"/pages/login.html"             //登录页面，必填，当检测到需要登录时，需要跳转到该页面
 }
 ```
 ***注1:security配置可以放在独立文件中（目录与noomi.json相同目录或子目录），在noomi.json中以路径方式引入，也可以在noomi.json中以对象方式配置。配置项为"security"。***
@@ -1472,33 +1475,33 @@ class MyClass{
 	"web":{
 		"web_config":{
 			"upload_tmp_dir":"/upload/tmp", //上传临时目录，相对于项目根目录，以/开始
-			"upload_max_size":0,			//上传内容最大字节数
+			"upload_max_size":0,            //上传内容最大字节数
 			"forbidden_path":["/test/app"], //限制路径，访问该路径时，返回404
-			"cache":true,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
-			"cache_option":{				//静态资源缓存配置
-				"save_type":0,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
-				"max_size":20000000,		//缓存最大字节数，save_type为0时有效
+			"cache":true,                   //是否启用静态资源缓存，如果为false，则cache_option无效，默认false
+			"cache_option":{                //静态资源缓存配置
+				"save_type":0,              //存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
+				"max_size":20000000,        //缓存最大字节数，save_type为0时有效
 				//缓存静态资源类型，默认['*']，缓存所有静态资源，不建议使用*
 				"file_type":[".html",".htm",".js",".css"],	
-				"redis":"default",			//redis client名，与redis配置保持一直，默认default
-				"expires":0,				//页面缓存 expires 属性
-				"max_age":0,				//cache-control中的max-age属性
+				"redis":"default",          //redis client名，与redis配置保持一直，默认default
+				"expires":0,                //页面缓存 expires 属性
+				"max_age":0,                //cache-control中的max-age属性
 				//cache-control中的public属性，优先级高于private配置，即public和private同时为true时，设置public
 				"public":true,				
-				"private":true,				//cache-control中的private属性
-				"no_cache":false,			//cache-control中的no-cache属性
-				"no_store":false,			//cache-control中的no-store属性
-				"must_revalidation":false,	//cache-control中的must-revalidation属性
+				"private":true,	            //cache-control中的private属性
+				"no_cache":false,           //cache-control中的no-cache属性
+				"no_store":false,           //cache-control中的no-store属性
+				"must_revalidation":false,  //cache-control中的must-revalidation属性
 				"proxy_revalidation":false  //cache-control中的proxy-revalidation属性
 			}
 		},
 		//session配置(可选配置)
 		"session":{
-			"name":"NSESSIONID", 			//set-cookie中的sessionId名，默认为NSESSIONID
-			"timeout":30,					//session超时时间，单位:分钟
-			"save_type":0,					//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
-			"max_size":20000000,			//缓存最大字节数，save_type为0时有效
-			"redis":"default"				//redis client名，与redis配置保持一直，默认default
+            "name":"NSESSIONID",            //set-cookie中的sessionId名，默认为NSESSIONID
+            "timeout":30,                   //session超时时间，单位:分钟
+            "save_type":0,                  //存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
+            "max_size":20000000,            //缓存最大字节数，save_type为0时有效
+            "redis":"default"               //redis client名，与redis配置保持一直，默认default
 		},
 		//http异常页配置(可选配置)，如果http异常码在该配置中，则重定向到该异常码对应的页面
 		"error_page":[
@@ -1530,10 +1533,10 @@ class MyClass{
 			"/dist/test/app/module/**/*.js",
 			//对象模式，加载单个模块
 			{
-				"name":"logAdvice", 			//实例名，不可重复，必填
-				"class":"LogAdvice",			//类名，必填
-				"path":"advice/logadvice",		//模块路径，相对于module_path中的路径，必填
-				"singleton":true,				//是否单例，布尔型，默认true,
+				"name":"logAdvice",             //实例名，不可重复，必填
+				"class":"LogAdvice",            //类名，必填
+				"path":"advice/logadvice",      //模块路径，相对于module_path中的路径，必填
+				"singleton":true,               //是否单例，布尔型，默认true,
 				"properties":[                  //注入对象
 					{
 						"name":"commonTool",    //属性名
@@ -1649,8 +1652,8 @@ class MyClass{
 				//如果路径最后为*，表示该实例下的方法匹配
 				//如 /upload_*，则/upload_add表示调用uploadAction实例的add方法
 				"path":"/upload",				
-				"instance_name":"uploadAction",	//实例名，字符串，必填
-				"method":"upload",      		//方法，字符串，可选，当path中带
+				"instance_name":"uploadAction", //实例名，字符串，必填
+				"method":"upload",              //方法，字符串，可选，当path中带
 				//路由结果集，如果不填，则默认为json，方法return值（必须为json格式）将回写到请求端
 				"results":[{
 					//方法返回值，如果return 1，则调用该路由结果
@@ -1700,9 +1703,9 @@ class MyClass{
 	// "redis":"redis.json",
 	//安全框架配置，当需要使用noomi的安全框架时，需要配置
 	"security":{
-		"save_type":0,				//同session配置
-		"max_size":10000000,		//同session配置
-		"redis":"default",			//同session配置
+		"save_type":0,              //同session配置
+		"max_size":10000000,        //同session配置
+		"redis":"default",          //同session配置
 		//过滤器针对的路由路径，如果不设置，则默为/*，表示拦截所有请求(只针对路由)
 		//"expressions":["/*"], 
 		//数据库相关设置
@@ -1716,20 +1719,20 @@ class MyClass{
 			// },
 			//鉴权相关数据表名字映射，如果与默认值相同，则不用配置，数据表结构详情请参考安全管理器节
 			"tables":{
-				"groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority
-				"resource":"t_resource",					//资源表名，默认t_resource
-				"resourceAuthority":"t_resource_authority"	//资源权限表名，默认t_resource_authority
+				"groupAuthority":"t_group_authority",       //组权限表名，默认t_group_authority
+				"resource":"t_resource",                    //资源表名，默认t_resource
+				"resourceAuthority":"t_resource_authority"  //资源权限表名，默认t_resource_authority
 			},
 			//鉴权相关字段名映射，如果与默认值相同，则不用配置
 			"columns":{
-				"resourceId":"resource_id",					//资源id字段名，默认resource_id
-				"authorityId":"authority_id",				//权限id字段名，默认authority_id
-				"resourceUrl":"url",						//资源url字段名，默认url
-				"groupId":"group_id"						//组id字段名，默认group_id
+				"resourceId":"resource_id",                 //资源id字段名，默认resource_id
+				"authorityId":"authority_id",               //权限id字段名，默认authority_id
+				"resourceUrl":"url",                        //资源url字段名，默认url
+				"groupId":"group_id"                        //组id字段名，默认group_id
 			}
 		},
-		"auth_fail_url":"/pages/error/403.html",			//鉴权失败页面路径，必填
-		"login_url":"/pages/login.html"						//登录页面，必填
+        "auth_fail_url":"/pages/error/403.html",            //鉴权失败页面路径，必填
+        "login_url":"/pages/login.html"                     //登录页面，必填
 	},
 	//安全框架，文件方式
 	// "security":"security.json"
