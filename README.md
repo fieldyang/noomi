@@ -4,6 +4,8 @@
 
 # 用法
 - [起步](#起步)
+    - [源码使用](#源码使用)
+    - [安装](#安装)
     - [示例1-hello world](#示例1) 
     - [示例2-IoC](#示例2) 
     - [示例3-Aop](#示例3) 
@@ -37,14 +39,26 @@
 
 所有实例在vscode下执行，其它ide工具请相应调整。
 
-### 安装
+### <a id='源码使用'>源码使用</a>
+源码使用便于调试和了解noomi运行流程，使用方法：
+1. down整个项目源码；
+2. 目录和文件结构按示例进行创建；
+3. 删除所有的import，按照提示重新导入所需模块。  
+***注:初次使用，建议安装方式使用。***
+### <a id='安装'>安装</a>
 #### 全局安装
 npm install noomi -g
 #### 本地安装  
 npm install noomi  
-
 ***其它安装方式请参考 npm install***
-
+#### 依赖包
+1. cls-hooked: 4.2.2+
+2. json5: 2.1.1+
+3. mime: 2.4.4+
+4. redis: 2.8.0+
+5. sequelize: 5.21.2+
+6. sequelize-typescript: 1.0.0+
+7. uuid: 3.3.3+
 ### 项目初始化
 
 创建noomi目录,切换到根目录
@@ -123,13 +137,13 @@ import { Router, Route} from "noomi";
 export class Hello{
     @Route('/hello')
     sayHello(){
-        return 'hello world!';
+        return {result:'hello world!'};
     }
 }
 ```
 #### 执行和测试
 
-切换到app.js文件，按F5执行 切换到浏览器，输入localhost:3000/hello，浏览器显示hello world!
+切换到app.js文件，按F5执行 切换到浏览器，输入localhost:3000/hello，浏览器显示{result:"hello world!"}
 
 ### <a id='示例2'>示例2-IoC</a>
 
@@ -156,12 +170,12 @@ export class Hello{
     charChange:CharChange;
     @Route('/hello')
     sayHello(){
-        return this.charChange.toUpper('hello world!');
+        return {result:this.charChange.toUpper('hello world!')};
     }
 }
 ```
 
-切换到浏览器，输入localhost:3000/hello，输出变大写, ，浏览器显示HELLO WORLD!
+切换到浏览器，输入localhost:3000/hello，输出变大写, ，浏览器显示{result:"HELLO WORLD!"}
 
 ### <a id='示例3'>示例3-Aop</a>
 
@@ -1874,19 +1888,4 @@ alter table t_resource_authority add constraint FK_RES_AUTH_REF_RES foreign key 
 
 # 贡献者
 1. 杨雷 email:fieldyang@163.com git:https://github.com/fieldyang
-2. 唐榜 email:244750596@qq.com git:https://github.com/Tang1227
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+2. 唐榜 email:244750596@qq.com git:https://github.com/Tang1227 
