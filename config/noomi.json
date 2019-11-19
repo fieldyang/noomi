@@ -135,7 +135,7 @@
 	//实例配置，文件方式
 	//"instance":"instance.json", 
 	//数据库配置，如果不需要使用数据库，则不用配置
-	"database":{
+	/*"database":{
 		//数据库产品，字符串，可选值：mysql,oracle,mssql,sequelize，默认mysql
 		"product":"mysql",
 		//连接管理器实例名，字符串，如果不设置，则根据product自动生成，如product为mysql，
@@ -165,9 +165,9 @@
 			//如下所示，如果实例名以service开头，其下所有方法都将作为事务方法
 			// "expressions":["service*.*"]
 		}
-	},
+	},*/
 	//数据库配置，文件方式
-	//"database":"database_mysql.json",
+	"database":"database_sequelize.json",
 	//路由配置(可选配置)，如果采用注解方式设置路由，则不用配置
 	/*"route":{
 		//路由命名空间，命名空间+路由路径=实际路由路径

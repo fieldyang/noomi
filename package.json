@@ -38,6 +38,7 @@
     "sequelize": "^5.21.2"
   },
   "devDependencies": {
+    "mongodb": "^3.3.4",
     "mssql": "^6.0.0",
     "oracledb": "^4.0.1"
   },

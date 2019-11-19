@@ -1,6 +1,6 @@
 {
     "product":"sequelize",
-    "connection_manager":"sequelizeConnectionManager",
+    // "connection_manager":"sequelizeConnectionManager",
     "use_pool":true,
     "options":{
         "dialect":"mysql",
@@ -17,11 +17,12 @@
         },
         "define": {
             "timestamps": false
-        }
+        },
+        "models":["/dist/test/app/module/dao/pojosequelize"]
     },
     "transaction":{
-        "isolation_level":2,
-        "transaction":"sequelizeTransaction",
+        // "isolation_level":2,
+        // "transaction":"sequelizeTransaction",
         "expressions":[]
     }
 }

@@ -1,10 +1,10 @@
 import{Table,Column,Model,HasMany, ForeignKey, BelongsTo} from 'sequelize-typescript';
-import { Resource } from './resource';
-import { Authority } from './authority';
+import Resource from './resource';
+import Authority from './authority';
 
 @Table({tableName:'t_resource_authority'})
 
-class ResourceAuthority extends Model<ResourceAuthority>{
+export default class ResourceAuthority extends Model<ResourceAuthority>{
     @Column({
         primaryKey:true,
         field:'resource_authority_id'
@@ -30,4 +30,4 @@ class ResourceAuthority extends Model<ResourceAuthority>{
     authority:Authority;
 }
 
-export {ResourceAuthority}
+// export {ResourceAuthority}

@@ -1,22 +1,28 @@
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 import { Transactional, Instance, Transactioner } from "../../../../core/tools/decorator";
 
+import Resource from "../dao/pojosequelize/resource";
+import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
+
+
+
+
 @Transactioner()
 @Instance('dataImpl')
 class DataImpl{
     // @Transactional()
     async addRes(url:string){
         //mysql
-        let sql:string = "insert into t_resource(resource_id,url) values(15,'"+url+"')";
-        let r = await new Promise(async (resolve,reject)=>{
-            let conn = await getConnection();
-            conn.query(sql,(err,result)=>{
-                if(err){
-                    reject(err);
-                }
-                resolve(result);
-            });
-        }); 
+        // let sql:string = "insert into t_resource(resource_id,url) values(15,'"+url+"')";
+        // let r = await new Promise(async (resolve,reject)=>{
+        //     let conn = await getConnection();
+        //     conn.query(sql,(err,result)=>{
+        //         if(err){
+        //             reject(err);
+        //         }
+        //         resolve(result);
+        //     });
+        // }); 
         
         //oracle
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -31,27 +37,27 @@ class DataImpl{
 
         //sequelize
             
-        // const res = new Resource({
-        //     resourceId:13,
-        //     url:'/test/test'
-        // })
-        // let r1 = await res.save();
+        const res = new Resource({
+            resourceId:13,
+            url:'/test/test'
+        })
+        let r1 = await res.save();
         return 2;
         
     }
     // @Transactional()
     async addResAuth(){
         //mysql
-        let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
-        let r = await new Promise(async (resolve,reject)=>{
-            let conn = await getConnection();
-            conn.query(sql,(err,result)=>{
-                if(err){
-                    reject(err);
-                }
-                resolve(result);
-            });
-        });
+        // let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
+        // let r = await new Promise(async (resolve,reject)=>{
+        //     let conn = await getConnection();
+        //     conn.query(sql,(err,result)=>{
+        //         if(err){
+        //             reject(err);
+        //         }
+        //         resolve(result);
+        //     });
+        // });
 
         //oracle
         // let sql:string = "insert into t_resource_authority(resource_authority_id,resource_id,authority_id) values(2,3,4)";
@@ -68,11 +74,11 @@ class DataImpl{
         // }
         
         //sequelize
-        // const res = new ResourceAuthority({
-        //     resourceId:13,
-        //     authorityId:2
-        // })
-        // let r1 = await res.save();
+        const res = new ResourceAuthority({
+            resourceId:11,
+            authorityId:2
+        })
+        let r1 = await res.save();
         return 1;
     }
     

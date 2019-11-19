@@ -1,8 +1,9 @@
 import{Table,Column,Model,HasMany} from 'sequelize-typescript';
-import { ResourceAuthority } from './resourceauthority';
+import ResourceAuthority from './resourceauthority';
+
 @Table({tableName:'t_resource'})
 
-class Resource extends Model<Resource>{
+export default class Resource extends Model<Resource>{
     @Column({
         primaryKey:true,
         field:'resource_id'
@@ -15,4 +16,4 @@ class Resource extends Model<Resource>{
     @HasMany(()=>ResourceAuthority)
     resourceAuthorities:ResourceAuthority[];
 }
-export{Resource}
+// export{Resource}
