@@ -29,13 +29,14 @@
   },
   "homepage": "https://github.com/noomijs/noomi#readme",
   "dependencies": {
+    "cls-hooked": "^4.2.2",
     "json5": "^2.1.1",
     "mime": "^2.4.4",
-    "uuid": "^3.3.3",
-    "sequelize-typescript": "^1.0.0",
-    "cls-hooked": "^4.2.2",
     "redis": "^2.8.0",
-    "sequelize": "^5.21.2"
+    "sequelize": "^5.21.2",
+    "sequelize-typescript": "^1.0.0",
+    "typeorm": "^0.2.20",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "mongodb": "^3.3.4",

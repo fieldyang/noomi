@@ -44,12 +44,21 @@
 1. down整个项目源码；
 2. 目录和文件结构按示例进行创建；
 3. 删除所有的import，按照提示重新导入所需模块。  
-***注:初次使用，建议安装方式使用。***
+***注:初次使用，建议[cli安装](#cli安装)方式使用。***
 ### <a id='安装'>安装</a>
+#### <a id='cli安装'>cli安装</a>
+1. 安装noomi-cli，输入 npm install noomi-cli -g；
+2. 新建一个目录，如 myfirstapp；
+3. 命令行模式到该目录下；
+4. 输入 noomi-cli -n 或 noomi-cli -c(淘宝源安装)，进行项目新建；
+5. 在vscode中添加文件夹到workspace；
+6. 找到根目录下的app.ts文件并运行；
+7. 浏览器中输入localhost:3000/hello。  
+***详情请参考 [npm noomi-cli](https://www.npmjs.com/package/noomi-cli)。***
 #### 全局安装
 npm install noomi -g
 #### 本地安装  
-npm install noomi  
+npm install noomi [--save]   
 ***其它安装方式请参考 npm install***
 #### 依赖包
 1. cls-hooked: 4.2.2+
@@ -1348,7 +1357,7 @@ async Testlogin() {
 }
 //鉴权成功，跳转到鉴权前的页面
 ```
-### <a id='#数据库Database'>数据库 Database</a>
+### <a id='数据库Database'>数据库 Database</a>
 noomi支持4种connection manager：mysql、oracle、mssql、sequelize，用户可以自定义connection manager，自定义connection manager需要加入InstanceFactory。  
 使用数据源，需要在noomi.json中配置database属性，典型配置如下：
 #### mysql配置
@@ -1398,7 +1407,20 @@ noomi支持4种connection manager：mysql、oracle、mssql、sequelize，用户�
 }
 ```
 ***注:options参考 npm mssql配置***
+
+#### mongodb配置
+```js
+{
+    "product":"mongodb",
+    "options":{
+        "url":"mongodb://localhost:27017"
+    }
+}
+```
+***注:options的url参考 mongodb connect url配置***
+
 #### sequelize配置
+noomi采用sequelize-typescript进行封装，原生sequelize尚未进行可行性测试。
 ```js
 {
     "product":"sequelize",
@@ -1418,7 +1440,10 @@ noomi支持4种connection manager：mysql、oracle、mssql、sequelize，用户�
         },
         "define": {
             "timestamps": false
-        }
+        },
+        //model所在路径，是编译后的js所在路径，相对于项目根目录。如:/dist/module/dao/pojo，表示该目录下的所有js文件
+        //model class定义时，要用export default 进行导出，如 export default class UserModel{...}
+        "models":[]
     }
 }
 ```
@@ -1621,7 +1646,7 @@ class MyClass{
 	//"instance":"instance.json", 
 	//数据库配置，如果不需要使用数据库，则不用配置
 	"database":{
-		//数据库产品，字符串，可选值：mysql,oracle,mssql,sequelize，默认mysql
+		//数据库产品，字符串，可选值：mysql,oracle,mssql,mongodb,sequelize，默认mysql
 		"product":"mysql",
 		//连接管理器实例名，字符串，如果不设置，则根据product自动生成，如product为mysql，
 		//则connection_manager为mysqlConnectionManager，

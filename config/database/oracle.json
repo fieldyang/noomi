@@ -1,0 +1,14 @@
+{
+    "product":"oracle",
+    "use_pool":true,
+    "options":{
+        "user":"your user",
+        "password":"your password",
+        "connectString":"localhost/your db",
+        "poolMin":5,
+        "poolMax":20
+    },
+    "transaction":{
+        "expressions":[]
+    }
+}

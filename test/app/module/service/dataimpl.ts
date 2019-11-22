@@ -1,8 +1,11 @@
-import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
+import { getConnection, closeConnection, getManager } from "../../../../core/database/connectionmanager";
 import { Transactional, Instance, Transactioner } from "../../../../core/tools/decorator";
+import { Resource } from "../dao/pojo/resource";
+import { ResourceAuthority } from "../dao/pojo/resourceauthority";
+import { EntityManager } from "typeorm";
 
-import Resource from "../dao/pojosequelize/resource";
-import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
+
+
 
 
 
@@ -37,11 +40,11 @@ class DataImpl{
 
         //sequelize
             
-        const res = new Resource({
-            resourceId:13,
-            url:'/test/test'
-        })
-        let r1 = await res.save();
+        const res = new Resource();
+        res.resourceId = 15;
+        res.url = url;
+        let manager:any = await getManager();
+        let r1 = await manager.save(res);
         return 2;
         
     }
@@ -74,23 +77,32 @@ class DataImpl{
         // }
         
         //sequelize
-        const res = new ResourceAuthority({
-            resourceId:11,
-            authorityId:2
-        })
-        let r1 = await res.save();
+        // const res = new ResourceAuthority({
+        //     resourceId:11,
+        //     authorityId:2
+        // })
+        // let r1 = await res.save();
+
+        //typeorm
+        let manager:EntityManager = await getManager();
+        const res = new ResourceAuthority();
+        
+        
+        let r1 = await manager.save(res);
         return 1;
     }
     
     // @Transactional()
     async add(){
-        let r1 = await this.addResAuth();
-        let r2 = await this.addRes('/testtran');
-        if(r1 === 1 && r2 === 2){
-            return true;
-        }else{
-            return false;
-        }
+        // let r1 = await this.addResAuth();
+        let r1 = await this.addRes('/testtran');
+        let r2 = await this.addRes('/testtran1');
+        return true;
+        // if(r1 === 1 && r2 === 2){
+        //     return true;
+        // }else{
+        //     return false;
+        // }
     }
 }
 

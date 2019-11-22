@@ -167,7 +167,7 @@
 		}
 	},*/
 	//数据库配置，文件方式
-	"database":"database_sequelize.json",
+	"database":"database/typeorm.json",
 	//路由配置(可选配置)，如果采用注解方式设置路由，则不用配置
 	/*"route":{
 		//路由命名空间，命名空间+路由路径=实际路由路径

@@ -1,0 +1,14 @@
+{
+    "product":"mssql",
+    "use_pool":true,
+    "options":{
+        "server":"localhost",
+        "port":1434,
+        "user":"your user",
+        "password":"your password",
+        "database":"your db"
+    },
+    "transaction":{
+        "expressions":[]
+    }
+}

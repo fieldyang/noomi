@@ -1,14 +1,13 @@
 {
     "product":"sequelize",
-    // "connection_manager":"sequelizeConnectionManager",
     "use_pool":true,
     "options":{
         "dialect":"mysql",
         "host":"localhost",
         "port":3306,
-        "username":"root",
-        "password":"field",
-        "database":"codement",
+        "username":"your user",
+        "password":"your password",
+        "database":"your db",
         "pool": {
             "max": 5,
             "min": 0,
@@ -18,11 +17,10 @@
         "define": {
             "timestamps": false
         },
-        "models":["/dist/test/app/module/dao/pojosequelize"]
+        "models":["your model js file directory"],
+        "repositoryMode":true
     },
     "transaction":{
-        // "isolation_level":2,
-        // "transaction":"sequelizeTransaction",
         "expressions":[]
     }
 }

@@ -1,0 +1,19 @@
+{
+    "product":"typeorm",
+    "use_pool":true,
+    "options":{
+        "type": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "username": "root",
+        "password": "field",
+        "database": "codement",
+        "logging": true,
+        "entities": [
+            "/dist/test/app/module/dao/pojo/*.js"
+        ]
+    },
+    "transaction":{
+        "isolation_level":1
+    }
+}

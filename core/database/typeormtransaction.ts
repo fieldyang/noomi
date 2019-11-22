@@ -2,7 +2,9 @@ import { Transaction } from "./transaction";
 /**
  * mysql 事务类
  */
-class SequelizeTransaction extends Transaction{
+class TypeormTransaction extends Transaction{
+    manager:any;
+    
     async begin():Promise<void>{}
 
     async commit():Promise<void>{}
@@ -10,4 +12,4 @@ class SequelizeTransaction extends Transaction{
     async rollback():Promise<void>{}
 }
 
-export {SequelizeTransaction};
+export {TypeormTransaction};
