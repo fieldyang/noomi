@@ -14,7 +14,7 @@ import { EntityManager } from "typeorm";
 @Instance('dataImpl')
 class DataImpl{
     // @Transactional()
-    async addRes(url:string){
+    async addRes(id:number,url:string){
         //mysql
         // let sql:string = "insert into t_resource(resource_id,url) values(15,'"+url+"')";
         // let r = await new Promise(async (resolve,reject)=>{
@@ -41,7 +41,7 @@ class DataImpl{
         //sequelize
             
         const res = new Resource();
-        res.resourceId = 15;
+        res.resourceId = id;
         res.url = url;
         let manager:any = await getManager();
         let r1 = await manager.save(res);
@@ -95,8 +95,8 @@ class DataImpl{
     // @Transactional()
     async add(){
         // let r1 = await this.addResAuth();
-        let r1 = await this.addRes('/testtran');
-        let r2 = await this.addRes('/testtran1');
+        let r1 = await this.addRes(16,'/testtran');
+        let r2 = await this.addRes(17,'/testtran1');
         return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;

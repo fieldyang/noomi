@@ -1,9 +1,6 @@
-import {Sequelize as SequelizeOrigin} from 'sequelize';
-import { Sequelize } from "sequelize-typescript";
-import { TransactionManager } from "./transactionmanager";
 import { App } from '../tools/application';
-import { createConnection, Connection, ConnectionManager, getConnectionManager } from 'typeorm';
-import { Resource } from '../../test/app/module/dao/pojo/resource';
+import { Connection, getConnectionManager } from 'typeorm';
+
 
 
 /**

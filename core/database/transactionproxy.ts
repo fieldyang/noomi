@@ -2,7 +2,6 @@ import { DBManager } from "./dbmanager";
 import { TransactionManager } from "./transactionmanager";
 import { getConnection } from "./connectionmanager";
 import { InstanceFactory } from "../main/instancefactory";
-import { Sequelize } from "sequelize";
 import { QueryRunner } from "typeorm";
 
 
