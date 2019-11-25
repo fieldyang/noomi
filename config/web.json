@@ -36,5 +36,14 @@
 			"code":403,
 			"location":"/pages/error/403.html"
 		}
-	]
+    ],
+    //https 配置，如果不需要https，则删除此项
+    "https":{
+        //是否只采用https，如果为true，则不会启动http server
+        "only_https":true,
+        //私钥文件路径，相对于根目录
+        "key_file":"/sslkey/noomiprivatekey.pem",
+        //证书文件路径，相对与根目录
+        "cert_file":"/sslkey/noomicertificate.pem"
+    }
 }

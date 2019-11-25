@@ -44,6 +44,15 @@ class TypeormConnectionManager{
      */
     async release(conn?:any){
     }
+
+    /**
+     * 关闭连接
+     */
+    async close(){
+        if(this.connection){
+            this.connection.close();
+        }
+    }
 }
 
 

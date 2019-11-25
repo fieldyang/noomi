@@ -27,6 +27,7 @@
         - [过滤器 Filter](#过滤器)
         - [异常页 ErrorPage](#异常页ErrorPage)
         - [页面缓存 WebCache](#页面缓存)
+        - [Https](#Https)
     - [安全框架 Security](#安全Security)
     - [数据库 DataBase](#数据库Database)
     - [事务 Transaction](#事务Transaction)
@@ -1182,6 +1183,23 @@ class NodomFilter{
     }
 }
 ```
+### <a id='Https'>Https</a>
+新增于 v0.1.9  
+
+https配置，证书可以通过openssl生成，也可以拷贝源码中的sslkey目录。  
+需要在web配置项中配置https项，配置如下:
+```js
+//https 配置，如果不需要https，则删除此项
+"https":{
+    //是否只采用https，如果为true，则不会启动http server
+    "only_https":true,
+    //私钥文件路径，相对于根目录
+    "key_file":"sslkey/noomiprivatekey.pem",
+    //证书文件路径，相对与根目录
+    "cert_file":"sslkey/noomicertificate.pem"
+}
+
+```
 ***注:web配置可以放在独立文件中（目录与noomi.json相同目录或子目录），在noomi.json中以路径方式引入，也可以在noomi.json中以对象方式配置。配置项为"web"。格式如下：***
 
 ```js
@@ -1588,7 +1606,16 @@ class MyClass{
 				"code":403,
 				"location":"/pages/error/403.html"
 			}
-		]
+        ],
+        //https 配置，如果不需要https，则删除此项
+		"https":{
+			//是否只采用https，如果为true，则不会启动http server
+			"only_https":true,
+			//私钥文件路径，相对于根目录
+			"key_file":"/sslkey/noomiprivatekey.pem",
+			//证书文件路径，相对与根目录
+			"cert_file":"/sslkey/noomicertificate.pem"
+		}
     },
 	// web文件配置方式
 	//"web":"web.json",
@@ -1752,8 +1779,6 @@ class MyClass{
 	},
 	//路由配置，文件方式
 	// "route":"route.json",
-	
-	
 	//过滤器配置
 	"filter":{
 		"filters":[
