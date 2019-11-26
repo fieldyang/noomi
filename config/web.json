@@ -5,6 +5,7 @@
         "upload_tmp_dir":"/upload/tmp",
         "upload_max_size":0,
         "forbidden_path":["/test/app"],
+        // "cross_domain":"*",
 	    "cache":true,
         "cache_option":{
             "save_type":0,
