@@ -9,6 +9,7 @@
         "cache_option":{
             "save_type":0,
             "max_size":20000000,
+            "max_single_size":10000000,
             "file_type":[".html",".htm",".js",".css"],
             "redis":"default",
             "max_age":0,

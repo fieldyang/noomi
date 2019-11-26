@@ -12,8 +12,10 @@
 			"cache_option":{				//静态资源缓存配置
 				"save_type":0,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
 				"max_size":20000000,		//缓存最大字节数，save_type为0时有效
+				"max_single_size":1000000,	//单个缓存文件最大size
 				//缓存静态资源类型，默认['*']，缓存所有静态资源，不建议使用*
-				"file_type":[".html",".htm",".js",".css"],	
+				//"file_type":[".html",".htm",".js",".css"],	
+				"file_type":["*"],
 				"redis":"default",			//redis client名，与redis配置保持一直，默认default
 				"expires":0,				//页面缓存 expires 属性
 				"max_age":0,				//cache-control中的max-age属性
