@@ -282,7 +282,6 @@ class MemoryCache{
                 ci.value = Object.create(null);
             }
             let v:string;
-            let size:number = this.getRealSize(v);
             //转字符串
             if(typeof item.value === 'object'){
                 v = JSON.stringify(item.value);

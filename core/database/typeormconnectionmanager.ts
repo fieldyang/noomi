@@ -1,5 +1,6 @@
 import { App } from '../tools/application';
 import { Connection, getConnectionManager } from 'typeorm';
+import { Util } from '../tools/util';
 
 
 
@@ -13,7 +14,7 @@ class TypeormConnectionManager{
         if(cfg.entities){
             cfg.entities.forEach((item,i)=>{
                 if(typeof item === 'string'){
-                    cfg.entities[i] = App.path.posix.join(process.cwd(),item);
+                    cfg.entities[i] = Util.getAbsPath([item]);
                 }
             });
         }
