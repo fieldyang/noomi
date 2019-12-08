@@ -11,4 +11,5 @@ export class App {
     static redis = require('redis');
     static JSON = require('json5');
     static configPath:string;
+    static isCluster:boolean = false;       //应用是否部署为为集群
 }

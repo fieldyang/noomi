@@ -62,6 +62,12 @@ class Noomi{
         //异常
         ErrorFactory.init(language);
 
+        //设置是否集群
+        App.isCluster = iniJson['cluster']===true?true:false;
+        if(App.isCluster && iniJson['redis'] === undefined){
+            throw new NoomiError("0600");
+        }
+        
         //redis初始化
         if(iniJson.hasOwnProperty('redis')){
             console.log(msgTip["0101"]);

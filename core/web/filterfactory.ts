@@ -10,7 +10,7 @@ interface FilterConfig{
     method_name?:string;    //方法名,默认do
     url_pattern?:string|Array<string>;       //正则表达式串，或数组
     instance?:any;          //实例
-    order?:number;           //优先级，越小越高
+    order?:number;          //优先级，越小越高
 }
 
 /**
