@@ -44,7 +44,7 @@ export class NCache{
             this.saveType = cfg.saveType || 0;
         }
         
-        this.name = cfg.name;
+        this.name = App.appName + '_' + cfg.name;
         this.redis = cfg.redis;
         
         if(this.saveType === 0){

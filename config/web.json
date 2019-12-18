@@ -1,48 +1,52 @@
-
-
 {
     "web_config":{
-        "upload_tmp_dir":"/upload/tmp",
-        "upload_max_size":0,
-        "static_path":["/test/app"],
-        // "cross_domain":"*",
-	    "cache":true,
-        "cache_option":{
-            "save_type":0,
-            "max_size":20000000,
-            "max_single_size":10000000,
-            "file_type":[".html",".htm",".js",".css"],
-            "redis":"default",
-            "max_age":0,
-            "expires":0,
-            "public":true,
-            "private":true,
-            "no_cache":false,
-            "no_store":false,
-            "must_revalidation":false,
-            "proxy_revalidation":false
+        "upload_tmp_dir":"/upload/tmp", //上传临时目录，相对于项目根目录，以/开始
+        "upload_max_size":0,			//上传内容最大字节数
+        "static_path":["/test","/pages"], 		//静态资源路径
+        "welcome":"/test/index.html", 	//welcome 页面
+        //"cross_domain":"*", 			//跨域设置
+        "cache":true,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
+        "cache_option":{				//静态资源缓存配置
+            "save_type":0,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
+            "max_size":20000000,		//缓存最大字节数，save_type为0时有效
+            "max_single_size":1000000,	//单个缓存文件最大size
+            //缓存静态资源类型，默认['*']，缓存所有静态资源，不建议使用*
+            //"file_type":[".html",".htm",".js",".css"],	
+            "file_type":["*"],
+            "redis":"default",			//redis client名，与redis配置保持一直，默认default
+            "expires":0,				//页面缓存 expires 属性
+            "max_age":0,				//cache-control中的max-age属性
+            //cache-control中的public属性，优先级高于private配置，即public和private同时为true时，设置public
+            "public":true,				
+            "private":true,				//cache-control中的private属性
+            "no_cache":false,			//cache-control中的no-cache属性
+            "no_store":false,			//cache-control中的no-store属性
+            "must_revalidation":false,	//cache-control中的must-revalidation属性
+            "proxy_revalidation":false  //cache-control中的proxy-revalidation属性
         }
     },
+    //session配置(可选配置)
     "session":{
-        "name":"NSESSIONID",
-        "timeout":30,
-        "save_type":0,
-        "max_size":20000000,
-        "redis":"default"
+        "name":"NSESSIONID",			//set-cookie中的sessionId名，默认为NSESSIONID
+        "timeout":30,					//session超时时间，单位:分钟
+        "save_type":0,					//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
+        "max_size":20000000,			//缓存最大字节数，save_type为0时有效
+        "redis":"default"				//redis client名，与redis配置保持一直，默认default
     },
-    "error_page":[
-		{
-			"code":404,
-			"location":"/pages/error/404.html"
-		},{
-			"code":403,
-			"location":"/pages/error/403.html"
-		}
-    ],
+    //http异常页配置(可选配置)，如果http异常码在该配置中，则重定向到该异常码对应的页面
+    "error_page":[{
+        //异常码，类型：数字
+        "code":404,
+        //页面地址，相对于项目跟路径，以/开始
+        "location":"/pages/error/404.html"	
+    },{
+        "code":403,
+        "location":"/pages/error/403.html"
+    }],
     //https 配置，如果不需要https，则删除此项
     "https":{
         //是否只采用https，如果为true，则不会启动http server
-        "only_https":true,
+        "only_https":false,
         //私钥文件路径，相对于根目录
         "key_file":"/sslkey/noomiprivatekey.pem",
         //证书文件路径，相对与根目录

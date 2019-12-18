@@ -4,17 +4,18 @@ import { AopFactory } from "./aopfactory";
 import { FilterFactory } from "../web/filterfactory";
 import { HttpRequest } from "../web/httprequest";
 import { Server } from "net";
-import { SecurityFactory } from "../tools/securityfactory";
+
 import { IncomingMessage, ServerResponse } from "http";
 import { RedisFactory } from "../tools/redisfactory";
 import { NoomiError,ErrorFactory } from "../tools/errorfactory";
 import { WebConfig } from "../web/webconfig";
 import { RequestQueue } from "../web/requestqueue";
 import { DBManager } from "../database/dbmanager";
-import { App } from "../tools/application";
 import { NoomiTip_zh } from "../locales/msg_zh";
 import { NoomiTip_en } from "../locales/msg_en";
 import { Util } from "../tools/util";
+import { App } from "../tools/application";
+import { SecurityFactory } from "../tools/securityfactory";
 
 class Noomi{
     port:number;            //http port
@@ -49,6 +50,7 @@ class Noomi{
         if(iniJson === null){
             throw new NoomiError("1001");
         }
+        App.appName = iniJson['app_name']||'APP';
         let language:string = iniJson['language'] || 'zh';
         let msgTip:object;
         switch(language){

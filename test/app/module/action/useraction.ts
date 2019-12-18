@@ -18,6 +18,10 @@ class UserAction extends BaseAction{
     @Inject("dataImpl")
     dataImpl:DataImpl;
     
+    async user(){
+        return{success:true,user:'yes'};
+    }
+
     async addres(){
         try{
             let r = await this.dataImpl.add();
@@ -56,11 +60,10 @@ class UserAction extends BaseAction{
             return 2;
         }
         
-        // let ui = this.userService.getInfo(params);
-        // return {
-        //     success:true,
-        //     result:ui
-        // }
+        return {
+            success:true,
+            result:'user info'
+        }
     }
 
     @Route('/showinfo')

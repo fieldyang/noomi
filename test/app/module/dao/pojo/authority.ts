@@ -26,8 +26,6 @@ export class Authority extends BaseEntity{
     @OneToMany(()=>GroupAuthority, (groupAuthority: GroupAuthority)=>groupAuthority.authority,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     tGroupAuthoritys:GroupAuthority[];
     
-
-   
     @OneToMany(()=>ResourceAuthority, (resourceAuthority: ResourceAuthority)=>resourceAuthority.authority,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     resourceAuthorities:ResourceAuthority[];
 

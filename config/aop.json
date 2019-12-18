@@ -1,4 +1,3 @@
-//aop配置，如果为注解方式，则不用配置
 {
     //子文件列表，表示可以加载的子aop文件
     "files":[],  
@@ -17,13 +16,16 @@
             //切面对应的实例名，必填
             "instance":"logAdvice",
             //通知，必填
+            //所有通知对应的方法，传入参数为被拦截方法的相关信息，格式为{instanceName:实例名,methodName:方法名,params:参数数组}
+            //after-return增加 returnValue:结果
+            //sfter-throw增加 throwValue:异常信息
             "advices":[
                 {
                     //通知对应的切点
                     "pointcut_id":"pointcut1",	
-                    //通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(return),after-throw(抛出异常),around(环绕，即前后置)
+                    //通知类型，字符串，必填，取值范围:before(前置),after(后置),after-return(正常return),after-throw(抛出异常),around(环绕，即前后置)
                     "type":"before",
-                    //切面对应实例的方法名，字符串，必填
+                    //该切面的方法名，字符串，必填
                     "method":"before"
                 },{
                     "pointcut_id":"pointcut1",

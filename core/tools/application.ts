@@ -1,4 +1,5 @@
 export class App {
+    static appName:string='APP';          //应用名
     static http = require('http');
     static fs = require('fs');
     static path = require('path');

@@ -1,8 +1,8 @@
 {
-    //路由命名空间
+    //路由命名空间，命名空间+路由路径=实际路由路径
     "namespace":"",
-    //子文件，相对于app的configPath路径
-    "files":["route/subroute.json"],    
+    //子文件，相对于configPath路径
+    // "files":["route/subroute.json"],    
     //路由配置
     "routes":[              			
         {
@@ -20,8 +20,9 @@
                 "type":"redirect",		
                 //如果type为redirect和chain，则此项必填
                 //为redirect，则为页面或路由路径，为chain时，必须为路由路径
+                //url支持参数，如 ${page}，则表示用当前路由对应的实例中的page属性值作为url
                 "url":"/user/showinfo",
-                //参数列表，如果url为路由路径，则会从现路由对应的实例中取参数列表对应的属性并作为参数传递到下个路由
+                //参数列表，如果url为路由路径，则会从现路由对应的实例中取参数列表对应的属性值并作为参数传递到下个路由
                 "params":["userName"]
             },{
                 //方法返回值，如果return 2，则调用该路由结果

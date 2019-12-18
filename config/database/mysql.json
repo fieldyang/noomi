@@ -1,6 +1,14 @@
 {
+    //数据库产品，字符串，可选值：mysql,oracle,mssql,sequelize，默认mysql
     "product":"mysql",
+    //连接管理器实例名，字符串，如果不设置，则根据product自动生成，如product为mysql，
+    //则connection_manager为mysqlConnectionManager，
+    //可以使用自定义connection_mananger，需实现ConnectionManager接口
+    "connection_manager":"mssqlConnectionManager", 
+    //是否使用数据库连接池，如果设置为true，则options选项需按照数据库产品的连接规则设置连接池相关属性，
+    //此设置对mssql和sequelize无效，mssql仅支持连接池的连接方式。sequelzie由配置文件内部设置
     "use_pool":true,
+    //数据库连接属性，请参考各数据库产品的连接设置方式
     "options":{
         "host":"localhost",
         "port":3306,
@@ -9,7 +17,15 @@
         "database":"codement",
         "connectionLimit":10
     },
+    //事务设置，当存在该项时，noomi开启事务嵌套能力
     "transaction":{
-        "expressions":[]
+        //事务实例名，如果不设置，则根据product自动生成，如果自定义事务，请继承Transaction接口
+          // "transaction":"mssqlTransaction",
+        //隔离级, 针对sequelzie，如果为数据库，则执行数据库的隔离级 
+        //取值: 1 read uncommited, 2 read commited, 3 repeatable read, 4 serializable
+        // "isolation_level":2,
+        //方法表达式，符合表达式条件的方法会被设置为事务方法，调用时该方法涉及的数据库操作会加入事务执行，当出现异常时，会进行事务回滚
+        //如下所示，如果实例名以service开头，其下所有方法都将作为事务方法
+        // "expressions":["service*.*"]
     }
 }
