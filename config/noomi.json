@@ -6,7 +6,7 @@
 	"web":"web.json",
 	"instance":"instance.json",
 	"aop":"aop.json",
-	"database":"database/mysql.json",
+	"database":"database/sequelize.json",
 	// "route":"route.json",
 	"filter":"filter.json",
 	"redis":"redis.json",

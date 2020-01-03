@@ -1,14 +1,10 @@
 import { getConnection, closeConnection, getManager } from "../../../../core/database/connectionmanager";
-import { Transactional, Instance, Transactioner } from "../../../../core/tools/decorator";
-import { Resource } from "../dao/pojo/resource";
-import { ResourceAuthority } from "../dao/pojo/resourceauthority";
+import { Transaction, Instance, Transactioner } from "../../../../core/tools/decorator";
+// import { Resource } from "../dao/pojo/resource";
+// import { ResourceAuthority } from "../dao/pojo/resourceauthority";
 import { EntityManager } from "typeorm";
-
-
-
-
-
-
+import Resource from "../dao/pojosequelize/resource";
+import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
 
 @Transactioner()
 @Instance('dataImpl')
@@ -16,7 +12,7 @@ class DataImpl{
     // @Transactional()
     async addRes(id:number,url:string){
         //mysql
-        // let sql:string = "insert into t_resource(resource_id,url) values(15,'"+url+"')";
+        // let sql:string = "insert into t_resource(resource_id,url) values(" + id + ",'"+url+"')";
         // let r = await new Promise(async (resolve,reject)=>{
         //     let conn = await getConnection();
         //     conn.query(sql,(err,result)=>{
@@ -37,15 +33,19 @@ class DataImpl{
         // let conn = await getConnection();
         // let r = await conn.query(sql);
 
-
         //sequelize
-            
-        const res = new Resource();
-        res.resourceId = id;
-        res.url = url;
-        let manager:any = await getManager();
-        let r1 = await manager.save(res);
-        return 2;
+        let res = new Resource({
+            resourceId:id,
+            url:url
+        });
+        let r1 = await res.save();
+        //typeorm
+        // let res = new Resource();
+        // res.resourceId = id;
+        // res.url = url;
+        // let manager:any = await getManager();
+        // let r1 = await manager.save(res);
+        // return 2;
         
     }
     // @Transactional()
@@ -95,14 +95,40 @@ class DataImpl{
     // @Transactional()
     async add(){
         // let r1 = await this.addResAuth();
-        let r1 = await this.addRes(16,'/testtran');
-        let r2 = await this.addRes(17,'/testtran1');
+        let r1 = await this.addRes(18,'/testtran');
+        try{
+            let r2 = await this.addRes(18,'/testtran1');
+        }catch(e){
+
+        }
+        
         return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;
         // }else{
         //     return false;
         // }
+    }
+
+
+    async methodA(){
+        // try{
+            await this.mehtodB();
+        // }catch(e){
+        //     console.log(e);
+        // }
+        
+        // await this.methodC();
+        console.log('finished');
+    }
+
+    async mehtodB(){
+        // throw new Error('methodB failed');
+        await this.methodC();
+    }
+
+    async methodC(){
+        throw new Error('methodB failed');
     }
 }
 

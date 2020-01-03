@@ -1,4 +1,4 @@
-import { BaseAction } from "../../../../core/main/route/baseaction";
+import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { User } from "../dao/pojo/user";
 import { SecurityFactory } from "../../../../core/tools/securityfactory";
 import { GroupUser } from "../dao/pojo/groupuser";
@@ -11,7 +11,7 @@ import { getConnection, closeConnection } from "../../../../core/database/connec
 @Router({
     namespace:'/user'
 })
-export class LoginAction extends BaseAction{
+export class LoginAction extends BaseRoute{
     toPage:string;
     @Route({
         "path":"/login",

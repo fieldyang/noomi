@@ -1,6 +1,6 @@
 import { Inject, Instance, Router, Route } from "../../../../core/tools/decorator";
 import { UserService } from "../service/userservice";
-import { BaseAction } from "../../../../core/main/route/baseaction";
+import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { DataImpl } from "../service/dataimpl";
 
 /**
@@ -11,7 +11,7 @@ import { DataImpl } from "../service/dataimpl";
     path:'/'
 })
 
-class UserAction extends BaseAction{
+class UserAction extends BaseRoute{
     userName:string;
     @Inject("userService")
     userService:UserService;
@@ -95,6 +95,15 @@ class UserAction extends BaseAction{
     async addtwo(){
         try{
             let r = await this.userService.addTwoUser(this.model.id,this.model.name,this.model.age,this.model.mobile);
+            return {success:true}
+        }catch(e){
+            return {success:false,msg:e};
+        }
+    }
+
+    async testNest(){
+        try{
+            let r = await this.dataImpl.methodA();
             return {success:true}
         }catch(e){
             return {success:false,msg:e};

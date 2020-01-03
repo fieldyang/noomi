@@ -5,9 +5,9 @@
         "dialect":"mysql",
         "host":"localhost",
         "port":3306,
-        "username":"your user",
-        "password":"your password",
-        "database":"your db",
+        "username":"root",
+        "password":"field",
+        "database":"codement",
         "pool": {
             "max": 5,
             "min": 0,
@@ -17,7 +17,7 @@
         "define": {
             "timestamps": false
         },
-        "models":["your model js file directory"],
+        "models":["/dist/test/app/module/dao/pojosequelize"],
         "repositoryMode":true
     },
     "transaction":{

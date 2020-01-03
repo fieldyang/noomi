@@ -1,8 +1,8 @@
-import { BaseAction } from "../../../../core/main/route/baseaction";
+import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { Route, Router } from "../../../../core/tools/decorator";
 
 @Router()
-class UploadAction extends BaseAction{
+class UploadAction extends BaseRoute{
     @Route('/upload')
     upload(data){
         return this.model;

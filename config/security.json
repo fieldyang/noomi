@@ -6,13 +6,15 @@
     //"expressions":["/*"], 
     //数据库相关设置
     "dboption":{
+        "product":"mysql",
         //数据库连接设置，如果没有配置database，则此项必填，否则使用数据库配置中的数据库connection manager
-        // "conn_cfg":{
-        //     "user":"root",
-        //     "password":"field",
-        //     "host":"localhost",
-        //     "database":"codement"
-        // },
+        "conn_cfg":{
+            
+            "user":"root",
+            "password":"field",
+            "host":"localhost",
+            "database":"codement"
+        },
         //鉴权相关数据表名字映射，如果与默认值相同，则不用配置，数据表结构详情请参考安全管理器节
         /*"tables":{
             "groupAuthority":"t_group_authority", 		//组权限表名，默认t_group_authority
