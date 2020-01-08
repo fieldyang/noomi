@@ -5,6 +5,7 @@ import { Transaction, Instance, Transactioner } from "../../../../core/tools/dec
 import { EntityManager } from "typeorm";
 import Resource from "../dao/pojosequelize/resource";
 import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
+import { Sequelize } from "sequelize-typescript";
 
 @Transactioner()
 @Instance('dataImpl')
@@ -33,17 +34,27 @@ class DataImpl{
         // let conn = await getConnection();
         // let r = await conn.query(sql);
 
-        //sequelize
-        let res = new Resource({
+        let seq:Sequelize  = await getConnection();
+        let res:Resource = await seq.getRepository(Resource).create({
             resourceId:id,
             url:url
         });
+        
+        //sequelize
+        // let res = Resource.build({
+        //     resourceId:id,
+        //     url:url
+        // });
+        // let res = new Resource({
+        //     resourceId:id,
+        //     url:url
+        // });
         let r1 = await res.save();
         //typeorm
         // let res = new Resource();
         // res.resourceId = id;
         // res.url = url;
-        // let manager:any = await getManager();
+        // let manager:EntityManager = await getManager();
         // let r1 = await manager.save(res);
         // return 2;
         

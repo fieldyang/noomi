@@ -1,11 +1,12 @@
 import { Connection, getConnectionManager, EntityManager } from 'typeorm';
 import { Util } from '../tools/util';
+import { IConnectionManager } from './connectionmanager';
 
 
 /**
  * typeorm连接管理器
  */
-class TypeormConnectionManager{
+class TypeormConnectionManager implements IConnectionManager{
     /**
      * typeorm connection
      */
