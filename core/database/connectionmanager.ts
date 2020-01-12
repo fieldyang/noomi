@@ -54,7 +54,7 @@ async function getConnection():Promise<Sequelize|Connection|any>{
 };
 
 /**
- * 关闭连接
+ * 关闭数据库连接
  * @param conn  待关闭的连接，product为原生数据库(mysql、mssql、oracle) 时有效
  */
 async function closeConnection(conn:any){

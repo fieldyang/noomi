@@ -56,9 +56,9 @@ interface IInstanceCfg{
      */
     singleton?:boolean;                     
     /**
-     * 参数列表，初始化时需要传入的参数
+     * 参数数组，初始化时需要传入的参数
      */
-    params?:Array<any>;                     
+    params?:Array<any>;
     /**
      * 属性列表，定义需要注入的属性
      */

@@ -11,18 +11,18 @@ import { Sequelize } from "sequelize-typescript";
 @Instance('dataImpl')
 class DataImpl{
     // @Transactional()
-    async addRes(id:number,url:string){
+    async addRes(url:string,id?:number){
         //mysql
-        // let sql:string = "insert into t_resource(resource_id,url) values(" + id + ",'"+url+"')";
-        // let r = await new Promise(async (resolve,reject)=>{
-        //     let conn = await getConnection();
-        //     conn.query(sql,(err,result)=>{
-        //         if(err){
-        //             reject(err);
-        //         }
-        //         resolve(result);
-        //     });
-        // }); 
+        let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
+        let r = await new Promise(async (resolve,reject)=>{
+            let conn = await getConnection();
+            conn.query(sql,[url,id],(err,result)=>{
+                if(err){
+                    reject(err);
+                }
+                resolve(result);
+            });
+        }); 
         
         //oracle
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -34,13 +34,14 @@ class DataImpl{
         // let conn = await getConnection();
         // let r = await conn.query(sql);
 
-        let seq:Sequelize  = await getConnection();
-        let res:Resource = await seq.getRepository(Resource).create({
-            resourceId:id,
-            url:url
-        });
-        
         //sequelize
+        // let seq:Sequelize  = await getConnection();
+        // let res:Resource = await seq.getRepository(Resource).create({
+        //     resourceId:id,
+        //     url:url
+        // });
+        
+        
         // let res = Resource.build({
         //     resourceId:id,
         //     url:url
@@ -49,7 +50,7 @@ class DataImpl{
         //     resourceId:id,
         //     url:url
         // });
-        let r1 = await res.save();
+        // let r1 = await res.save();
         //typeorm
         // let res = new Resource();
         // res.resourceId = id;
@@ -106,12 +107,12 @@ class DataImpl{
     // @Transactional()
     async add(){
         // let r1 = await this.addResAuth();
-        let r1 = await this.addRes(18,'/testtran');
-        try{
-            let r2 = await this.addRes(18,'/testtran1');
-        }catch(e){
+        let r1 = await this.addRes('/testtran');
+        // try{
+            let r2 = await this.addRes('/testtran1',18);
+        // }catch(e){
 
-        }
+        // }
         
         return true;
         // if(r1 === 1 && r2 === 2){
