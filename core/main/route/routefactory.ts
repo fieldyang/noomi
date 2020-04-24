@@ -294,7 +294,6 @@ class RouteFactory{
                 }
                 const route = this.getRoute(url1);
                 if(route !== null){
-                    
                     //调用
                     try{
                         let re = route.instance[route.method](params);
@@ -312,8 +311,29 @@ class RouteFactory{
                     }
                 }
                 return;
-            case "none": //什么都不做
+            case "none":    //什么都不做
                 break;
+            case "stream":  //文件流
+                //文件名
+                let pn:string = result.params[0];
+                
+                if(pn){
+                    let fn:string = getValue(instance,pn);
+                    if(fn){
+                        fn = Util.getAbsPath([fn]);
+                        if(!App.fs.existsSync(fn)){
+                            throw new NoomiError('0050');
+                        }
+                        let stream = App.fs.createReadStream(fn);
+                        if(stream){
+                            res.writeStreamToClient({
+                                data:stream,
+                                type:'application/octet-stream'
+                            });
+                        }
+                    }
+                }
+                return;
             default: //json
                 res.writeToClient({
                     data:data

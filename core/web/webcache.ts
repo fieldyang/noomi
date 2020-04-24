@@ -3,8 +3,7 @@ import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { Stats } from "fs";
 import { App } from "../tools/application";
-import { pipeline, Stream } from "stream";
-import { resolve } from "dns";
+import { Stream } from "stream";
 
 /**
  * web 缓存类
@@ -59,7 +58,6 @@ class WebCache{
     /**
      * 不能缓存的媒体类型
      */
-    // static excludeFileTypes:Array<string> = ["image/","audio/","video/"];
     static excludeFileTypes:Array<string> = ["audio/","video/"];
     /**
      * 初始化
@@ -121,7 +119,7 @@ class WebCache{
         //获取mime type
         mimeType = App.mime.getType(path);
         //超出最大尺寸
-        if(stat.size < this.maxSingleSize){
+        if(this.maxSingleSize > 0 && stat.size < this.maxSingleSize){
             for (let tp of this.fileTypes){
                 if(mimeType.startsWith(tp)){
                     addFlag = true;
@@ -211,7 +209,7 @@ class WebCache{
             this.writeCacheToClient(response);
         }
         
-        if(data !== null){
+        if(data){
             return {data:data,type:mimeType};
         }
     }

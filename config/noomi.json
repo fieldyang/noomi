@@ -2,7 +2,7 @@
 {
 	"app_name":"App", 		//应用名
 	"language":"zh", 	//框架提示语言(可选配置)，zh中文，en英文，默认zh
-	"cluster":true,		//集群设置，如果设置为true，则表示运行于集群环境，所有NCaceh的save_type都设置为1
+	"cluster":false,		//集群设置，如果设置为true，则表示运行于集群环境，所有NCaceh的save_type都设置为1
 	"web":"web.json",
 	"instance":"instance.json",
 	"aop":"aop.json",

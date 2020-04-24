@@ -17,6 +17,8 @@ class UserAction extends BaseRoute{
     userService:UserService;
     @Inject("dataImpl")
     dataImpl:DataImpl;
+
+    downloadPath:string;
     
     async user(){
         return{success:true,user:'yes'};
@@ -49,6 +51,11 @@ class UserAction extends BaseRoute{
             "type":"chain",
             "url":"/user/last",
             "params":["type"]
+        },{
+            value:3,
+            type:'stream',
+            // url:'/user/down',
+            params:['downloadPath']
         }]
     })
     getinfo(params){
@@ -58,6 +65,9 @@ class UserAction extends BaseRoute{
         }else if(params.type==2){
             this.userName = 'bbb';
             return 2;
+        }else if(params.type==3){
+            this.downloadPath = '/test/js/app.js';
+            return 3;
         }
         
         return {
