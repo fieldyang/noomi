@@ -3,6 +3,8 @@ import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { Stats } from "fs";
 import { App } from "../tools/application";
+import { pipeline, Stream } from "stream";
+import { resolve } from "dns";
 
 /**
  * web 缓存类
@@ -57,7 +59,8 @@ class WebCache{
     /**
      * 不能缓存的媒体类型
      */
-    static excludeFileTypes:Array<string> = ["image","audio","video"];  
+    // static excludeFileTypes:Array<string> = ["image/","audio/","video/"];
+    static excludeFileTypes:Array<string> = ["audio/","video/"];
     /**
      * 初始化
      * @param cfg   配置项，包括:
@@ -74,7 +77,11 @@ class WebCache{
      */
     static async init(cfg:any){
         this.maxAge = cfg.max_age|0;
-        this.fileTypes = cfg.file_type || ['*'];
+        this.fileTypes = cfg.file_type;
+        if(!this.fileTypes || this.fileTypes[0] === '*'){
+            this.fileTypes = ['text/','application/','image/'];
+        }
+
         this.noCache = cfg.no_cache || false;
         this.noStore = cfg.no_store || false;
         this.isPublic = cfg.public || false;
@@ -97,11 +104,11 @@ class WebCache{
      * @param url       url请求url
      * @param path      url对应路径
      * @param response  response对象
+     * @param gzip      压缩类型 gzip,br,deflate
      * @returns         {data:文件内容,type:mime type}
      */
-    static async add(url:string,path:string,response?:HttpResponse):Promise<Object>{
+    static async add(url:string,path:string,response:HttpResponse,gzip:string):Promise<Object>{
         const fs = App.fs;
-        const pathMdl = App.path;
         let addFlag:boolean = false;
 
         //获取lastmodified
@@ -115,19 +122,17 @@ class WebCache{
         mimeType = App.mime.getType(path);
         //超出最大尺寸
         if(stat.size < this.maxSingleSize){
-            //非全部类型，需要进行类型判断
-            if(this.fileTypes[0] === '*'){
-                addFlag = true;
-            }else{
-                let extName = pathMdl.extname(url);
-                if(this.fileTypes.includes(extName)){
+            for (let tp of this.fileTypes){
+                if(mimeType.startsWith(tp)){
                     addFlag = true;
+                    break;
                 }
             }
+            
             //媒体类型不缓存
             if(addFlag){
                 for(let t of this.excludeFileTypes){
-                    if(mimeType.indexOf(t)){
+                    if(mimeType.startsWith(t)){
                         addFlag = false;
                         break;
                     }
@@ -135,15 +140,51 @@ class WebCache{
             }    
         }
         
-        let data:string|undefined;
+        let data:Buffer;
         if(addFlag){
-            //读数据
-            data = await new Promise((resolve,reject)=>{
-                App.fs.readFile(path,'utf8',(err,v)=>{
-                    if(err){
-                        resolve();
+            const stream = App.stream;
+            const zlib = App.zlib;
+            const util = App.util;
+            const pipeline = util.promisify(stream.pipeline);
+            let srcStream:Stream;
+            let bufs = [];
+            let tmpFn:string;
+            if(gzip){
+                //生成临时文件
+                tmpFn = App.path.resolve(App.path.dirname(path),App.uuid.v1());
+                //根据不同类型压缩
+                let zip;
+                switch(gzip){
+                    case 'br':
+                        zip = zlib.createBrotliDecompress();
+                        break;
+                    case 'gzip':
+                        zip = zlib.createGzip();
+                        break;
+                    case 'deflate':
+                        zip = zlib.createInflate();
+                        break;
+                }
+                //压缩
+                await pipeline(App.fs.createReadStream(path),zip,App.fs.createWriteStream(tmpFn));
+                //创建输入流
+                srcStream = fs.createReadStream(tmpFn);
+            }else{
+                //创建输入流
+                srcStream = fs.createReadStream(path);
+            }
+
+            //从输入流读数据
+            data = await new Promise((res,rej)=>{
+                srcStream.on('data',(buf)=>{
+                    bufs.push(buf);
+                });
+                srcStream.on('end',()=>{
+                    res(Buffer.concat(bufs));
+                    //删除临时文件
+                    if(tmpFn){
+                        App.fs.unlinkSync(tmpFn);
                     }
-                    resolve(v);
                 });
             });
             //最后修改 
@@ -152,20 +193,17 @@ class WebCache{
             const hash = App.crypto.createHash('md5');
             hash.update(data,'utf8');
             let etag:string = hash.digest('hex');
-            if(response){
-                this.writeCacheToClient(response,etag,lastModified);
-            }
-            if(addFlag){
-                await this.cache.set({
-                    key:url,
-                    value:{
-                        etag:etag,
-                        lastModified:lastModified,
-                        data:data,
-                        type:mimeType
-                    }
-                });
-            }
+            await this.cache.set({
+                key:url,
+                value:{
+                    etag:etag,
+                    lastModified:lastModified,
+                    data:!gzip?data:undefined,
+                    zipData:gzip?data:undefined,
+                    type:mimeType
+                }
+            });
+        
             if(response){
                 this.writeCacheToClient(response,etag,lastModified);
             }
@@ -173,7 +211,7 @@ class WebCache{
             this.writeCacheToClient(response);
         }
         
-        if(data){
+        if(data !== null){
             return {data:data,type:mimeType};
         }
     }
@@ -183,9 +221,10 @@ class WebCache{
      * @param request   request
      * @param response  response
      * @param url       url
+     * @param gzip      压缩类型 br,gzip,deflate
      * @returns         0不用回写数据 或 {data:data,type:mimetype}
      */
-    static async load(request:HttpRequest,response:HttpResponse,url:string):Promise<number|object>{
+    static async load(request:HttpRequest,response:HttpResponse,url:string,gzip:string):Promise<number|object>{
         let rCheck:number = await this.check(request,url);
         switch(rCheck){
             case 0:
@@ -193,10 +232,10 @@ class WebCache{
             case 1:
                 //从缓存获取
                 let map = await this.cache.getMap(url);
-                if(map !== null && map.data && map.data !== ''){
+                if(map !== null && (!gzip && map.data) || (gzip && map.zipData)){
                     this.writeCacheToClient(response,map.etag,map.lastModified);
                     return {
-                        data:map.data,
+                        data:gzip?map.zipData:map.data,
                         type:map.type
                     }
                 }

@@ -5,7 +5,8 @@ import { Route, Router } from "../../../../core/tools/decorator";
 class UploadAction extends BaseRoute{
     @Route('/upload')
     upload(data){
-        return this.model;
+        console.log(this.model);
+        // return this.model;
     }
 }
 
