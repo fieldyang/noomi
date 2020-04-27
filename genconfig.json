@@ -1,0 +1,18 @@
+{
+    //语言 zh(中文) en(英文)
+    "language":"zh",
+    //源ts文件目录
+    "src":"./core",
+    //存储markdown文件的目录
+    "dst":"./docs",
+    //文档基础路径，生成文件内部和文件间超链接时需要
+    "baseUrl":"/webroute/api/", 
+    //路径后缀名，比如".html"，如果最后由markdown文件生成html文件，则可能需要url指向为html文件
+    "fileSuffix":"",            
+    //是否显示私有属性和方法
+    "showPrivate":true,         
+    //默认版本号，如果有@since，则显示@since值，否则显示defaultSince，如果不设置，则不显示
+    "defaultSince":"0.0.1",
+    //不添加到文档的注释标签数组
+    "excludeTags":["author","date"]
+}
