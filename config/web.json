@@ -14,7 +14,7 @@
             // "file_type":["*"],
             "redis":"default",			//redis client名，与redis配置保持一直，默认default
             "expires":0,				//页面缓存 expires 属性
-            "max_age":0,				//cache-control中的max-age属性
+            "max_age":1800,				//cache-control中的max-age属性
             //cache-control中的public属性，优先级高于private配置，即public和private同时为true时，设置public
             "public":true,				
             "private":true,				//cache-control中的private属性
