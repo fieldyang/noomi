@@ -43,7 +43,7 @@
 #### 参数
 + url *&lt;<font class='datatype'>string</font>&gt;*       url路径
 + request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request 对象
-+ response *&lt;<font class='datatype'>HttpResponse</font>&gt;*  response 对象
++ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response 对象
   
 #### 返回值
 <font class='datatype'>Promise&lt;boolean&gt;</font>  

@@ -35,12 +35,22 @@ interface IResponseWriteCfg{
     zip?:string;  
 }
 
+/** 
+ * response类
+ * @remarks
+ * 在ServerResponse基础上增加了写客户端方法，更适合直接使用
+ */ 
 export class HttpResponse extends ServerResponse{
     srcRes:ServerResponse;                  //源response
     request:IncomingMessage;                //源request
     cookie:HttpCookie = new HttpCookie();   //cookie
     
-    init(req,res){
+    /**
+     * 初始化response对象
+     * @param req   源request对象
+     * @param res   源response对象
+     */
+    init(req:IncomingMessage,res:ServerResponse){
         this.request = req;
         this.srcRes = res;
     }
@@ -85,6 +95,7 @@ export class HttpResponse extends ServerResponse{
      * 写数据流到浏览器(客户端)
      * @param config    回写配置项
      *              data:file path
+     * @since           0.3.3
      */
     writeFileToClient(config:IResponseWriteCfg):void{
         //设置cookie

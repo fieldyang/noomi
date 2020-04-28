@@ -45,7 +45,7 @@ http response对象
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>HttpResponse</font>  
+<font class='datatype'>[HttpResponse](HttpResponse)</font>  
 ### <a id="PROP_srcReq">srcReq</a>
 源IncommingMessage对象(server listen 时传入)，某些需要操纵源IncommingMessage的情况下，可以直接使用  
 #### 修饰符

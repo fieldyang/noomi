@@ -37,7 +37,7 @@ void
 <font class="modifier">public  static  async</font>  
 #### 参数
 + request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request
-+ response *&lt;<font class='datatype'>HttpResponse</font>&gt;*  response
++ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response
 + path *&lt;<font class='datatype'>string</font>&gt;*      文件路径
   
 #### 返回值

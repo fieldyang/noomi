@@ -33,7 +33,7 @@ response对象
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>HttpResponse</font>  
+<font class='datatype'>[HttpResponse](HttpResponse)</font>  
 ## 方法
 ### <a id="METHOD_setModel">setModel(data)</a>
 #### 描述
@@ -61,7 +61,7 @@ void
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ res *&lt;<font class='datatype'>HttpResponse</font>&gt;*   response对象
++ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*   response对象
   
 #### 返回值
 <font class='datatype'>void</font>  

@@ -1,6 +1,7 @@
 # Class WebCache
 ## 属性列表
 + [cache](#PROP_cache)
++ [cacheTypes](#PROP_cacheTypes)
 + [excludeFileTypes](#PROP_excludeFileTypes)
 + [expires](#PROP_expires)
 + [isPrivate](#PROP_isPrivate)
@@ -15,6 +16,7 @@
 ## 方法列表
 + [add](#METHOD_add)
 + [check](#METHOD_check)
++ [checkNeedCache](#METHOD_checkNeedCache)
 + [init](#METHOD_init)
 + [load](#METHOD_load)
 + [writeCacheToClient](#METHOD_writeCacheToClient)
@@ -32,6 +34,14 @@ cache对象
 <font class="modifier">public  static</font>  
 #### 数据类型
 <font class='datatype'>[NCache](NCache)</font>  
+### <a id="PROP_cacheTypes">cacheTypes</a>
+可压缩类型  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 数据类型
+<font class='datatype'>Array&lt;RegExp&gt;</font>  
+#### 初始值
+[  
 ### <a id="PROP_excludeFileTypes">excludeFileTypes</a>
 不能缓存的媒体类型  
 #### 修饰符
@@ -103,7 +113,7 @@ cache-control proxy-revalidation
 #### 参数
 + url *&lt;<font class='datatype'>string</font>&gt;*       url请求url
 + path *&lt;<font class='datatype'>string</font>&gt;*      url对应路径
-+ response *&lt;<font class='datatype'>HttpResponse</font>&gt;*  response对象
++ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response对象
 + gzip *&lt;<font class='datatype'>string</font>&gt;*      压缩类型 gzip,br,deflate
   
 #### 返回值
@@ -121,6 +131,16 @@ cache-control proxy-revalidation
 #### 返回值
 <font class='datatype'>Promise&lt;number&gt;</font>  
 0:从浏览器获取 1:已更新 2:资源不在缓存  
+### <a id="METHOD_checkNeedCache">checkNeedCache(mimeType)</a>
+#### 描述
+检查mime类型文件是否需要压缩  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 参数
++ mimeType *&lt;<font class='datatype'>string</font>&gt;* 
+  
+#### 返回值
+<font class='datatype'>boolean</font>  
 ### <a id="METHOD_init">init(cfg)</a>
 #### 描述
 初始化  
@@ -141,16 +161,15 @@ max_single_size     单个缓存文件最大尺寸
   
 #### 返回值
 void  
-### <a id="METHOD_load">load(request,response,url,gzip)</a>
+### <a id="METHOD_load">load(request,response,url)</a>
 #### 描述
 加载资源  
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
 + request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request
-+ response *&lt;<font class='datatype'>HttpResponse</font>&gt;*  response
++ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response
 + url *&lt;<font class='datatype'>string</font>&gt;*       url
-+ gzip *&lt;<font class='datatype'>string</font>&gt;*      压缩类型 br,gzip,deflate
   
 #### 返回值
 <font class='datatype'>Promise&lt;number|object&gt;</font>  
@@ -161,7 +180,7 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ response *&lt;<font class='datatype'>HttpResponse</font>&gt;*          response对象
++ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*          response对象
 + etag *&lt;<font class='datatype'>string</font>&gt;*              etag            文件hash码
 + lastModified *&lt;<font class='datatype'>string</font>&gt;*      lasmodified     最后修改时间
   

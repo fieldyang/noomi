@@ -1,5 +1,6 @@
 # Class RedisFactory
 ## 属性列表
++ [bufferPrefix](#PROP_bufferPrefix)
 + [clientMap](#PROP_clientMap)
   
 ## 方法列表
@@ -19,6 +20,14 @@
 <font class="since">开始于 : v0.0.1</font>  
 redis 工厂  
 ## 属性
+### <a id="PROP_bufferPrefix">bufferPrefix</a>
+buffer data 前缀，用于识别buffer  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 数据类型
+<font class='datatype'>string</font>  
+#### 初始值
+'@@BF_DT@@'  
 ### <a id="PROP_clientMap">clientMap</a>
 存储所有的redis对象  
 #### 修饰符
