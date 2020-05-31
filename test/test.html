@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="data:;base64,=">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
     <title>Document</title>
     <style>
         div{
@@ -16,10 +18,36 @@
     </style>
 </head>
 <body>
-    <a href='../pages/error/403.html'>403</a>
-    <a href='../pages/error/403.html'>404</a>
-    <a href='../pages/login.html'>login</a>
+    <form >
+        <div>类型：<input type='text' name='type' enctype='multipart/form-data'/></div>
+        <div>姓名：<input type='text' name='userName'/></div>
+    </form>
+    <button onclick='post()'>提交</button>
 </body>
+<script>
+    // function post(){
+    //     let xhr = new XMLHttpRequest();
+    //     xhr.open('POST','http://localhost:3000/user/getinfo',true);
+    //     // let form = new FormData(document.querySelector('form'));
+    //     // xhr.setRequestHeader('Content-Type','multipart/form-data');
+    //     xhr.send('type=4&userName=aaa');
+    //     xhr.onload = (x)=>{
+    //         console.log(xhr.responseText);
+    //     }
     
-</script>
+    // }
+
+    function post(){
+        axios.post('http://localhost:3000/user/getinfo', {
+            type: '4',
+            userName:'张三'
+        })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+</script>    
 </html>

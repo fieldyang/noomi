@@ -4,7 +4,7 @@ import { Instance, WebFilter } from "../../../../core/tools/decorator";
     name:'nodomFilter'
 })
 class NodomFilter{
-    @WebFilter('/*',1)
+    //@WebFilter('/*',1)
     do(request,response){
         const url = require("url");
         let path = url.parse(request.url).pathname;

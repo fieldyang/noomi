@@ -59,6 +59,7 @@ class UserAction extends BaseRoute{
         }]
     })
     getinfo(params){
+        console.log(this.model);
         if(params.type==1){
             this.userName = 'aaa';
             return 1;
