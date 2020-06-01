@@ -93,19 +93,27 @@ const fs = require('fs');
     
 // }
 
-function test(){
-    const url = require('url');
-    const path = require('path');
-}
-fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
-function test1(){
-    const App = require('./app');
-    const path = App.path;
-    const url = App.url;
-}
+// function test(){
+//     const url = require('url');
+//     const path = require('path');
+// }
+// fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
+// function test1(){
+//     const App = require('./app');
+//     const path = App.path;
+//     const url = App.url;
+// }
     
-for(let i=0;i<10000000;i++){
-    test();
-}
-// console.timeEnd('1');
-fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
+// for(let i=0;i<10000000;i++){
+//     test();
+// }
+// // console.timeEnd('1');
+// fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
+
+let str = '/user/info/(?!\\S+/)*';
+str = str.replace(/\*/g,'.*');
+str = '^' + str + '$'; 
+let reg = new RegExp(str);
+
+console.log(reg);
+console.log(reg.test('/user/info/yang/xxx'));

@@ -75,9 +75,11 @@ export class HttpResponse extends ServerResponse{
         //跨域
         if(config.crossDomain || WebConfig.crossDomain){
             headers['Access-Control-Allow-Origin'] = crossDomain;
-            headers['Access-Control-Allow-Headers'] = 'Content-Type,x-requested-with';
+            //添加allow headers
+            headers['Access-Control-Allow-Headers'] = WebConfig.config['allow_headers']||'';
             headers['Access-Control-Allow-Credentials'] = 'true';
-            headers['Access-Control-Allow-Methods'] = 'PUT,POST,GET,OPTIONS';
+            headers['Access-Control-Allow-Methods'] = 'POST,GET,OPTIONS';
+            headers['Access-Control-Max-Age'] = WebConfig.config['access_max_age']||86400;
         }
         
         //contenttype 和 字符集

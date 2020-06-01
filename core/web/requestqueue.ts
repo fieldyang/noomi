@@ -1,6 +1,6 @@
 import { HttpRequest } from "./httprequest";
 import { WebConfig } from "./webconfig";
-import { RouteFactory } from "../main/route/routefactory";
+import { RouteFactory, IRoute } from "../main/route/routefactory";
 import { FilterFactory } from "./filterfactory";
 import { StaticResource } from "./staticresource";
 import { App } from "../tools/application";
@@ -78,27 +78,27 @@ class RequestQueue{
             return;
             case 'DELETE':
                 request.response.writeToClient({
-                    statusCode:501
+                    statusCode:405
                 });
                 return;
             case 'PUT':
                 request.response.writeToClient({
-                    statusCode:501
+                    statusCode:405
                 });
                 return;
             case 'HEAD':
                 request.response.writeToClient({
-                    statusCode:501
+                    statusCode:405
                 });
                 return;    
             case 'TRACE':
                 request.response.writeToClient({
-                    statusCode:501
+                    statusCode:405
                 });
                 return;        
             case 'PATCH':
                 request.response.writeToClient({
-                    statusCode:501
+                    statusCode:405
                 });
                 return;    
         }
@@ -118,13 +118,13 @@ class RequestQueue{
             let code = await StaticResource.load(request,request.response,path);
             if(code === 404){
                 //获得路由，可能没有，则
-                let route = RouteFactory.getRoute(path);
+                let route:IRoute = RouteFactory.getRoute(path);
                 if(route === null){
                     code = 404;
                 }else{
                     //参数
                     let params = await request.init();
-                    code = RouteFactory.handleRoute(path,params,request,request.response);
+                    code = RouteFactory.handleRoute(route,params,request,request.response);
                 }
                 if(code !== 0){
                     let page = PageFactory.getErrorPage(code);
