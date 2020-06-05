@@ -5,6 +5,7 @@ import { FilterFactory } from "./filterfactory";
 import { StaticResource } from "./staticresource";
 import { App } from "../tools/application";
 import { PageFactory } from "../tools/pagefactory";
+import { HttpResponse } from "./httpresponse";
 
 /**
  * @exclude
@@ -71,11 +72,8 @@ class RequestQueue{
     static handleOne(request:HttpRequest){
         switch (request.method){
             case 'OPTIONS':
-                request.response.writeToClient({
-                    statusCode:200,
-                    data:''
-                });
-            return;
+                request.response.doOptions();
+                return;
             case 'DELETE':
                 request.response.writeToClient({
                     statusCode:405
@@ -86,16 +84,6 @@ class RequestQueue{
                     statusCode:405
                 });
                 return;
-            case 'HEAD':
-                request.response.writeToClient({
-                    statusCode:405
-                });
-                return;    
-            case 'TRACE':
-                request.response.writeToClient({
-                    statusCode:405
-                });
-                return;        
             case 'PATCH':
                 request.response.writeToClient({
                     statusCode:405
@@ -147,6 +135,7 @@ class RequestQueue{
     static setCanHandle(v:boolean){
         this.canHandle = v;
     }
+
 }
 
 export {RequestQueue}
