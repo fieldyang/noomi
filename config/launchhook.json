@@ -1,0 +1,8 @@
+[{
+    "instance":"userService",
+    "method":"sayHello"
+},{
+    "instance":"testHook",
+    "method":"haha",
+    "params":["yang",false]
+}]

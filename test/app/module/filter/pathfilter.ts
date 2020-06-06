@@ -1,11 +1,16 @@
-import { Instance, WebFilter } from "../../../../core/tools/decorator";
+import { Instance, WebFilter, Inject } from "../../../../core/tools/decorator";
+import { UserService } from "../service/userservice";
 
 @Instance({
     name:'pathFilter'
 })
 class PathFilter{
+    @Inject("userService")
+    us:UserService;
     @WebFilter('/*',2)
     do2(request,response){
+        console.log(request,response);
+        this.us.sayHello();
         const url = require("url");
         let path = url.parse(request.url).pathname;
         console.log('pathfilter',path);

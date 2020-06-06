@@ -1,10 +1,18 @@
 import { Transactioner, Instance } from "../../../../core/tools/decorator";
 import { getConnection } from "../../../..";
+import { WebConfig } from "../../../../core/web/webconfig";
 
 //Transactioner注解器把UserService类的所有方法注册为事务方法
 @Transactioner()
 @Instance('userService')
 export class UserService{
+    constructor(){
+        console.log(WebConfig.cors);
+    }
+
+    sayHello(){
+        console.log('hello');
+    }
     async addUser(
         name:string,
         age:string,
