@@ -25,31 +25,31 @@
     <button onclick='post()'>提交</button>
 </body>
 <script>
-    // function post(){
-    //     let xhr = new XMLHttpRequest();
-    //     xhr.open('POST','http://localhost:3000/user/getinfo');
-    //     let form = new FormData(document.querySelector('form'));
-    //     // xhr.setRequestHeader('Content-Type','multipart/form-data');
-    //     // xhr.withCredentials = true;
-    //     xhr.setRequestHeader('x-token','123456');
-    //     xhr.send(form);
-    //     xhr.onload = (x)=>{
-    //         console.log(xhr.responseText);
-    //     }
-    // }
-
     function post(){
-        axios.post('http://localhost:3000/user/getinfo', {
-            type: '4',
-            userName:'张三'
-        })
-        .then(function (response) {
-            console.log(response);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+        let xhr = new XMLHttpRequest();
+        xhr.open('HEAD','http://localhost:3000/test/files/file1.js');
+        let form = new FormData(document.querySelector('form'));
+        // xhr.setRequestHeader('Content-Type','multipart/form-data');
+        // xhr.withCredentials = true;
+        xhr.setRequestHeader('x-token','123456');
+        xhr.send(form);
+        xhr.onload = (x)=>{
+            console.log(xhr.responseText);
+        }
     }
+
+    // function post(){
+    //     axios.post('http://localhost:3000/user/getinfo', {
+    //         type: '4',
+    //         userName:'张三'
+    //     })
+    //     .then(function (response) {
+    //         console.log(response);
+    //     })
+    //     .catch(function (error) {
+    //         console.log(error);
+    //     });
+    // }
     // function post(){
     //     const form = new FormData(document.querySelector('form'));
     //     fetch('/user/getinfo', {
