@@ -1,8 +1,18 @@
 # Class HttpResponse
+## 属性列表
++ [cookie](#PROP_cookie)
++ [request](#PROP_request)
++ [srcRes](#PROP_srcRes)
+  
 ## 方法列表
++ [doHead](#METHOD_doHead)
++ [doOptions](#METHOD_doOptions)
 + [getHeader](#METHOD_getHeader)
 + [init](#METHOD_init)
 + [redirect](#METHOD_redirect)
++ [setContentLength](#METHOD_setContentLength)
++ [setContentType](#METHOD_setContentType)
++ [setCorsHead](#METHOD_setCorsHead)
 + [setHeader](#METHOD_setHeader)
 + [writeCookie](#METHOD_writeCookie)
 + [writeFileToClient](#METHOD_writeFileToClient)
@@ -16,7 +26,46 @@ response类
 在ServerResponse基础上增加了写客户端方法，更适合直接使用  
 ### Extends:
 <font class='datatype'>ServerResponse</font>  
+## 属性
+### <a id="PROP_cookie">cookie</a>
+cookie  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 数据类型
+<font class='datatype'>[HttpCookie](HttpCookie)</font>  
+#### 初始值
+new HttpCookie()  
+### <a id="PROP_request">request</a>
+源request  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 数据类型
+<font class='datatype'>IncomingMessage</font>  
+### <a id="PROP_srcRes">srcRes</a>
+源response  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 数据类型
+<font class='datatype'>ServerResponse</font>  
 ## 方法
+### <a id="METHOD_doHead">doHead(config)</a>
+#### 描述
+处理head方法请求  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 参数
++ config *&lt;<font class='datatype'>[IResponseWriteCfg](IResponseWriteCfg)</font>&gt;*    response config
+  
+#### 返回值
+<font class='datatype'>boolean</font>  
+如果请方法为head，则返回true，否则返回false  
+### <a id="METHOD_doOptions">doOptions()</a>
+#### 描述
+处理options  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 返回值
+void  
 ### <a id="METHOD_getHeader">getHeader(key)</a>
 #### 描述
 获取header  
@@ -47,6 +96,33 @@ void
 #### 参数
 + page *&lt;<font class='datatype'>string</font>&gt;*  跳转路径url
   
+#### 返回值
+void  
+### <a id="METHOD_setContentLength">setContentLength(length)</a>
+#### 描述
+设置content length  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 参数
++ length *&lt;<font class='datatype'>number</font>&gt;*    内容长度
+  
+#### 返回值
+void  
+### <a id="METHOD_setContentType">setContentType(type)</a>
+#### 描述
+设置回写类型  
+#### 修饰符
+<font class="modifier">public</font>  
+#### 参数
++ type *&lt;<font class='datatype'>string</font>&gt;*      类型
+  
+#### 返回值
+void  
+### <a id="METHOD_setCorsHead">setCorsHead()</a>
+#### 描述
+设置跨域头  
+#### 修饰符
+<font class="modifier">public</font>  
 #### 返回值
 void  
 ### <a id="METHOD_setHeader">setHeader(key,value)</a>

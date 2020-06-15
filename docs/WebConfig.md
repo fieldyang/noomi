@@ -1,7 +1,7 @@
 # Class WebConfig
 ## 属性列表
 + [config](#PROP_config)
-+ [crossDomain](#PROP_crossDomain)
++ [cors](#PROP_cors)
 + [httpsCfg](#PROP_httpsCfg)
 + [useHttps](#PROP_useHttps)
 + [useServerCache](#PROP_useServerCache)
@@ -26,12 +26,12 @@ web 配置类
 <font class="modifier">public  static</font>  
 #### 数据类型
 <font class='datatype'>any</font>  
-### <a id="PROP_crossDomain">crossDomain</a>
-跨域域名，多个域名用','分割  
+### <a id="PROP_cors">cors</a>
+跨域设置  
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>string</font>  
+<font class='datatype'>object</font>  
 ### <a id="PROP_httpsCfg">httpsCfg</a>
 https配置，useHttps为true时有效，包括：  
 only_https:是否只采用https，如果为true，则不会启动http server，只启动https server  

@@ -1,6 +1,7 @@
 # Class RouteFactory
 ## 属性列表
 + [dynaRouteArr](#PROP_dynaRouteArr)
++ [errorHandler](#PROP_errorHandler)
 + [staticRouteMap](#PROP_staticRouteMap)
   
 ## 方法列表
@@ -27,6 +28,13 @@
 <font class='datatype'>IRouteCfg[]</font>  
 #### 初始值
 new Array()  
+### <a id="PROP_errorHandler">errorHandler</a>
+<font class="since">开始于 : v0.3.7</font>  
+异常处理器实例名  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 数据类型
+<font class='datatype'>string</font>  
 ### <a id="PROP_staticRouteMap">staticRouteMap</a>
 静态路由(不带通配符)路由集合  
 #### 修饰符

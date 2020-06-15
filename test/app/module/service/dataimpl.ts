@@ -16,13 +16,16 @@ class DataImpl{
         let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
         let r = await new Promise(async (resolve,reject)=>{
             let conn = await getConnection();
+            if(conn == null){
+                reject("conn is null");
+            }
             conn.query(sql,[url,id],(err,result)=>{
                 if(err){
                     reject(err);
                 }
                 resolve(result);
             });
-        }); 
+        });
         
         //oracle
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -107,8 +110,8 @@ class DataImpl{
     // @Transactional()
     async add(){
         // let r1 = await this.addResAuth();
-        let r1 = await this.addRes('/testtran');
         // try{
+            let r1 = await this.addRes('/testtran');
             let r2 = await this.addRes('/testtran1',18);
         // }catch(e){
 

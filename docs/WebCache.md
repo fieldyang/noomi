@@ -1,7 +1,6 @@
 # Class WebCache
 ## 属性列表
 + [cache](#PROP_cache)
-+ [cacheTypes](#PROP_cacheTypes)
 + [excludeFileTypes](#PROP_excludeFileTypes)
 + [expires](#PROP_expires)
 + [isPrivate](#PROP_isPrivate)
@@ -16,7 +15,6 @@
 ## 方法列表
 + [add](#METHOD_add)
 + [check](#METHOD_check)
-+ [checkNeedCache](#METHOD_checkNeedCache)
 + [init](#METHOD_init)
 + [load](#METHOD_load)
 + [writeCacheToClient](#METHOD_writeCacheToClient)
@@ -34,14 +32,6 @@ cache对象
 <font class="modifier">public  static</font>  
 #### 数据类型
 <font class='datatype'>[NCache](NCache)</font>  
-### <a id="PROP_cacheTypes">cacheTypes</a>
-可压缩类型  
-#### 修饰符
-<font class="modifier">public  static</font>  
-#### 数据类型
-<font class='datatype'>Array&lt;RegExp&gt;</font>  
-#### 初始值
-[  
 ### <a id="PROP_excludeFileTypes">excludeFileTypes</a>
 不能缓存的媒体类型  
 #### 修饰符
@@ -105,20 +95,18 @@ cache-control proxy-revalidation
 #### 数据类型
 <font class='datatype'>boolean</font>  
 ## 方法
-### <a id="METHOD_add">add(url,path,response,gzip)</a>
+### <a id="METHOD_add">add(url,cacheData[,dontSaveData])</a>
 #### 描述
 添加资源到缓存中  
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ url *&lt;<font class='datatype'>string</font>&gt;*       url请求url
-+ path *&lt;<font class='datatype'>string</font>&gt;*      url对应路径
-+ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response对象
-+ gzip *&lt;<font class='datatype'>string</font>&gt;*      压缩类型 gzip,br,deflate
++ url *&lt;<font class='datatype'>string</font>&gt;*           url请求url
++ cacheData *&lt;<font class='datatype'>object</font>&gt;*     待缓存数据
++ dontSaveData *&lt;<font class='datatype'>boolean</font>&gt;*  不缓存文件数据
   
 #### 返回值
-<font class='datatype'>Promise&lt;Object&gt;</font>  
-{data:文件内容,type:mime type}  
+void  
 ### <a id="METHOD_check">check(request,url)</a>
 #### 描述
 资源check，如果需要更改，则从服务器获取  
@@ -131,16 +119,6 @@ cache-control proxy-revalidation
 #### 返回值
 <font class='datatype'>Promise&lt;number&gt;</font>  
 0:从浏览器获取 1:已更新 2:资源不在缓存  
-### <a id="METHOD_checkNeedCache">checkNeedCache(mimeType)</a>
-#### 描述
-检查mime类型文件是否需要压缩  
-#### 修饰符
-<font class="modifier">public  static</font>  
-#### 参数
-+ mimeType *&lt;<font class='datatype'>string</font>&gt;* 
-  
-#### 返回值
-<font class='datatype'>boolean</font>  
 ### <a id="METHOD_init">init(cfg)</a>
 #### 描述
 初始化  
