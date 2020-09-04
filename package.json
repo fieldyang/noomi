@@ -30,7 +30,6 @@
   "homepage": "https://github.com/noomijs/noomi#readme",
   "dependencies": {
     "cls-hooked": "^4.2.2",
-    "jschardet": "^2.1.1",
     "json5": "^2.1.1",
     "mime": "^2.4.4",
     "redis": "^2.8.0",

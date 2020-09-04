@@ -2,7 +2,7 @@
     "web_config":{
         "upload_tmp_dir":"/upload/tmp", //上传临时目录，相对于项目根目录，以/开始
         "upload_max_size":0,			//上传内容最大字节数
-        "static_path":["/test","/pages"], 		//静态资源路径
+        "static_path":["/test","/pages","/upload"], 		//静态资源路径
         "welcome":"/test/index.html", 	//welcome 页面
         //跨域设置
         "cors":{
@@ -10,7 +10,7 @@
             "allow_headers":"x-token",  //自定义header，多个以","分割，method=options时有效
             "access_max_age":86400      //预检结果缓存时间(秒)，默认24小时
         },
-        "cache":false,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
+        "cache":true,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
         "cache_option":{				//静态资源缓存配置
             "save_type":0,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
             "max_size":20000000,		//缓存最大字节数，save_type为0时有效

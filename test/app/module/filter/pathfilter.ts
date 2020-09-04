@@ -7,7 +7,7 @@ import { UserService } from "../service/userservice";
 class PathFilter{
     @Inject("userService")
     us:UserService;
-    @WebFilter('/*',2)
+    @WebFilter('/user/*',1000)
     do2(request,response){
         console.log(request,response);
         this.us.sayHello();

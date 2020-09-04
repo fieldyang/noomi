@@ -109,11 +109,4 @@ const fs = require('fs');
 // }
 // // console.timeEnd('1');
 // fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
-
-let str = '/user/info/(?!\\S+/)*';
-str = str.replace(/\*/g,'.*');
-str = '^' + str + '$'; 
-let reg = new RegExp(str);
-
-console.log(reg);
-console.log(reg.test('/user/info/yang/xxx'));
+// const fs = require('fs');
