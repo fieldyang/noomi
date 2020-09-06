@@ -8,7 +8,7 @@
 	// "launchhook":"launchhook.json",
 	
 	// "aop":"aop.json",
-	// "database":"database/mysql.json",
+	"database":"database/typeorm.json",
 	// "route":"route.json",
 	// "filter":"filter.json",
 	"redis":"redis.json"

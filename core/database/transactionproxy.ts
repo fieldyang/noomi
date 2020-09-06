@@ -25,7 +25,11 @@ class TransactionProxy{
                     retValue = await new Promise(async (resolve,reject)=>{
                         TransactionManager.namespace.run(async ()=>{
                             let v = await doSequelize();
-                            resolve(v);
+                            if(v instanceof Error){
+                                reject(v)
+                            }else{
+                                resolve(v);
+                            }
                         });
                     });
                     break;
@@ -33,7 +37,11 @@ class TransactionProxy{
                     retValue = await new Promise(async (resolve,reject)=>{
                         TransactionManager.namespace.run(async ()=>{
                             let v = await doTypeorm();
-                            resolve(v);
+                            if(v instanceof Error){
+                                reject(v)
+                            }else{
+                                resolve(v);
+                            }
                         });
                     });
                     break;
@@ -128,8 +136,14 @@ class TransactionProxy{
                         r = await func.apply(instance,params);
                         await queryRunner.commitTransaction();
                     }catch(e){
-                        r = e;
+                        //异常信息，非error对象
+                        if(typeof e === 'string'){
+                            r = new Error(e);
+                        }else{
+                            r = e;
+                        }
                         await queryRunner.rollbackTransaction();
+                        // throw r;
                     }finally{
                         await queryRunner.release();
                         //从头事务管理器删除事务
@@ -140,7 +154,12 @@ class TransactionProxy{
                     try{
                         result = await func.apply(instance,params);
                     }catch(e){
-                        result = e;
+                        //异常信息，非error对象
+                        if(typeof e === 'string'){
+                            result = new Error(e);
+                        }else{
+                            result = e;
+                        }
                     }
                 }
                 return result;

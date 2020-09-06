@@ -191,8 +191,8 @@ class AopFactory{
         //延迟处理method aop代理，避免某些实例尚未加载，只加一次
         if(this.needToUpdateProxy){
             setImmediate(()=>{
-                AopFactory.updMethodProxy.call(AopFactory);
-                this.needToUpdateProxy = true;
+                AopFactory.updMethodProxy();
+                // this.needToUpdateProxy = false;
             });
             this.needToUpdateProxy = false;
         }
@@ -212,13 +212,13 @@ class AopFactory{
             let reg:RegExp = Util.toReg(expression);
             pc.expressions.push(reg);
             //加入代理
-            this.addProxyByExpression(reg);
+            // this.addProxyByExpression(reg);
         }else{
             expression.forEach(item=>{
                 let reg:RegExp = Util.toReg(item);
                 pc.expressions.push(reg);
                 //加入代理
-                this.addProxyByExpression(reg);
+                // this.addProxyByExpression(reg);
             });
         }
     }
@@ -275,21 +275,19 @@ class AopFactory{
     /**
      * 更新aop匹配的方法代理，为所有aop匹配的方法设置代理
      */
-    static updMethodProxy():void{
+    static updMethodProxy(){
         if(!this.pointcuts || this.pointcuts.size === 0){
             return;
         }
         //遍历instance factory设置aop代理
-        let insFac = InstanceFactory.getFactory();
-        //处理过的实例名数组
-        let instances:Array<string> = [];
+        // let insFac = InstanceFactory.getFactory();
         //遍历pointcut
         let pc:AopPointcut;
         for(pc of this.pointcuts.values()){
             let reg:RegExp;
             //遍历expression
             for(reg of pc.expressions){
-                this.addProxyByExpression(reg,instances);
+                this.addProxyByExpression(reg);
             }
         }
     }
@@ -297,16 +295,11 @@ class AopFactory{
     /**
      * 通过正则式给方法加代理
      * @param expr          表达式正则式
-     * @param instances     处理过的instance name
      */
-    static addProxyByExpression(expr:RegExp,instances?:Array<string>){
+    static addProxyByExpression(expr:RegExp){
         //遍历instance factory设置aop代理
         let insFac = InstanceFactory.getFactory();
         for(let insName of insFac.keys()){
-            //该实例处理过，不再处理
-            if(instances && instances.includes(insName)){
-                continue;
-            }
             //先检测instanceName
             let instance = InstanceFactory.getInstance(insName);
             if(instance){
@@ -318,9 +311,6 @@ class AopFactory{
                     //实例名+方法符合aop正则表达式
                     if(expr.test(insName + '.' + key)){
                         instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
-                        if(instances){
-                            instances.push(insName);
-                        }
                     }
                 });
             }

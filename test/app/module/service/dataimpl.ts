@@ -1,19 +1,19 @@
 import { getConnection, closeConnection, getManager } from "../../../../core/database/connectionmanager";
 import { Transaction, Instance, Transactioner } from "../../../../core/tools/decorator";
-// import { Resource } from "../dao/pojo/resource";
+import { Resource } from "../dao/pojo/resource";
 // import { ResourceAuthority } from "../dao/pojo/resourceauthority";
 import { EntityManager } from "typeorm";
-import Resource from "../dao/pojosequelize/resource";
+// import Resource from "../dao/pojosequelize/resource";
 import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
 import { Sequelize } from "sequelize-typescript";
 
-@Transactioner()
+// @Transactioner()
 @Instance('dataImpl')
 class DataImpl{
-    // @Transactional()
+    @Transaction()
     async addRes(url:string,id?:number){
         //mysql
-        let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
+        /*let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
         let r = await new Promise(async (resolve,reject)=>{
             let conn = await getConnection();
             if(conn == null){
@@ -25,7 +25,7 @@ class DataImpl{
                 }
                 resolve(result);
             });
-        });
+        });*/
         
         //oracle
         // let sql:string = "insert into t_resource(resource_id,url) values(13,'"+url+"')";
@@ -55,15 +55,15 @@ class DataImpl{
         // });
         // let r1 = await res.save();
         //typeorm
-        // let res = new Resource();
-        // res.resourceId = id;
-        // res.url = url;
-        // let manager:EntityManager = await getManager();
-        // let r1 = await manager.save(res);
-        // return 2;
+        let res = new Resource();
+        res.resourceId = id;
+        res.url = url;
+        let manager:EntityManager = await getManager();
+        let r1 = await manager.save(res);
+        return 2;
         
     }
-    // @Transactional()
+    // @Transaction()
     async addResAuth(){
         //mysql
         // let sql:string = "insert into t_resource_authority(resource_id,authority_id) values(3,4)";
@@ -101,23 +101,22 @@ class DataImpl{
         //typeorm
         let manager:EntityManager = await getManager();
         const res = new ResourceAuthority();
-        
-        
-        let r1 = await manager.save(res);
+        await manager.save(res);
         return 1;
     }
     
-    // @Transactional()
+    @Transaction()
     async add(){
         // let r1 = await this.addResAuth();
         // try{
-            let r1 = await this.addRes('/testtran');
-            let r2 = await this.addRes('/testtran1',18);
+            // let r1 = await this.addRes('/testtran');
+            // let r2 = await this.addRes('/testtran1',18);
         // }catch(e){
-
+        //     return false;
         // }
-        
-        return true;
+        let r1 = await this.addRes('/testtran1');
+        throw 'hahaha';
+        // return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;
         // }else{
