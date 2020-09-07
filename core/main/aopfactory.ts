@@ -148,11 +148,7 @@ class AopFactory{
      * 切点map，用于存储所有切点
      */
     static pointcuts:any = new Map();
-    /**
-     * 更新proxy开关，如果设置为true，则会在nexttick更新代理，默认true
-     */
-    static needToUpdateProxy:boolean = true;
-
+    
     /**
      * 添加一个切面
      * @param cfg   切面对象 
@@ -188,14 +184,7 @@ class AopFactory{
             throw new NoomiError("2003",id);
         }
         this.pointcuts.set(id,new AopPointcut(id,expressions));
-        //延迟处理method aop代理，避免某些实例尚未加载，只加一次
-        if(this.needToUpdateProxy){
-            setImmediate(()=>{
-                AopFactory.updMethodProxy();
-                // this.needToUpdateProxy = false;
-            });
-            this.needToUpdateProxy = false;
-        }
+        InstanceFactory.addAfterInitOperation(this.updMethodProxy,this);
     }
 
     /**
@@ -211,16 +200,15 @@ class AopFactory{
         if(!Array.isArray(expression)){
             let reg:RegExp = Util.toReg(expression);
             pc.expressions.push(reg);
-            //加入代理
-            // this.addProxyByExpression(reg);
+            
         }else{
             expression.forEach(item=>{
                 let reg:RegExp = Util.toReg(item);
                 pc.expressions.push(reg);
-                //加入代理
-                // this.addProxyByExpression(reg);
             });
         }
+        //把更新方法代理加入实例工厂后处理
+        InstanceFactory.addAfterInitOperation(this.updMethodProxy,this);
     }
 
     /**
@@ -279,8 +267,6 @@ class AopFactory{
         if(!this.pointcuts || this.pointcuts.size === 0){
             return;
         }
-        //遍历instance factory设置aop代理
-        // let insFac = InstanceFactory.getFactory();
         //遍历pointcut
         let pc:AopPointcut;
         for(pc of this.pointcuts.values()){

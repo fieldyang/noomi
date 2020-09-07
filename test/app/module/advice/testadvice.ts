@@ -12,15 +12,15 @@ class TestAdvice{
     before(){
         console.log("注解前置通知，方法名:",arguments[0].methodName);
     }
-    // @After("testPointcut()")
-    // after(){
-    //     console.log("注释后置通知，方法名:",arguments[0].methodName);
-    // }
+    @After("testPointcut()")
+    after(){
+        console.log("注释后置通知，方法名:",arguments[0].methodName);
+    }
 
-    // @Around("testPointcut()")
-    // around(){
-    //     console.log("注释环绕通知，方法名:",arguments[0].methodName);
-    // }
+    @Around("testPointcut()")
+    around(){
+        console.log("注释环绕通知，方法名:",arguments[0].methodName);
+    }
 
     @AfterThrow("testPointcut()")
     afterThrow(){
