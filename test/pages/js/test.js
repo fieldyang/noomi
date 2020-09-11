@@ -83,30 +83,19 @@
 // }
 
 // f4();
-
 const fs = require('fs');
-
-// class App{
-//     static fs = require('fs');
-//     static path = require('path');
-//     static url = require('url');
+// fs.watch('./',{recursive:true},(eventType,fileName)=>{
+//     console.log(eventType,fileName);
+// })
+// console.log(__dirname);
+// let path = '/Users/leiyang/develop/codework/jswork/noomi/test/js';
+// const dir = fs.readdirSync(path,{withFileTypes:true});
+// for (let dirent of dir) {
     
+//     // if(!dirent.isDirectory()){
+//     //     return;
+//     // }
+//     console.log(dirent.name);
 // }
 
-// function test(){
-//     const url = require('url');
-//     const path = require('path');
-// }
-// fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
-// function test1(){
-//     const App = require('./app');
-//     const path = App.path;
-//     const url = App.url;
-// }
-    
-// for(let i=0;i<10000000;i++){
-//     test();
-// }
-// // console.timeEnd('1');
-// fs.writeFileSync('log.out',new Date().getTime() + '\n',{flag:'a'});
-// const fs = require('fs');
+console.log(require('os').platform())

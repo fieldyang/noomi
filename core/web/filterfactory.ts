@@ -52,6 +52,7 @@ interface IFilter{
      * 优先级，越小越高，1-10为框架保留，默认10000
      */
     order:number;
+
 }
 
 
@@ -72,6 +73,9 @@ class FilterFactory{
      */
     static addFilter(cfg:IFilterCfg):void{
         let ins:any = cfg.instance || cfg.instance_name;
+        //方法名,默认方法do
+        let method = cfg.method_name || 'do';
+        // 正则式数组
         let ptns:Array<RegExp> = [];
         //默认 "/*"
         if(!cfg.url_pattern){
@@ -84,6 +88,32 @@ class FilterFactory{
             ptns.push(Util.toReg(cfg.url_pattern));
         }
         
+        //查找重复过滤器类
+        let f:IFilter = this.filters.find(item=>{
+            //方法名不同，则返回false
+            if(item.method !== method){
+                return false;
+            }
+            let tp = typeof item.instance;
+            if(cfg.instance){
+                if(tp === 'string'){
+                    return item.instance === cfg.instance.constructor.name;
+                }else{
+                    return item.instance.constructor.name === cfg.instance.constructor.name;
+                }
+            }else{
+                if(tp === 'string'){
+                    return item.instance === cfg.instance_name;
+                }else{
+                    return item.instance.constructor.name === cfg.instance_name;
+                }
+            }
+        });
+        //删除之前添加的过滤器
+        if(f){
+            let ind = this.filters.indexOf(f);
+            this.filters.splice(ind,1);
+        }
         //加入过滤器集合
         this.filters.push({
             instance:ins,

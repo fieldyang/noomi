@@ -2,6 +2,7 @@ import { NoomiError } from "../tools/errorfactory";
 import { StaticResource } from "../web/staticresource";
 import { Util } from "../tools/util";
 import { App } from "../tools/application";
+import { Watcher, EWatcherType } from "../tools/watcher";
 
 /**
  * 实例属性
@@ -141,18 +142,21 @@ class InstanceFactory{
         }
         
         //执行后处理
-        this.doAfterInitOperations();
+        setImmediate(()=>{
+            this.doAfterInitOperations();
+        });
     }
     /**
      * 添加单例到工厂
-     * @param cfg   实例配置对象
-     * @returns     undefined或添加的实例
+     * @param cfg       实例配置对象
+     * @param replace   替换之前的实例
+     * @returns         undefined或添加的实例
      */
     static addInstance(cfg:IInstanceCfg):any{
-        if(this.factory.has(cfg.name)){
-            console.log(new NoomiError("1002",cfg.name));
-            return;
-        }
+        // if(this.factory.has(cfg.name) && !replace){
+        //     console.log(new NoomiError("1002",cfg.name));
+        //     return;
+        // }
         
         let insObj:IInstance;
         let path:string;
@@ -222,8 +226,8 @@ class InstanceFactory{
             propName:propName,
             injectName:injectName
         });
-        //添加注入操作到初始化后处理
-        this.addAfterInitOperation(this.finishInject,this);
+        //延迟注入
+        setImmediate(()=>this.finishInject());
     }
 
     /**
@@ -238,6 +242,8 @@ class InstanceFactory{
             }
             Reflect.set(item.instance,item.propName,instance); 
         }
+        //清空inject list
+        this.injectList = [];
     }
     /**
      * 获取实例
@@ -255,7 +261,6 @@ class InstanceFactory{
         }else{
             let mdl = ins.class;
             param = param || ins.params || [];
-            // let instance = new mdl(param);
             let instance = Reflect.construct(mdl,param);
             
             //注入属性
@@ -433,14 +438,19 @@ class InstanceFactory{
             let fn:string = fileExt;
             let reg:RegExp = Util.toReg(fn,3);
             
+            //添加 file watcher
+            if(App.openWatcher){
+                Watcher.addDir(dirPath,EWatcherType.DYNAMIC);
+            }
+
             for (const dirent of dir) {
                 if(dirent.isDirectory()){
                     if(deep){
-                        handleDir(dirPath + '/' + dirent.name,fileExt,deep);
+                        handleDir(App.path.resolve(dirPath ,dirent.name),fileExt,deep);
                     }
                 }else if(dirent.isFile()){
                     if(reg.test(dirent.name)){
-                        require(dirPath + '/' + dirent.name);
+                        require(App.path.resolve(dirPath , dirent.name));
                     }
                 }            
             }
@@ -477,7 +487,9 @@ class InstanceFactory{
     static doAfterInitOperations(){
         for(let foo of this.afterInitOperations){
             foo['func'].apply(foo['thisObj']);
-        }
+        } 
+        //清理初始化后操作
+        this.afterInitOperations = [];   
     }
 }
 

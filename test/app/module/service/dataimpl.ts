@@ -7,10 +7,10 @@ import { EntityManager } from "typeorm";
 // import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
 import { Sequelize } from "sequelize-typescript";
 
-@Transactioner()
+// @Transactioner()
 @Instance('dataImpl')
 class DataImpl{
-    // @Transaction()
+    @Transaction()
     async addRes(url:string,id?:number){
         //mysql
         // let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
@@ -95,17 +95,17 @@ class DataImpl{
         // return 1;
     }
     
-    // @Transaction()
+    @Transaction()
     async add(){
         // let r1 = await this.addResAuth();
         // try{
-            let r1 = await this.addRes('/testtran');
-            let r2 = await this.addRes('/testtran1',14);
+            // let r1 = await this.addRes('/testtran');
+            // let r2 = await this.addRes('/testtran1',14);
         // }catch(e){
         //     return false;
         // }
-        // let r1 = await this.addRes('/testtran1');
-        // throw 'hahaha';
+        let r1 = await this.addRes('/testtran1');
+        throw 'hahaha';
         // return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;

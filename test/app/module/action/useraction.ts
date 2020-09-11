@@ -73,7 +73,7 @@ class UserAction extends BaseRoute{
         
         return {
             success:true,
-            result:'哈哈aaaaa'
+            result:'哈哈123232!'
         }
     }
 

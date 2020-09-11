@@ -179,10 +179,6 @@ class AopFactory{
      * @param expressions   方法匹配表达式数组
      */
     static addPointcut(id:string,expressions:Array<string>):void{
-        //切点
-        if(this.pointcuts.has(id)){
-            throw new NoomiError("2003",id);
-        }
         this.pointcuts.set(id,new AopPointcut(id,expressions));
         InstanceFactory.addAfterInitOperation(this.updMethodProxy,this);
     }
