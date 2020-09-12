@@ -180,6 +180,7 @@ class AopFactory{
      */
     static addPointcut(id:string,expressions:Array<string>):void{
         this.pointcuts.set(id,new AopPointcut(id,expressions));
+        //增加代理处理，此方法只在InstanceFactory init后执行
         InstanceFactory.addAfterInitOperation(this.updMethodProxy,this);
     }
 

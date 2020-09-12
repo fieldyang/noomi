@@ -6,7 +6,7 @@ import { Util } from "../tools/util";
 import { App } from "../tools/application";
 import { Stream } from "stream";
 import { Stats } from "fs";
-import { Watcher, EWatcherType } from "../tools/watcher";
+import { FileWatcher, EWatcherType } from "../tools/filewatcher";
 
 /**
  * 静态资源加载器
@@ -134,7 +134,7 @@ class StaticResource{
                     this.staticMap.set(paths,Util.toReg(paths,1));
                     //添加 file watcher
                     if(App.openWatcher){
-                        Watcher.addDir(Util.getAbsPath([paths]),EWatcherType.STATIC);
+                        FileWatcher.addDir(Util.getAbsPath([paths]),EWatcherType.STATIC);
                     }
                 }
             }

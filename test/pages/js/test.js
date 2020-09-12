@@ -98,4 +98,21 @@ const fs = require('fs');
 //     console.log(dirent.name);
 // }
 
-console.log(require('os').platform())
+class A{
+    sayHello(){
+        console.log('a');
+    }
+}
+
+class B{
+    sayHello(){
+        console.log('b');
+    }
+}
+
+let a = new A();
+a.__proto__.b = new B();
+
+let c = new A();
+c.b.sayHello();
+console.log(A.name);

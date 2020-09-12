@@ -51,7 +51,9 @@ function Instance(cfg){
  */
 function Inject(instanceName:string){
     return (target:any,propertyName:string)=>{
-        InstanceFactory.addInject(target,propertyName,instanceName);
+        process.nextTick(()=>{
+            InstanceFactory.addInject(target,propertyName,instanceName);
+        });
     }
 }
 
@@ -80,7 +82,7 @@ function Router(cfg?:any){
         if(cfg && cfg.path){
             let path:string = cfg.path;
             if(typeof path==='string' && (path=path.trim()) !== ''){
-                setImmediate(()=>{
+                process.nextTick(()=>{
                     //延迟到Route注解后，便于先处理非*的路由
                     RouteFactory.addRoute(namespace + path + '(?!\\S+/)*',instanceName,null,cfg.results);
                 });
@@ -105,7 +107,7 @@ function Router(cfg?:any){
  */
 function Route(cfg:any){
     return (target:any,propertyName:string)=>{
-        setImmediate(()=>{
+        process.nextTick(()=>{
             let ns = target.__routeconfig?target.__routeconfig.namespace:'';
             if(typeof cfg === 'string'){ //直接配置路径，默认type json
                 RouteFactory.addRoute(ns + cfg,target.__instanceName,propertyName);    
@@ -138,7 +140,17 @@ function WebFilter(pattern?:any,order?:number){
  */
 function Aspect(){
     return (target)=>{
+        let instanceName:string = '_nadvice_' + target.name;
+        //设置实例名
+        target.prototype.__instanceName = instanceName;
+        //设置aspect属性
         target.prototype.__isAspect = true;
+        //添加到实例工厂
+        InstanceFactory.addInstance({
+            name:instanceName,  //实例名
+            class:target,
+            singleton:true
+        });
     }
 }
 
@@ -257,7 +269,7 @@ function Transactioner(methodReg?:any){
 function Transaction(){
     return (target:any,name:string,desc:any)=>{
         //方法注解先于类注解，尚无实例名，延迟执行
-        setImmediate(()=>{
+        process.nextTick(()=>{
             TransactionManager.addTransaction(target.__instanceName,name);
         });
     }
