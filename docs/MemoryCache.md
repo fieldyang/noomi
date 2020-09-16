@@ -26,7 +26,7 @@
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(cfg)</a>
 #### 参数
-+ cfg *&lt;<font class='datatype'>[ICacheCfg](ICacheCfg)</font>&gt;* 
++ cfg *&lt;<font class='datatype'>[ICacheCfg](/webroute/api/icachecfg)</font>&gt;* 
   
 ## 属性
 ### <a id="PROP_extraSize">extraSize</a>
@@ -62,7 +62,7 @@ right = sum(1-(当前时间-使用记录)/当前时间) + timeout?5:0
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[MemoryItem](MemoryItem)</font>&gt;* 待计算的内存 item
++ item *&lt;<font class='datatype'>[MemoryItem](/webroute/api/memoryitem)</font>&gt;* 待计算的内存 item
   
 #### 返回值
 void  
@@ -72,7 +72,7 @@ void
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[MemoryItem](MemoryItem)</font>&gt;*              memory item
++ item *&lt;<font class='datatype'>[MemoryItem](/webroute/api/memoryitem)</font>&gt;*              memory item
 + changeExpire *&lt;<font class='datatype'>boolean</font>&gt;*      释放修改expire
   
 #### 返回值
@@ -83,7 +83,7 @@ void
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[ICacheItem](ICacheItem)</font>&gt;*  cacheitem
++ item *&lt;<font class='datatype'>[ICacheItem](/webroute/api/icacheitem)</font>&gt;*  cacheitem
   
 #### 返回值
 void  
@@ -183,7 +183,7 @@ object或null
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[ICacheItem](ICacheItem)</font>&gt;*      cache item
++ item *&lt;<font class='datatype'>[ICacheItem](/webroute/api/icacheitem)</font>&gt;*      cache item
 + timeout *&lt;<font class='datatype'>number</font>&gt;*   超时时间
   
 #### 返回值

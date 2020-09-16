@@ -3,7 +3,7 @@ import { getConnection } from "../../../..";
 import { WebConfig } from "../../../../core/web/webconfig";
 
 //Transactioner注解器把UserService类的所有方法注册为事务方法
-// @Transactioner()
+@Transactioner()
 @Instance('userService')
 export class UserService{
     constructor(){

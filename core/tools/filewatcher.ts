@@ -64,7 +64,8 @@ export class FileWatcher {
      * @param path  目录路径
      */
     private static async watchStatic(path:string){
-        try{
+        //支持recursive
+        if(process.platform === 'darwin' || process.platform === 'win32'){
             App.fs.watch(path,{recursive:true},async (eventType,fileName)=>{
                 //文件不存在或监听类型为rename，则返回
                 if(!fileName || eventType === 'rename'){
@@ -73,7 +74,7 @@ export class FileWatcher {
                 let path1:string = App.path.resolve(path ,fileName);
                 await this.handleStaticRes(path1);
             });    
-        }catch(e){  //不支持目录递归，则需要处理所有子孙目录
+        }else{
             App.fs.watch(path,async (eventType,fileName)=>{
                 //文件不存在或监听类型为rename，则返回
                 if(!fileName || eventType === 'rename'){
@@ -107,6 +108,10 @@ export class FileWatcher {
             let path1:string = App.path.resolve(path ,fileName);
             //删除require 缓存
             delete require.cache[path1];
+            //文件不存在，则不需要加载
+            if(!App.fs.existsSync(path1)){
+                return;
+            }
             let r = require(path1);
             let cls;
             //不同生成方法，r对象不同
@@ -123,10 +128,12 @@ export class FileWatcher {
             }else{
                 cls = r;
             }
-            //更新该类注入
-            setImmediate(()=>{
-                InstanceFactory.updInject(cls);
-            });
+            if(cls){
+                //更新该类注入
+                setImmediate(()=>{
+                    InstanceFactory.updInject(cls);
+                });
+            }
         });
     }
 

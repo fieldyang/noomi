@@ -8,7 +8,7 @@
         //表达式，必填，符合该表达式的方法会被拦截，可以采用通配符
         //如下，第一个表示拦截实例名为userService的getInfo方法
         //第二个表示拦截实例名以service开头的所有实例的所有方法（实例必须加入实例工厂，即用注解或在instance中配置）
-        "expressions":["userService.getInfo","service*.*"]   
+        "expressions":["dataImpl.*","service*.*"]   
     }],
     //切面，可以多个
     "aspects":[

@@ -8,5 +8,5 @@
 + sslPort *&lt;<font class='datatype'>number</font>&gt;*       https端口，默认4000
   
 ## 返回值
-<font class='datatype'>[NoomiMain](NoomiMain)</font>  
+<font class='datatype'>[NoomiMain](/webroute/api/noomimain)</font>  
 NoomiMain对象  

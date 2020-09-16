@@ -21,7 +21,7 @@
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>[ERouteResultType](ERouteResultType)</font>  
+<font class='datatype'>[ERouteResultType](/webroute/api/erouteresulttype)</font>  
 ### <a id="PROP_url">url</a>
 路径，type 为redirect 和 url时，必须设置  
 #### 修饰符

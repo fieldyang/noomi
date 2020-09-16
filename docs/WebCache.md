@@ -15,6 +15,7 @@
 ## 方法列表
 + [add](#METHOD_add)
 + [check](#METHOD_check)
++ [getCacheData](#METHOD_getCacheData)
 + [init](#METHOD_init)
 + [load](#METHOD_load)
 + [writeCacheToClient](#METHOD_writeCacheToClient)
@@ -31,7 +32,7 @@ cache对象
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>[NCache](NCache)</font>  
+<font class='datatype'>[NCache](/webroute/api/ncache)</font>  
 ### <a id="PROP_excludeFileTypes">excludeFileTypes</a>
 不能缓存的媒体类型  
 #### 修饰符
@@ -113,12 +114,22 @@ void
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request对象
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request对象
 + url *&lt;<font class='datatype'>string</font>&gt;* 
   
 #### 返回值
 <font class='datatype'>Promise&lt;number&gt;</font>  
 0:从浏览器获取 1:已更新 2:资源不在缓存  
+### <a id="METHOD_getCacheData">getCacheData(url)</a>
+#### 描述
+获取cache data  
+#### 修饰符
+<font class="modifier">public  static  async</font>  
+#### 参数
++ url *&lt;<font class='datatype'>string</font>&gt;*   缓存的url
+  
+#### 返回值
+void  
 ### <a id="METHOD_init">init(cfg)</a>
 #### 描述
 初始化  
@@ -145,8 +156,8 @@ void
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request
-+ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request
++ response *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*  response
 + url *&lt;<font class='datatype'>string</font>&gt;*       url
   
 #### 返回值
@@ -158,7 +169,7 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*          response对象
++ response *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*          response对象
 + etag *&lt;<font class='datatype'>string</font>&gt;*              etag            文件hash码
 + lastModified *&lt;<font class='datatype'>string</font>&gt;*      lasmodified     最后修改时间
   

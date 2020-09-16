@@ -482,13 +482,19 @@ class InstanceFactory{
     static updInject(clazz:any){
         //更改的instance name
         let insName = clazz.prototype.__instanceName;
+        if(!insName){
+            return;
+        }
         let arr:object[] = this.injectMap.get(insName);
-        if(arr){
-            for(let cn of arr){
-                let c = this.getInstance(cn['insName']);
-                if(c){
-                    c.prototype[cn['propName']] = this.getInstance(insName);
-                }
+        if(!arr || arr.length === 0){
+            return;
+        }
+        
+        for(let cn of arr){
+            let c = this.getInstance(cn['insName']);
+            let ins = this.getInstance(insName);
+            if(c){
+                c[cn['propName']] = ins;
             }
         }
     }

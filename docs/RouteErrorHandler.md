@@ -14,7 +14,7 @@
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*   http response
++ res *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*   http response
 + e *&lt;<font class='datatype'>Error</font>&gt;*     异常对象
   
 #### 返回值

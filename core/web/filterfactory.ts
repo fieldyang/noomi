@@ -23,10 +23,6 @@ interface IFilterCfg{
      */
     url_pattern?:string|Array<string>;
     /**
-     * 实例
-     */
-    instance?:any;
-    /**
      * 优先级，越小越高，1-10为框架保留，创建时尽量避免，默认10000
      */
     order?:number;
@@ -37,9 +33,9 @@ interface IFilterCfg{
  */
 interface IFilter{
     /**
-     * 实例或实例名
+     * 实例名
      */
-    instance:any; 
+    instance:string; 
     /**
      * 方法名
      */          
@@ -72,7 +68,10 @@ class FilterFactory{
      * @param cfg   过滤器配置项
      */
     static addFilter(cfg:IFilterCfg):void{
-        let ins:any = cfg.instance || cfg.instance_name;
+        let insName:string = cfg.instance_name;
+        if(!insName){
+            return;
+        }
         //方法名,默认方法do
         let method = cfg.method_name || 'do';
         // 正则式数组
@@ -90,25 +89,9 @@ class FilterFactory{
         
         //查找重复过滤器类
         let f:IFilter = this.filters.find(item=>{
-            //方法名不同，则返回false
-            if(item.method !== method){
-                return false;
-            }
-            let tp = typeof item.instance;
-            if(cfg.instance){
-                if(tp === 'string'){
-                    return item.instance === cfg.instance.constructor.name;
-                }else{
-                    return item.instance.constructor.name === cfg.instance.constructor.name;
-                }
-            }else{
-                if(tp === 'string'){
-                    return item.instance === cfg.instance_name;
-                }else{
-                    return item.instance.constructor.name === cfg.instance_name;
-                }
-            }
+            return item.instance === insName && item.method === method;
         });
+        
         //删除之前添加的过滤器
         if(f){
             let ind = this.filters.indexOf(f);
@@ -116,8 +99,8 @@ class FilterFactory{
         }
         //加入过滤器集合
         this.filters.push({
-            instance:ins,
-            method:cfg.method_name || 'do', //默认do
+            instance:insName,
+            method:method,
             patterns:ptns,
             order:cfg.order===undefined?10000:cfg.order
         });
@@ -189,25 +172,15 @@ class FilterFactory{
             return true;
         }
         
-        //过滤器方法集合
-        let methods:Array<Array<any>> = [];
-
-        //根据过滤器名找到过滤器实例
-        arr.forEach(item=>{
-            //可能是实例名，需要从实例工厂中获得
-            let ins = typeof item.instance === 'string'? InstanceFactory.getInstance(item.instance):item.instance;
+        for(let item of arr){
+            let ins = InstanceFactory.getInstance(item.instance);
             if(!ins){
-                return;
+                continue;
             }
             if(typeof ins[item.method] === 'function'){
-                methods.push([ins,item.method]);
-            }
-        });
-
-        //全部通过才通过
-        for(let i=0;i<methods.length;i++){
-            if(!await InstanceFactory.exec(methods[i][0],methods[i][1],[request,response])){
-                return false;
+                if(!await InstanceFactory.exec(ins,item.method,[request,response])){
+                    return false;
+                }
             }
         }
         return true;

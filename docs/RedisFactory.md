@@ -12,6 +12,7 @@
 + [has](#METHOD_has)
 + [init](#METHOD_init)
 + [parseFile](#METHOD_parseFile)
++ [preHandle](#METHOD_preHandle)
 + [set](#METHOD_set)
 + [setTimeout](#METHOD_setTimeout)
   
@@ -43,7 +44,7 @@ new Map()
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ cfg *&lt;<font class='datatype'>[IRedisCfg](IRedisCfg)</font>&gt;*   redis配置项
++ cfg *&lt;<font class='datatype'>[IRedisCfg](/webroute/api/irediscfg)</font>&gt;*   redis配置项
   
 #### 返回值
 void  
@@ -70,7 +71,7 @@ item value
 <font class="modifier">public  static  async</font>  
 #### 参数
 + clientName *&lt;<font class='datatype'>string</font>&gt;*    client name
-+ item *&lt;<font class='datatype'>[IRedisItem](IRedisItem)</font>&gt;*          redis item
++ item *&lt;<font class='datatype'>[IRedisItem](/webroute/api/iredisitem)</font>&gt;*          redis item
   
 #### 返回值
 <font class='datatype'>Promise&lt;string&gt;</font>  
@@ -93,7 +94,7 @@ void
 <font class="modifier">public  static  async</font>  
 #### 参数
 + clientName *&lt;<font class='datatype'>string</font>&gt;*    client name
-+ item *&lt;<font class='datatype'>[IRedisItem](IRedisItem)</font>&gt;*          IRedisItem
++ item *&lt;<font class='datatype'>[IRedisItem](/webroute/api/iredisitem)</font>&gt;*          IRedisItem
   
 #### 返回值
 void  
@@ -130,6 +131,17 @@ void
   
 #### 返回值
 void  
+### <a id="METHOD_preHandle">preHandle(value)</a>
+#### 描述
+预处理value  
+#### 修饰符
+<font class="modifier">private  static</font>  
+#### 参数
++ value *&lt;<font class='datatype'>any</font>&gt;*     待处理值
+  
+#### 返回值
+<font class='datatype'>any</font>  
+已处理值  
 ### <a id="METHOD_set">set(clientName,item)</a>
 #### 描述
 把值存入redis中  
@@ -137,7 +149,7 @@ void
 <font class="modifier">public  static  async</font>  
 #### 参数
 + clientName *&lt;<font class='datatype'>string</font>&gt;*    client name
-+ item *&lt;<font class='datatype'>[IRedisItem](IRedisItem)</font>&gt;*          redis item
++ item *&lt;<font class='datatype'>[IRedisItem](/webroute/api/iredisitem)</font>&gt;*          redis item
   
 #### 返回值
 void  

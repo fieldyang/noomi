@@ -24,7 +24,7 @@ aop 切点类
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[IAopAdvice](IAopAdvice)&gt;</font>  
+<font class='datatype'>Array&lt;[IAopAdvice](/webroute/api/iaopadvice)&gt;</font>  
 #### 初始值
 []  
 ### <a id="PROP_expressions">expressions</a>
@@ -48,7 +48,7 @@ aop 切点类
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ advice *&lt;<font class='datatype'>[IAopAdvice](IAopAdvice)</font>&gt;*    通知对象
++ advice *&lt;<font class='datatype'>[IAopAdvice](/webroute/api/iaopadvice)</font>&gt;*    通知对象
   
 #### 返回值
 <font class='datatype'>void</font>  

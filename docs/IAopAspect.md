@@ -14,7 +14,7 @@ Aop切面类型
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[IAopAdvice](IAopAdvice)&gt;</font>  
+<font class='datatype'>Array&lt;[IAopAdvice](/webroute/api/iaopadvice)&gt;</font>  
 ### <a id="PROP_instance">instance</a>
 实例名  
 #### 修饰符
@@ -26,4 +26,4 @@ Aop切面类型
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[AopPointcut](AopPointcut)&gt;</font>  
+<font class='datatype'>Array&lt;[AopPointcut](/webroute/api/aoppointcut)&gt;</font>  

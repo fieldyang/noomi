@@ -17,7 +17,7 @@ hook实例数组
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[IHookObj](IHookObj)&gt;</font>  
+<font class='datatype'>Array&lt;[IHookObj](/webroute/api/ihookobj)&gt;</font>  
 #### 初始值
 new Array()  
 ## 方法
@@ -27,7 +27,7 @@ new Array()
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ json *&lt;<font class='datatype'>Array&lt;[IHookObj](IHookObj)&gt;</font>&gt;* [{"instance":实例名,"method":方法名,params:参数数组}...]
++ json *&lt;<font class='datatype'>Array&lt;[IHookObj](/webroute/api/ihookobj)&gt;</font>&gt;* [{"instance":实例名,"method":方法名,params:参数数组}...]
   
 #### 返回值
 void  

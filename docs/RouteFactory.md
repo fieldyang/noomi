@@ -53,7 +53,7 @@ new Map()
 + path *&lt;<font class='datatype'>string</font>&gt;*      路由路径，支持通配符*，需要method支持
 + clazz *&lt;<font class='datatype'>string</font>&gt;*     对应类
 + method *&lt;<font class='datatype'>string</font>&gt;*    方法，path中包含*，则不设置
-+ results *&lt;<font class='datatype'>Array&lt;[IRouteResult](IRouteResult)&gt;</font>&gt;*   路由处理结果集
++ results *&lt;<font class='datatype'>Array&lt;[IRouteResult](/webroute/api/irouteresult)&gt;</font>&gt;*   路由处理结果集
   
 #### 返回值
 void  
@@ -66,7 +66,7 @@ void
 + path *&lt;<font class='datatype'>string</font>&gt;*      url路径
   
 #### 返回值
-<font class='datatype'>[IRoute](IRoute)</font>  
+<font class='datatype'>[IRoute](/webroute/api/iroute)</font>  
 路由对象  
 ### <a id="METHOD_handleException">handleException(res,e)</a>
 #### 描述
@@ -74,7 +74,7 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*   response 对象
++ res *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*   response 对象
 + e *&lt;<font class='datatype'>any</font>&gt;*     异常
   
 #### 返回值
@@ -85,8 +85,8 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*           response 对象
-+ result *&lt;<font class='datatype'>[IRouteResult](IRouteResult)</font>&gt;*        route result
++ res *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*           response 对象
++ result *&lt;<font class='datatype'>[IRouteResult](/webroute/api/irouteresult)</font>&gt;*        route result
 + data *&lt;<font class='datatype'>any</font>&gt;*          路由执行结果
 + instance *&lt;<font class='datatype'>any</font>&gt;*      路由实例
   
@@ -98,10 +98,10 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*       response 对象
++ res *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*       response 对象
 + data *&lt;<font class='datatype'>any</font>&gt;*      路由对应方法返回值
 + instance *&lt;<font class='datatype'>any</font>&gt;*  路由对应实例
-+ results *&lt;<font class='datatype'>Array&lt;[IRouteResult](IRouteResult)&gt;</font>&gt;*   route结果数组
++ results *&lt;<font class='datatype'>Array&lt;[IRouteResult](/webroute/api/irouteresult)&gt;</font>&gt;*   route结果数组
   
 #### 返回值
 <font class='datatype'>void</font>  
@@ -113,8 +113,8 @@ void
 #### 参数
 + pathOrRoute *&lt;<font class='datatype'>string|IRoute</font>&gt;*   路径或路由
 + params *&lt;<font class='datatype'>object</font>&gt;*        调用参数对象
-+ req *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*           request 对象
-+ res *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*           response 对象
++ req *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*           request 对象
++ res *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*           response 对象
   
 #### 返回值
 <font class='datatype'>number</font>  

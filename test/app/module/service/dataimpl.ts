@@ -1,16 +1,18 @@
 import { getConnection, closeConnection, getManager } from "../../../../core/database/connectionmanager";
-import { Transaction, Instance, Transactioner } from "../../../../core/tools/decorator";
+import { Transaction, Instance, Transactioner, Inject } from "../../../../core/tools/decorator";
 import { Resource } from "../dao/pojo/resource";
 // import { ResourceAuthority } from "../dao/pojo/resourceauthority";
 import { EntityManager } from "typeorm";
 // import Resource from "../dao/pojosequelize/resource";
 // import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
 import { Sequelize } from "sequelize-typescript";
+import { UserService } from "./userservice";
 
-// @Transactioner()
-@Instance('dataImpl')
+@Transactioner()
 class DataImpl{
-    @Transaction()
+    @Inject('userService')
+    us:UserService;
+    // @Transaction()
     async addRes(url:string,id?:number){
         //mysql
         // let sql:string = "insert into t_resource(url,resource_id) values(?,?)";
@@ -95,7 +97,7 @@ class DataImpl{
         // return 1;
     }
     
-    @Transaction()
+    // @Transaction()
     async add(){
         // let r1 = await this.addResAuth();
         // try{
@@ -104,6 +106,7 @@ class DataImpl{
         // }catch(e){
         //     return false;
         // }
+        this.us.sayHello();
         let r1 = await this.addRes('/testtran1');
         throw 'hahaha';
         // return true;

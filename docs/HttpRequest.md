@@ -23,7 +23,7 @@
 request类  
 ### remarks
 在IncomingMessage基础上增加了参数解析等方法，更适合直接使用  
-### Extends:
+### extends
 <font class='datatype'>IncomingMessage</font>  
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(req,res)</a>
@@ -45,7 +45,7 @@ http response对象
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>[HttpResponse](HttpResponse)</font>  
+<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>  
 ### <a id="PROP_srcReq">srcReq</a>
 源IncommingMessage对象(server listen 时传入)，某些需要操纵源IncommingMessage的情况下，可以直接使用  
 #### 修饰符
@@ -104,7 +104,7 @@ POST时的参数处理
 #### 修饰符
 <font class="modifier">public  async</font>  
 #### 返回值
-<font class='datatype'>Promise&lt;Session&gt;</font>  
+<font class='datatype'>Promise&lt;[Session](/webroute/api/session)&gt;</font>  
 session对象  
 ### <a id="METHOD_getSocket">getSocket()</a>
 #### 描述

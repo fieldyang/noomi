@@ -8,8 +8,8 @@
 ## 描述
 <font class="since">开始于 : v0.0.1</font>  
 mysql 事务类  
-### Extends:
-<font class='datatype'>[NoomiTransaction](NoomiTransaction)</font>  
+### extends
+<font class='datatype'>[NoomiTransaction](/webroute/api/noomitransaction)</font>  
 ## 方法
 ### <a id="METHOD_begin">begin()</a>
 #### 描述

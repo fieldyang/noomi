@@ -24,7 +24,7 @@
 response类  
 ### remarks
 在ServerResponse基础上增加了写客户端方法，更适合直接使用  
-### Extends:
+### extends
 <font class='datatype'>ServerResponse</font>  
 ## 属性
 ### <a id="PROP_cookie">cookie</a>
@@ -32,7 +32,7 @@ cookie
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>[HttpCookie](HttpCookie)</font>  
+<font class='datatype'>[HttpCookie](/webroute/api/httpcookie)</font>  
 #### 初始值
 new HttpCookie()  
 ### <a id="PROP_request">request</a>
@@ -54,7 +54,7 @@ new HttpCookie()
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ config *&lt;<font class='datatype'>[IResponseWriteCfg](IResponseWriteCfg)</font>&gt;*    response config
++ config *&lt;<font class='datatype'>[IResponseWriteCfg](/webroute/api/iresponsewritecfg)</font>&gt;*    response config
   
 #### 返回值
 <font class='datatype'>boolean</font>  
@@ -150,7 +150,7 @@ void
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ config *&lt;<font class='datatype'>[IResponseWriteCfg](IResponseWriteCfg)</font>&gt;*    回写配置项  
++ config *&lt;<font class='datatype'>[IResponseWriteCfg](/webroute/api/iresponsewritecfg)</font>&gt;*    回写配置项  
 data:file path
   
 #### 返回值
@@ -161,7 +161,7 @@ data:file path
 #### 修饰符
 <font class="modifier">public</font>  
 #### 参数
-+ config *&lt;<font class='datatype'>[IResponseWriteCfg](IResponseWriteCfg)</font>&gt;*    回写配置项
++ config *&lt;<font class='datatype'>[IResponseWriteCfg](/webroute/api/iresponsewritecfg)</font>&gt;*    回写配置项
   
 #### 返回值
 <font class='datatype'>void</font>  

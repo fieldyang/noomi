@@ -143,12 +143,18 @@ class AopFactory{
     /**
      * 切面map，用于存储所有切面
      */
-    static aspects:any = new Map();
+    static aspects:Map<string,IAopAspect> = new Map();
     /**
      * 切点map，用于存储所有切点
      */
-    static pointcuts:any = new Map();
+    static pointcuts:Map<string,AopPointcut> = new Map();
     
+    /**
+     * 已代理方法map，键为instanctName.methodName，避免重复代理
+     * @since 0.4.4
+     */
+    static proxyMethodMap:Map<string,boolean> = new Map();
+
     /**
      * 添加一个切面
      * @param cfg   切面对象 
@@ -197,7 +203,6 @@ class AopFactory{
         if(!Array.isArray(expression)){
             let reg:RegExp = Util.toReg(expression);
             pc.expressions.push(reg);
-            
         }else{
             expression.forEach(item=>{
                 let reg:RegExp = Util.toReg(item);
@@ -266,6 +271,7 @@ class AopFactory{
         }
         //遍历pointcut
         let pc:AopPointcut;
+
         for(pc of this.pointcuts.values()){
             let reg:RegExp;
             //遍历expression
@@ -291,9 +297,16 @@ class AopFactory{
                     if(key === 'constructor' || typeof(instance[key]) !== 'function'){
                         return;
                     }
+                    let method:string = insName + '.' + key;
+                    //已代理过，不再代理
+                    if(this.proxyMethodMap.has(method)){
+                        return;
+                    }
+                    
                     //实例名+方法符合aop正则表达式
-                    if(expr.test(insName + '.' + key)){
+                    if(expr.test(method)){
                         instance[key] = AopProxy.invoke(insName,key,instance[key],instance);
+                        this.proxyMethodMap.set(method,true);
                     }
                 });
             }

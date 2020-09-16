@@ -16,7 +16,7 @@
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ req *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;* 
++ req *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;* 
   
 #### 返回值
 void  
@@ -33,7 +33,7 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request
   
 #### 返回值
 void  

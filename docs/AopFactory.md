@@ -1,8 +1,8 @@
 # Class AopFactory
 ## 属性列表
 + [aspects](#PROP_aspects)
-+ [needToUpdateProxy](#PROP_needToUpdateProxy)
 + [pointcuts](#PROP_pointcuts)
++ [proxyMethodMap](#PROP_proxyMethodMap)
   
 ## 方法列表
 + [addAdvice](#METHOD_addAdvice)
@@ -28,23 +28,24 @@ Aop工厂
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>any</font>  
+<font class='datatype'>Map&lt;string,IAopAspect&gt;</font>  
 #### 初始值
 new Map()  
-### <a id="PROP_needToUpdateProxy">needToUpdateProxy</a>
-更新proxy开关，如果设置为true，则会在nexttick更新代理，默认true  
-#### 修饰符
-<font class="modifier">public  static</font>  
-#### 数据类型
-<font class='datatype'>boolean</font>  
-#### 初始值
-true  
 ### <a id="PROP_pointcuts">pointcuts</a>
 切点map，用于存储所有切点  
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>any</font>  
+<font class='datatype'>Map&lt;string,AopPointcut&gt;</font>  
+#### 初始值
+new Map()  
+### <a id="PROP_proxyMethodMap">proxyMethodMap</a>
+<font class="since">开始于 : v0.4.4</font>  
+已代理方法map，键为instanctName.methodName，避免重复代理  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 数据类型
+<font class='datatype'>Map&lt;string,boolean&gt;</font>  
 #### 初始值
 new Map()  
 ## 方法
@@ -54,7 +55,7 @@ new Map()
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ advice *&lt;<font class='datatype'>[IAopAdvice](IAopAdvice)</font>&gt;* 通知配置
++ advice *&lt;<font class='datatype'>[IAopAdvice](/webroute/api/iaopadvice)</font>&gt;* 通知配置
   
 #### 返回值
 <font class='datatype'>void</font>  
@@ -64,7 +65,7 @@ new Map()
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ cfg *&lt;<font class='datatype'>[IAopAspect](IAopAspect)</font>&gt;*   切面对象
++ cfg *&lt;<font class='datatype'>[IAopAspect](/webroute/api/iaopaspect)</font>&gt;*   切面对象
   
 #### 返回值
 <font class='datatype'>void</font>  
@@ -90,14 +91,13 @@ void
   
 #### 返回值
 <font class='datatype'>void</font>  
-### <a id="METHOD_addProxyByExpression">addProxyByExpression(expr[,instances])</a>
+### <a id="METHOD_addProxyByExpression">addProxyByExpression(expr)</a>
 #### 描述
 通过正则式给方法加代理  
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
 + expr *&lt;<font class='datatype'>RegExp</font>&gt;*          表达式正则式
-+ instances *&lt;<font class='datatype'>Array&lt;string&gt;</font>&gt;*     处理过的instance name
   
 #### 返回值
 void  
@@ -129,7 +129,7 @@ throw:[{instance:切面实例,method:切面方法},...]
 + methodName *&lt;<font class='datatype'>string</font>&gt;*    方法名
   
 #### 返回值
-<font class='datatype'>Array&lt;[AopPointcut](AopPointcut)&gt;</font>  
+<font class='datatype'>Array&lt;[AopPointcut](/webroute/api/aoppointcut)&gt;</font>  
 切点数组  
 ### <a id="METHOD_getPointcutById">getPointcutById(pointcutId)</a>
 #### 描述
@@ -140,7 +140,7 @@ throw:[{instance:切面实例,method:切面方法},...]
 + pointcutId *&lt;<font class='datatype'>string</font>&gt;*    切点id
   
 #### 返回值
-<font class='datatype'>[AopPointcut](AopPointcut)</font>  
+<font class='datatype'>[AopPointcut](/webroute/api/aoppointcut)</font>  
 切点对象  
 ### <a id="METHOD_init">init(config)</a>
 #### 描述
@@ -148,7 +148,7 @@ throw:[{instance:切面实例,method:切面方法},...]
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ config *&lt;<font class='datatype'>[IAopCfg](IAopCfg)</font>&gt;* 配置对象，包含切点集合、切面集合(含通知集合)
++ config *&lt;<font class='datatype'>[IAopCfg](/webroute/api/iaopcfg)</font>&gt;* 配置对象，包含切点集合、切面集合(含通知集合)
   
 #### 返回值
 void  
@@ -168,4 +168,4 @@ void
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 返回值
-<font class='datatype'>void</font>  
+void  

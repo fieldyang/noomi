@@ -21,7 +21,7 @@
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[IFilter](IFilter)&gt;</font>  
+<font class='datatype'>Array&lt;[IFilter](/webroute/api/ifilter)&gt;</font>  
 #### 初始值
 []  
 ## 方法
@@ -31,7 +31,7 @@
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 参数
-+ cfg *&lt;<font class='datatype'>[IFilterCfg](IFilterCfg)</font>&gt;*   过滤器配置项
++ cfg *&lt;<font class='datatype'>[IFilterCfg](/webroute/api/ifiltercfg)</font>&gt;*   过滤器配置项
   
 #### 返回值
 <font class='datatype'>void</font>  
@@ -42,8 +42,8 @@
 <font class="modifier">public  static  async</font>  
 #### 参数
 + url *&lt;<font class='datatype'>string</font>&gt;*       url路径
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request 对象
-+ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response 对象
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request 对象
++ response *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*  response 对象
   
 #### 返回值
 <font class='datatype'>Promise&lt;boolean&gt;</font>  
@@ -56,7 +56,7 @@
 + url *&lt;<font class='datatype'>string</font>&gt;*   资源url
   
 #### 返回值
-<font class='datatype'>Array&lt;[IFilter](IFilter)&gt;</font>  
+<font class='datatype'>Array&lt;[IFilter](/webroute/api/ifilter)&gt;</font>  
 filter数组  
 ### <a id="METHOD_init">init(config)</a>
 #### 描述

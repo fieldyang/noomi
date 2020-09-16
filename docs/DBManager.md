@@ -41,7 +41,7 @@
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 返回值
-<font class='datatype'>[IConnectionManager](IConnectionManager)</font>  
+<font class='datatype'>[IConnectionManager](/webroute/api/iconnectionmanager)</font>  
 connection manager  
 ### <a id="METHOD_init">init(cfg)</a>
 #### 描述

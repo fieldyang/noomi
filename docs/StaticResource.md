@@ -57,8 +57,8 @@ void
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request
-+ response *&lt;<font class='datatype'>[HttpResponse](HttpResponse)</font>&gt;*  response
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request
++ response *&lt;<font class='datatype'>[HttpResponse](/webroute/api/httpresponse)</font>&gt;*  response
 + path *&lt;<font class='datatype'>string</font>&gt;*      文件路径
   
 #### 返回值

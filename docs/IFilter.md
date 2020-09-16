@@ -11,11 +11,11 @@
 filter类型  
 ## 属性
 ### <a id="PROP_instance">instance</a>
-实例或实例名  
+实例名  
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>any</font>  
+<font class='datatype'>string</font>  
 ### <a id="PROP_method">method</a>
 方法名  
 #### 修饰符

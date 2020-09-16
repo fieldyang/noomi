@@ -16,8 +16,8 @@
 mssql连接管理器  
 ### remarks
 mssql直接启动连接池，不需要单独配置  
-### Implements:
-<font class='datatype'>[IConnectionManager](IConnectionManager)</font>  
+### implements
+<font class='datatype'>[IConnectionManager](/webroute/api/iconnectionmanager)</font>  
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(cfg)</a>
 #### 参数

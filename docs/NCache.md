@@ -28,7 +28,7 @@ Cache类
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(cfg)</a>
 #### 参数
-+ cfg *&lt;<font class='datatype'>[ICacheCfg](ICacheCfg)</font>&gt;*   cache初始化参数
++ cfg *&lt;<font class='datatype'>[ICacheCfg](/webroute/api/icachecfg)</font>&gt;*   cache初始化参数
   
 ## 属性
 ### <a id="PROP_memoryCache">memoryCache</a>
@@ -36,7 +36,7 @@ Cache类
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>[MemoryCache](MemoryCache)</font>  
+<font class='datatype'>[MemoryCache](/webroute/api/memorycache)</font>  
 ### <a id="PROP_name">name</a>
 cache名字，全局唯一  
 #### 修饰符
@@ -86,7 +86,7 @@ redis名，saveType为1时存在
 #### 修饰符
 <font class="modifier">private  async</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[ICacheItem](ICacheItem)</font>&gt;*      cache item
++ item *&lt;<font class='datatype'>[ICacheItem](/webroute/api/icacheitem)</font>&gt;*      cache item
 + timeout *&lt;<font class='datatype'>number</font>&gt;*   超时时间
   
 #### 返回值
@@ -183,7 +183,7 @@ object或null
 #### 修饰符
 <font class="modifier">public  async</font>  
 #### 参数
-+ item *&lt;<font class='datatype'>[ICacheItem](ICacheItem)</font>&gt;* 
++ item *&lt;<font class='datatype'>[ICacheItem](/webroute/api/icacheitem)</font>&gt;* 
 + timeout *&lt;<font class='datatype'>number</font>&gt;*   超时时间(秒)
   
 #### 返回值

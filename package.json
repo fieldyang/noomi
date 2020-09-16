@@ -1,6 +1,6 @@
 {
   "name": "noomi",
-  "version": "0.4.0-beta",
+  "version": "0.4.4",
   "description": "一个基于node的企业级框架，支持路由、IoC、Aop、事务嵌套、安全框架、缓存、集群",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -34,7 +34,7 @@
     "mime": "^2.4.6",
     "sequelize": "^5.22.3",
     "sequelize-typescript": "^1.1.0",
-    "typeorm": "^0.2.25",
+    "typeorm": "^0.2.26",
     "uuid": "^8.3.0"
   },
   "devDependencies": {

@@ -15,8 +15,8 @@
 ## 描述
 <font class="since">开始于 : v0.0.1</font>  
 mysql连接管理器  
-### Implements:
-<font class='datatype'>[IConnectionManager](IConnectionManager)</font>  
+### implements
+<font class='datatype'>[IConnectionManager](/webroute/api/iconnectionmanager)</font>  
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(cfg)</a>
 #### 参数

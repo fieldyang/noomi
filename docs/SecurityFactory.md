@@ -100,7 +100,7 @@
 #### 修饰符
 <font class="modifier">public  static</font>  
 #### 数据类型
-<font class='datatype'>[NCache](NCache)</font>  
+<font class='datatype'>[NCache](/webroute/api/ncache)</font>  
 ### <a id="PROP_dbOptions">dbOptions</a>
 数据表对象  
 #### 修饰符
@@ -227,7 +227,7 @@ void
 #### 参数
 + userId *&lt;<font class='datatype'>number</font>&gt;*    用户id
 + groups *&lt;<font class='datatype'>Array&lt;number&gt;</font>&gt;*    组id 数组
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;* 
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;* 
   
 #### 返回值
 void  
@@ -240,7 +240,7 @@ void
 <font class="modifier">public  static  async</font>  
 #### 参数
 + url *&lt;<font class='datatype'>string</font>&gt;*       资源url
-+ session *&lt;<font class='datatype'>Session</font>&gt;*   session对象
++ session *&lt;<font class='datatype'>[Session](/webroute/api/session)</font>&gt;*   session对象
   
 #### 返回值
 <font class='datatype'>Promise&lt;number&gt;</font>  
@@ -303,7 +303,7 @@ void
 <font class="modifier">public  static  async</font>  
 #### 参数
 + userId *&lt;<font class='datatype'>number</font>&gt;*    用户id
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;*   request对象
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;*   request对象
   
 #### 返回值
 void  
@@ -326,7 +326,7 @@ page url
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;* 
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;* 
   
 #### 返回值
 <font class='datatype'>Promise&lt;string&gt;</font>  
@@ -370,8 +370,8 @@ void
 #### 修饰符
 <font class="modifier">public  static  async</font>  
 #### 参数
-+ session *&lt;<font class='datatype'>Session</font>&gt;*   session对象
-+ request *&lt;<font class='datatype'>[HttpRequest](HttpRequest)</font>&gt;* 
++ session *&lt;<font class='datatype'>[Session](/webroute/api/session)</font>&gt;*   session对象
++ request *&lt;<font class='datatype'>[HttpRequest](/webroute/api/httprequest)</font>&gt;* 
   
 #### 返回值
 void  

@@ -26,4 +26,4 @@
 #### 修饰符
 <font class="modifier">public</font>  
 #### 数据类型
-<font class='datatype'>Array&lt;[IRouteResult](IRouteResult)&gt;</font>  
+<font class='datatype'>Array&lt;[IRouteResult](/webroute/api/irouteresult)&gt;</font>  

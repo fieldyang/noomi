@@ -1,6 +1,7 @@
 # Class Util
 ## 方法列表
 + [getAbsPath](#METHOD_getAbsPath)
++ [getRelPath](#METHOD_getRelPath)
 + [toReg](#METHOD_toReg)
   
 ---
@@ -17,6 +18,17 @@
 <font class="modifier">public  static</font>  
 #### 参数
 + pa *&lt;<font class='datatype'>Array&lt;string&gt;</font>&gt;*    待处理的字符串数组
+  
+#### 返回值
+<font class='datatype'>string</font>  
+字符串数组构成的的绝对地址  
+### <a id="METHOD_getRelPath">getRelPath(path)</a>
+#### 描述
+获取相对路径  
+#### 修饰符
+<font class="modifier">public  static</font>  
+#### 参数
++ path *&lt;<font class='datatype'>string</font>&gt;* 
   
 #### 返回值
 <font class='datatype'>string</font>  

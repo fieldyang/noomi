@@ -11,8 +11,8 @@
 ## 描述
 <font class="since">开始于 : v0.0.1</font>  
 mssql 事务类  
-### Extends:
-<font class='datatype'>[NoomiTransaction](NoomiTransaction)</font>  
+### extends
+<font class='datatype'>[NoomiTransaction](/webroute/api/noomitransaction)</font>  
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(id[,connection[,type]])</a>
 #### 参数

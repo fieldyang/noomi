@@ -5,7 +5,7 @@
 Noomi异常类  
 ### remarks
 用于产生异常信息  
-### Extends:
+### extends
 <font class='datatype'>Error</font>  
 ## 构造方法
 ### <a id="METHOD_constructor">constructor(code[,param])</a>
