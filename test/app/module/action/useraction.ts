@@ -67,7 +67,7 @@ class UserAction extends BaseRoute{
             this.userName = 'bbb';
             return 2;
         }else if(params.type==3){
-            this.downloadPath = '/test/js/app.js';
+            this.downloadPath = '/test/test.js';
             return 3;
         }
         
@@ -96,10 +96,10 @@ class UserAction extends BaseRoute{
 
     @Route('/last')
     last(params){
-        return params.type;
-        // return {
-        //     info:"this is the last info"
-        // }
+        // return params.type;
+        return {
+            info:"this is the last info"
+        }
     }
 
 

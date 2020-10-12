@@ -16,8 +16,9 @@ interface IResponseWriteCfg{
      * 字符集，默认utf8
      */             
     charset?:BufferEncoding;   
+
     /**
-     * 数据类型，默认text/html
+     * mime类型，默认text/html
      */
     type?:string;
     /**
@@ -37,6 +38,12 @@ interface IResponseWriteCfg{
      * 压缩类型，包括br,gzip,deflate
      */
     zip?:string;  
+
+    /**
+     * 回写类型  text,file 默认text
+     * @since 0.4.8
+     */
+    writeType?:string;
 }
 
 /** 

@@ -1,11 +1,48 @@
 import { NCache } from "../tools/ncache";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
-import { Stats } from "fs";
-import { App } from "../tools/application";
-import { Stream } from "stream";
 import { WebConfig } from "./webconfig";
-import { IStaticCacheObj } from "./staticresource";
+
+/**
+ * 静态资源缓存对象
+ * @since 0.4.6
+ */
+interface IWebCacheObj{
+    /**
+     * ETag
+     */
+    etag:string;
+    
+    /**
+     * 最后修改时间串
+     */
+    lastModified:string;
+    
+    /**
+     * 文件mime type
+     */
+    mimeType:string;
+    
+    /**
+     * 数据长度
+     */
+    dataSize?:number;
+    
+    /**
+     * 压缩数据长度
+     */
+    zipSize?:number;
+
+    /**
+     * 数据
+     */
+    data?:string;
+
+    /**
+     * 压缩数据
+     */
+    zipData?:string;
+}
 
 /**
  * web 缓存类
@@ -96,7 +133,7 @@ class WebCache{
      * @param cacheData     待缓存数据
      * @param dontSaveData  不缓存文件数据
      */
-    static async add(url:string,cacheData:IStaticCacheObj){
+    static async add(url:string,cacheData:IWebCacheObj){
         //存到cache
         await this.cache.set({
             key:url,
@@ -116,7 +153,7 @@ class WebCache{
         let rCheck:number = await this.check(request,url);
         switch(rCheck){
             case 0:
-                return 0;
+                return 304;
             case 1:
                 return await this.cache.getMap(url);
         }
@@ -200,4 +237,4 @@ class WebCache{
     }
 }
 
-export{WebCache}
+export{WebCache,IWebCacheObj}

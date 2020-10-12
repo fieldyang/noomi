@@ -1,20 +1,23 @@
-let a = {
-    b:{
-        c:{
-            d:{
-                e:{
-                    f:1,
-                    g:2
-                }
-            }
-        },
-        ii:{
-            jj:'hello'
-        }
-    }
+async function foo(){
+    return new Promise((res,rej)=>{
+        rej(1);
+    }).catch(e=>{
+        console.log('error:',e);
+    });
 }
 
-const v8 = require('v8');
-let buf = v8.serialize(a);
-let x = v8.deserialize(buf);
-console.log(x.b.c.d);
+async function f1(){
+    return await foo();
+}
+
+
+
+(async ()=>{
+    let r = await foo();
+    console.log(r);
+})()
+
+
+// require('zlib').gzip(require('v8').serialize(o),(err,r)=>{
+//     console.log(err,r);
+// })
