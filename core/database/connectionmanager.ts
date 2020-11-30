@@ -20,19 +20,19 @@ interface IConnectionManager{
     /**
      * 获取连接
      */
-    getConnection():Promise<any>;
+    getConnection:Function;
 
     /**
      * 释放连接
      * @param conn  待释放的连接
      */
-    release(conn:any):Promise<any>;
+    release:Function;
 
     /**
      * 获取EntityManager，TypeormConnectionManager有效
      * @returns 
      */
-    getManager():Promise<EntityManager>;
+    getManager?:Function;
 }
 
 /**

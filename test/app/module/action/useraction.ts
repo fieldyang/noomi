@@ -23,7 +23,9 @@ class UserAction extends BaseRoute{
     async user(){
         return{success:true,user:'yes'};
     }
-
+    @Route({
+        path:'/addres'
+    })
     async addres(){
         try{
             let r = await this.dataImpl.add();

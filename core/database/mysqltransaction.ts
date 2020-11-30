@@ -17,7 +17,7 @@ class MysqlTransaction extends NoomiTransaction{
                 if(err){
                     reject(err);
                 }
-                resolve();
+                resolve(1);
             });
         });
     }
@@ -31,7 +31,7 @@ class MysqlTransaction extends NoomiTransaction{
                 if(err){
                     reject(err);
                 }
-                resolve();
+                resolve(1);
             });
         });
     }
@@ -45,7 +45,7 @@ class MysqlTransaction extends NoomiTransaction{
                 if(err){
                     reject(err);
                 }
-                resolve();
+                resolve(1);
             });
         });
     }

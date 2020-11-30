@@ -72,7 +72,8 @@ enum TransactionSource{
     MSSQL='mssql',
     MONGODB='mongodb',
     SEQUALIZE='sequalize',
-    TYPEORM='typeorm'
+    TYPEORM='typeorm',
+    RELAEN='relaen'
 }
 
 export{NoomiTransaction,TransactionType}

@@ -9,7 +9,7 @@
 	// "launchhook":"launchhook.json",
 	
 	// "aop":"aop.json",
-	"database":"database/typeorm.json",
+	"database":"database/relaen.json",
 	// "route":"route.json",
 	// "filter":"filter.json",
 	"redis":"redis.json"

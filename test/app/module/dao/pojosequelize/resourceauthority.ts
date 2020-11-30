@@ -11,13 +11,13 @@ export default class ResourceAuthority extends Model<ResourceAuthority>{
     })
     resourceAuthorityId:number;
 
-    @ForeignKey(()=>Resource)
+    // @ForeignKey(()=>Resource)
     @Column({
         field:'resource_id'
     })
     resourceId:number;
 
-    @BelongsTo(()=>Resource)
+    // @BelongsTo(()=>Resource)
     resource:Resource
 
     @ForeignKey(()=>Authority)

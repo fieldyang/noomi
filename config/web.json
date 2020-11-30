@@ -10,12 +10,11 @@
             "allow_headers":"x-token",  //自定义header，多个以","分割，method=options时有效
             "access_max_age":86400      //预检结果缓存时间(秒)，默认24小时
         },
-        "cache":true,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
+        "cache":false,					//是否启用静态资源缓存，如果为false，则cache_option无效，默认false
         "cache_option":{				//静态资源缓存配置
             "save_type":1,  			//存储类型 0 memory, 1 redis，需要安装redis服务器并启动服务
             "max_size":20000000,		//缓存最大字节数，save_type为0时有效
             "max_single_size":0,	    //单个缓存文件最大size,0表示不限制
-            //缓存静态资源类型，默认['*']，缓存所有静态资源(mime为text/*,application/*)
             "redis":"default",			//redis client名，与redis配置保持一直，默认default
             "expires":0,				//页面缓存 expires 属性
             "max_age":1800,				//cache-control中的max-age属性

@@ -2,11 +2,13 @@ import { getConnection, closeConnection, getManager } from "../../../../core/dat
 import { Transaction, Instance, Transactioner, Inject } from "../../../../core/tools/decorator";
 import { Resource } from "../dao/pojo/resource";
 // import { ResourceAuthority } from "../dao/pojo/resourceauthority";
-import { EntityManager } from "typeorm";
+// import { EntityManager } from "typeorm";
 // import Resource from "../dao/pojosequelize/resource";
 // import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
 import { Sequelize } from "sequelize-typescript";
 import { UserService } from "./userservice";
+import { User } from "../dao/entity/user";
+import { Connection, EntityManagerFactory ,EntityManager} from "relaen";
 
 @Transactioner()
 class DataImpl{
@@ -47,11 +49,22 @@ class DataImpl{
         // });
         // let r1 = await res.save();
         //typeorm
-        let res = new Resource();
-        res.resourceId = id;
-        res.url = url;
-        let manager:EntityManager = await getManager();
-        let r1 = await manager.save(res);
+        // let res = new Resource();
+        // res.resourceId = id;
+        // res.url = url;
+        // let manager:EntityManager = await getManager();
+        // let r1 = await manager.save(res);
+
+        //relaen
+        let conn:Connection = await getConnection();
+        let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
+        let user:User = new User();
+        user.setUserName('yang');
+        user.setAge(10);
+        user.setSexy('M');
+        await user.save(true);
+        em.close();
+        await conn.close();
         return 2;
         
     }
@@ -95,6 +108,16 @@ class DataImpl{
         // const res = new ResourceAuthority();
         // await manager.save(res);
         // return 1;
+
+        let conn:Connection = await getConnection();
+        let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
+        let user:User = new User(4);
+        user.setUserName('yanglei');
+        user.setAge(10);
+        user.setSexy('M');
+        await user.save();
+        em.close();
+        await conn.close();
     }
     
     // @Transaction()
@@ -106,10 +129,12 @@ class DataImpl{
         // }catch(e){
         //     return false;
         // }
-        this.us.sayHello();
-        let r1 = await this.addRes('/testtran1');
-        throw 'hahaha';
-        // return true;
+        // this.us.sayHello();
+        // let r1 = await this.addRes('/testtran1');
+        // throw 'hahaha';
+        await this.addRes(null);
+        await this.addResAuth();
+        return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;
         // }else{

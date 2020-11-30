@@ -2,6 +2,7 @@ import { NCache } from "../tools/ncache";
 import { HttpRequest } from "./httprequest";
 import { HttpResponse } from "./httpresponse";
 import { WebConfig } from "./webconfig";
+import { RedisFactory } from "../tools/redisfactory";
 
 /**
  * 静态资源缓存对象
@@ -134,6 +135,9 @@ class WebCache{
      * @param dontSaveData  不缓存文件数据
      */
     static async add(url:string,cacheData:IWebCacheObj){
+        if(!this.cache){
+            return;
+        }
         //存到cache
         await this.cache.set({
             key:url,
@@ -147,9 +151,12 @@ class WebCache{
      * @param response  response
      * @param url       url
      * @param gzip      压缩类型 br,gzip,deflate
-     * @returns         0不用回写数据 或 {data:data,type:mimetype}
+     * @returns         0无缓存，异常码 或 cache数据
      */
     static async load(request:HttpRequest,response:HttpResponse,url:string):Promise<number|object>{
+        if(!this.cache){
+            return 0;
+        }
         let rCheck:number = await this.check(request,url);
         switch(rCheck){
             case 0:
@@ -164,6 +171,9 @@ class WebCache{
      * @param url   缓存的url
      */
     static async getCacheData(url:string){
+        if(!this.cache){
+            return;
+        }
         return this.cache.getMap(url);
     }
     /**
@@ -209,6 +219,9 @@ class WebCache{
      * @returns         0:从浏览器获取 1:已更新 2:资源不在缓存
      */
     static async check(request:HttpRequest,url:string):Promise<number>{
+        if(!this.cache){
+            return 2;
+        }
         let exist = await this.cache.has(url);
         if(!exist){
             return 2;

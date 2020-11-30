@@ -99,13 +99,13 @@ interface IRoute{
     results?:Array<IRouteResult>;
     /**
      * route 实例对应url路径
-     * @since 0.4.8
+     * @since 0.4.7
      */
     path?:string;
 
     /**
      * 参数对象
-     * @since 0.4.8
+     * @since 0.4.7
      */
     params?:object;
 
@@ -267,8 +267,7 @@ class RouteFactory{
         
         try{
             let re = await func.call(route.instance,params);
-            re = await this.handleResult(route,re);
-            return re;
+            return await this.handleResult(route,re);
         }catch(e){
             this.handleException(res,e);
         }
@@ -353,8 +352,7 @@ class RouteFactory{
                 if(route1 !== null){
                     //设置route path
                     route1.path = url1;
-                    let re = await this.handleRoute(route1,route.instance.request,res,params);
-                    return re;
+                    return await this.handleRoute(route1,route.instance.request,res,params);
                 }
                 break;
             case ERouteResultType.NONE:    //什么都不做

@@ -12,6 +12,7 @@ import { OracleTransaction } from "./oracletransaction";
 import { App } from "../tools/application";
 import { MssqlTransaction } from "./mssqltransaction";
 import { TypeormTransaction } from "./typeormtransaction";
+import { RelaenTransaction } from "./relaentransaction";
 
 class TransactionManager{
     static transactionMap:Map<number,NoomiTransaction> = new Map();  //transaction map
@@ -67,37 +68,26 @@ class TransactionManager{
         
         //添加transaction到实例工厂，已存在则不再添加
         let tn:string = this.transactionMdl;
+        //事务类
+        let clazz:any;
         if(tn){
             let ins = InstanceFactory.getInstance(tn);
             if(ins === null){
                 switch(cfg.product){
+                    case "relaen":
+                        clazz = RelaenTransaction;
+                        break;    
                     case "mysql":
-                    InstanceFactory.addInstance({
-                        name:tn,
-                        class:MysqlTransaction,
-                        singleton:false
-                    });
+                        clazz = MysqlTransaction;
                     break;
                     case "mssql":
-                        InstanceFactory.addInstance({
-                            name:tn,
-                            class:MssqlTransaction,
-                            singleton:false
-                        });
+                        clazz = MssqlTransaction;
                         break;
                     case "oracle":
-                        InstanceFactory.addInstance({
-                            name:tn,
-                            class:OracleTransaction,
-                            singleton:false
-                        });
+                        clazz = OracleTransaction;
                         break;
                     case "sequelize":
-                        InstanceFactory.addInstance({
-                            name:tn,
-                            class:SequelizeTransaction,
-                            singleton:false
-                        }); 
+                        clazz = SequelizeTransaction;
                         //事务选项
                         this.transactionOption = {
                             autocommit:false
@@ -120,33 +110,34 @@ class TransactionManager{
                         }
                         break;
                     case 'typeorm': //typeorm
-                            InstanceFactory.addInstance({
-                                name:tn,
-                                class:TypeormTransaction,
-                                singleton:false
-                            }); 
-                            this.transactionOption = {};
-                            //设置隔离级别
-                            if(this.isolationLevel !== 0){
-                                switch(TransactionManager.isolationLevel){
-                                    case 1:  
-                                        this.transactionOption.isolationLevel = "READ UNCOMMITTED";
-                                        break;
-                                    case 2:
-                                        this.transactionOption.isolationLevel = "READ COMMITTED";
-                                        break;
-                                    case 3:
-                                        this.transactionOption.isolationLevel = "REPEATABLE READ";
-                                        break;
-                                    case 4:
-                                        this.transactionOption.isolationLevel = "SERIALIZABLE";
-                                }
+                        clazz = TypeormTransaction;
+                        this.transactionOption = {};
+                        //设置隔离级别
+                        if(this.isolationLevel !== 0){
+                            switch(TransactionManager.isolationLevel){
+                                case 1:  
+                                    this.transactionOption.isolationLevel = "READ UNCOMMITTED";
+                                    break;
+                                case 2:
+                                    this.transactionOption.isolationLevel = "READ COMMITTED";
+                                    break;
+                                case 3:
+                                    this.transactionOption.isolationLevel = "REPEATABLE READ";
+                                    break;
+                                case 4:
+                                    this.transactionOption.isolationLevel = "SERIALIZABLE";
                             }
-                            break;
+                        }
+                        break;
                 }
+                InstanceFactory.addInstance({
+                    name:tn,
+                    class:clazz,
+                    singleton:false
+                }); 
+                
             }
         }
-        
     }
 
     /**

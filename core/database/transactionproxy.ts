@@ -2,7 +2,7 @@ import { DBManager } from "./dbmanager";
 import { TransactionManager } from "./transactionmanager";
 import { getConnection } from "./connectionmanager";
 import { InstanceFactory } from "../main/instancefactory";
-import { QueryRunner } from "typeorm";
+import { QueryRunner, TreeChildren } from "typeorm";
 
 /**
  * 事务Aop代理
@@ -21,6 +21,18 @@ class TransactionProxy{
         return async (params)=>{
             let retValue;
             switch(DBManager.product){
+                case 'relaen':
+                    retValue = await new Promise(async (resolve,reject)=>{
+                        TransactionManager.namespace.run(async ()=>{
+                            let v = await doRelaen();
+                            if(v instanceof Error){
+                                reject(v)
+                            }else{
+                                resolve(v);
+                            }
+                        });
+                    });
+                    break;
                 case 'sequelize':
                     retValue = await new Promise(async (resolve,reject)=>{
                         TransactionManager.namespace.run(async ()=>{
@@ -50,7 +62,7 @@ class TransactionProxy{
                         TransactionManager.namespace.run(async ()=>{
                             let v = await doDataScource();
                             if(v instanceof Error){
-                                reject(v)
+                                reject(v);
                             }else{
                                 resolve(v);
                             }
@@ -66,6 +78,29 @@ class TransactionProxy{
              * 数据源处理
              */
             async function doDataScource(){
+                if(!TransactionManager.getIdFromLocal()){
+                    //保存transaction id
+                    TransactionManager.setIdToLocal();
+                }
+                //advices获取
+                let adviceInstance = InstanceFactory.getInstance('NoomiTransactionAdvice');
+                let result:any;
+                //before aop执行
+                await adviceInstance.before.apply(adviceInstance);
+                
+                try{
+                    result = await func.apply(instance,params);
+                    //return aop执行
+                    await adviceInstance.afterReturn.apply(adviceInstance);
+                }catch(e){
+                    //异常aop执行
+                    await adviceInstance.afterThrow.apply(adviceInstance);
+                    result = handleErr(e);
+                }
+                return result;
+            }
+
+            async function doRelaen(){
                 if(!TransactionManager.getIdFromLocal()){
                     //保存transaction id
                     TransactionManager.setIdToLocal();

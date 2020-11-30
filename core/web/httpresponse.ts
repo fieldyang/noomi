@@ -41,7 +41,7 @@ interface IResponseWriteCfg{
 
     /**
      * 回写类型  text,file 默认text
-     * @since 0.4.8
+     * @since 0.4.7
      */
     writeType?:string;
 }

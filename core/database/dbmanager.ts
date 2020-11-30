@@ -8,6 +8,7 @@ import { OracleConnectionManager } from "./oracleconnectionmanager";
 import { MssqlConnectionManager } from "./mssqlconnectionmanager";
 import { TypeormConnectionManager } from "./typeormconnectionmanager";
 import { IConnectionManager } from "./connectionmanager";
+import { RelaenConnectionManager } from "./relaenconnectionmanager";
 
 /**
  * 数据库管理器
@@ -49,49 +50,42 @@ class DBManager{
             opt.usePool = cfg.use_pool;
             //设置是否使用transaction标志
             opt.useTransaction = cfg.transaction?true:false;
-        
+            // connection manager
+            let cm:IConnectionManager;
+            //connection manager 类
+            let clazz:any;
             switch(product){
                 case "mysql":
                     cm = new MysqlConnectionManager(opt);
-                    InstanceFactory.addInstance({
-                        name:cmName,
-                        instance:cm,
-                        class:MysqlConnectionManager
-                    });
+                    clazz = MysqlConnectionManager;
                     break;
                 case "mssql":
                     cm = new MssqlConnectionManager(opt);
-                    InstanceFactory.addInstance({
-                        name:cmName,
-                        instance:cm,
-                        class:MssqlConnectionManager
-                    });
+                    clazz = MssqlConnectionManager;
                     break;
                 case "oracle":
                     cm = new OracleConnectionManager(opt);
-                    InstanceFactory.addInstance({
-                        name:cmName,
-                        instance:cm,
-                        class:OracleConnectionManager
-                    });
+                    clazz = OracleConnectionManager;
                     break;
                 case "sequelize":
                     cm = new SequelizeConnectionManager(opt);
-                    InstanceFactory.addInstance({
-                        name:cmName,
-                        instance:cm,
-                        class:SequelizeConnectionManager
-                    });
+                    clazz = SequelizeConnectionManager;
                     break;
                 case "typeorm":
                     cm = new TypeormConnectionManager(opt);
-                    InstanceFactory.addInstance({
-                        name:cmName,
-                        instance:cm,
-                        class:TypeormConnectionManager
-                    });
+                    clazz = TypeormConnectionManager;
+                    break;
+                case "relaen":
+                    cm = new RelaenConnectionManager(opt);
+                    clazz = TypeormConnectionManager
                     break;
             }
+            //添加到实例工厂
+            InstanceFactory.addInstance({
+                name:cmName,
+                instance:cm,
+                class:clazz
+            });
         }
         this.connectionManagerName = cmName;
         //事务配置
