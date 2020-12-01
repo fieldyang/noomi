@@ -2,7 +2,6 @@ import { NoomiError } from "../tools/errorfactory";
 import { MysqlConnectionManager } from "./mysqlconnectionmanager";
 import { InstanceFactory } from "../main/instancefactory";
 import { TransactionManager } from "./transactionmanager";
-import { SequelizeConnectionManager } from "./sequelizeconnectionmanager";
 import { App } from "../tools/application";
 import { OracleConnectionManager } from "./oracleconnectionmanager";
 import { MssqlConnectionManager } from "./mssqlconnectionmanager";
@@ -67,18 +66,15 @@ class DBManager{
                     cm = new OracleConnectionManager(opt);
                     clazz = OracleConnectionManager;
                     break;
-                case "sequelize":
-                    cm = new SequelizeConnectionManager(opt);
-                    clazz = SequelizeConnectionManager;
+                case "relaen":
+                    cm = new RelaenConnectionManager(opt);
+                    clazz = RelaenConnectionManager;
                     break;
                 case "typeorm":
                     cm = new TypeormConnectionManager(opt);
                     clazz = TypeormConnectionManager;
                     break;
-                case "relaen":
-                    cm = new RelaenConnectionManager(opt);
-                    clazz = TypeormConnectionManager
-                    break;
+                
             }
             //添加到实例工厂
             InstanceFactory.addInstance({

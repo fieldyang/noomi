@@ -103,24 +103,23 @@ class RequestQueue{
         //welcome页面
         if(path === '' || path ==='/'){
             if(WebConfig.welcomePage){
-                data = await StaticResource.load(request,response,WebConfig.welcomePage,gzip);
+                path = WebConfig.welcomePage;
             }
         }
-        if(!data){
-            //过滤器执行
-            if(!await FilterFactory.doChain(request.url,request,response)){
-                return;
-            }
-            //从路由查找
-            data = await RouteFactory.handleRoute(path,request,response);
-            //静态资源
-            if(!data){  
-                //从web cache获取数据
-                data = await WebCache.load(request,response,path);
-                if(!data){
-                    //加载静态数据
-                    data = await StaticResource.load(request,response,path,gzip);
-                }
+        
+        //过滤器执行
+        if(!await FilterFactory.doChain(request.url,request,response)){
+            return;
+        }
+        //从路由查找
+        data = await RouteFactory.handleRoute(path,request,response);
+        //静态资源
+        if(!data){  
+            //从web cache获取数据
+            data = await WebCache.load(request,response,path);
+            if(!data){
+                //加载静态数据
+                data = await StaticResource.load(request,response,path,gzip);
             }
         }
         
@@ -138,6 +137,8 @@ class RequestQueue{
                 }
             }else if(typeof data === 'object'){
                 let cData:IWebCacheObj = <IWebCacheObj>data;
+                //json格式为utf8，zip和流用binary
+                let charset = data.mimeType.indexOf('/json') === -1 || gzip&&cData.zipData?'binary':'utf8';
                 //写web cache相关参数
                 WebCache.writeCacheToClient(response,cData.etag,cData.lastModified);
                 //可能只缓存静态资源信息，所以需要判断数据
@@ -147,14 +148,14 @@ class RequestQueue{
                         type:cData.mimeType,
                         size:cData.zipSize,
                         zip:'gzip',
-                        charset:'binary'
+                        charset:charset
                     });
                 }else if(cData.data){
                     response.writeToClient({
                         data:cData.data,
                         type:cData.mimeType,
                         size:cData.dataSize,
-                        charset:'binary'
+                        charset:charset
                     });
                 }else{
                     response.writeFileToClient({

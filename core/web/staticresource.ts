@@ -55,8 +55,6 @@ class StaticResource{
             let ro:number|object = await WebCache.load(request,response,path);
             if(ro !== undefined && typeof ro === 'object'){
                 cacheData = ro;
-            }else{
-                return <number>ro;
             }
         }
         

@@ -1,33 +1,33 @@
-import{Table,Column,Model,HasMany, ForeignKey, BelongsTo} from 'sequelize-typescript';
-import Resource from './resource';
-import Authority from './authority';
+// import{Table,Column,Model,HasMany, ForeignKey, BelongsTo} from 'sequelize-typescript';
+// import Resource from './resource';
+// import Authority from './authority';
 
-@Table({tableName:'t_resource_authority'})
+// @Table({tableName:'t_resource_authority'})
 
-export default class ResourceAuthority extends Model<ResourceAuthority>{
-    @Column({
-        primaryKey:true,
-        field:'resource_authority_id'
-    })
-    resourceAuthorityId:number;
+// export default class ResourceAuthority extends Model<ResourceAuthority>{
+//     @Column({
+//         primaryKey:true,
+//         field:'resource_authority_id'
+//     })
+//     resourceAuthorityId:number;
 
-    // @ForeignKey(()=>Resource)
-    @Column({
-        field:'resource_id'
-    })
-    resourceId:number;
+//     // @ForeignKey(()=>Resource)
+//     @Column({
+//         field:'resource_id'
+//     })
+//     resourceId:number;
 
-    // @BelongsTo(()=>Resource)
-    resource:Resource
+//     // @BelongsTo(()=>Resource)
+//     resource:Resource
 
-    @ForeignKey(()=>Authority)
-    @Column({
-        field:'authority_id'
-    })
-    authorityId:number;
+//     @ForeignKey(()=>Authority)
+//     @Column({
+//         field:'authority_id'
+//     })
+//     authorityId:number;
 
-    @BelongsTo(()=>Authority)
-    authority:Authority;
-}
+//     @BelongsTo(()=>Authority)
+//     authority:Authority;
+// }
 
-// export {ResourceAuthority}
+// // export {ResourceAuthority}

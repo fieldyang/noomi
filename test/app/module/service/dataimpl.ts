@@ -1,14 +1,18 @@
 import { getConnection, closeConnection, getManager } from "../../../../core/database/connectionmanager";
 import { Transaction, Instance, Transactioner, Inject } from "../../../../core/tools/decorator";
-import { Resource } from "../dao/pojo/resource";
+// import { Resource } from "../dao/pojo/resource";
 // import { ResourceAuthority } from "../dao/pojo/resourceauthority";
 // import { EntityManager } from "typeorm";
 // import Resource from "../dao/pojosequelize/resource";
 // import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
-import { Sequelize } from "sequelize-typescript";
+// import { Sequelize } from "sequelize-typescript";
 import { UserService } from "./userservice";
 import { User } from "../dao/entity/user";
 import { Connection, EntityManagerFactory ,EntityManager} from "relaen";
+// import { Resource } from "../dao/pojo/resource";
+// import { EntityManager } from "typeorm";
+// import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
+// import Resource from "../dao/pojosequelize/resource";
 
 @Transactioner()
 class DataImpl{
@@ -58,7 +62,7 @@ class DataImpl{
         //relaen
         let conn:Connection = await getConnection();
         let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
-        let user:User = new User();
+        let user:User = new User(100);
         user.setUserName('yang');
         user.setAge(10);
         user.setSexy('M');
@@ -97,8 +101,8 @@ class DataImpl{
         // }
         
         //sequelize
-        // const res = new ResourceAuthority({
-        //     resourceId:11,
+        // const res = new Resource({
+        //     resourceId:100,
         //     authorityId:2
         // })
         // let r1 = await res.save();
@@ -109,15 +113,16 @@ class DataImpl{
         // await manager.save(res);
         // return 1;
 
-        let conn:Connection = await getConnection();
-        let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
-        let user:User = new User(4);
-        user.setUserName('yanglei');
-        user.setAge(10);
-        user.setSexy('M');
-        await user.save();
-        em.close();
-        await conn.close();
+        //relaen
+        // let conn:Connection = await getConnection();
+        // let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
+        // let user:User = new User(4);
+        // user.setUserName('yanglei');
+        // user.setAge(10);
+        // user.setSexy('M');
+        // await user.save();
+        // em.close();
+        // await conn.close();
     }
     
     // @Transaction()
@@ -132,8 +137,10 @@ class DataImpl{
         // this.us.sayHello();
         // let r1 = await this.addRes('/testtran1');
         // throw 'hahaha';
-        await this.addRes(null);
-        await this.addResAuth();
+        
+        // await this.addResAuth();
+        await this.addRes('/testtran1',100);
+        await this.addRes('/testtran1',100);
         return true;
         // if(r1 === 1 && r2 === 2){
         //     return true;

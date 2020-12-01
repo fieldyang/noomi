@@ -1,8 +1,5 @@
 import { BaseRoute } from "../../../../core/main/route/baseroute";
-import { User } from "../dao/pojo/user";
 import { SecurityFactory } from "../../../../core/tools/securityfactory";
-import { GroupUser } from "../dao/pojo/groupuser";
-import { Group } from "../dao/pojo/group";
 import { OrmFactory } from "../dao/impl/ormfactory";
 import { Instance, Router, Route } from "../../../../core/tools/decorator";
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";

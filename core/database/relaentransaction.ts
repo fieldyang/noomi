@@ -1,36 +1,46 @@
-import { NoomiTransaction, TransactionType } from "./noomitransaction";
-import { DBManager } from "./dbmanager";
-import { Transaction, Connection ,getConnection } from "relaen";
+import { NoomiTransaction, ETransactionType } from "./noomitransaction";
 /**
  * relaen 事务类
+ * @since 0.4.7
  */
 class RelaenTransaction extends NoomiTransaction{
-    private tr:Transaction;
-    constructor(id:number,connection?:any,type?:TransactionType){
+    // private tr:any;
+    constructor(id:number,connection?:any,type?:ETransactionType){
         super(id,connection,type);
-        
     }
     
+    /**
+     * 事务开始
+     */
     async begin(){
         if(!this.tr){
-            let cm:Connection = await getConnection();
-            this.tr = cm.createTransaction();
+            this.tr = this.connection.createTransaction();
         }
-        this.tr.begin();
+        await this.tr.begin();
     }
 
+    /**
+     * 事务提交
+     */
     async commit(){
         if(!this.tr){
             return;
         }
-        this.tr.commit();
+        await this.tr.commit();
     }
 
+    /**
+     * 事务回滚
+     */
     async rollback(){
         if(!this.tr){
             return;
         }
-        this.tr.rollback();
+        try{
+            await this.tr.rollback();
+        }catch(e){
+            console.log(e);
+        }
     }
 }
 

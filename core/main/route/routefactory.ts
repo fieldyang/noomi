@@ -5,7 +5,7 @@ import { NoomiError } from "../../tools/errorfactory";
 import { Util } from "../../tools/util";
 import { App } from "../../tools/application";
 import { RouteErrorHandler } from "./routeerrorhandler";
-import { WebCache, IWebCacheObj } from "../../web/webcache";
+import { IWebCacheObj } from "../../web/webcache";
 
 /**
  * 路由配置类型
@@ -230,12 +230,6 @@ class RouteFactory{
             return 0;
         }
 
-        //如果在缓存中，则直接返回
-        let data = await WebCache.load(req,res,req.url);
-        if(data){
-            return <IWebCacheObj>data;
-        }
-        
         //绑定path
         if(!route.path && req){
             route.path = req.url;
@@ -380,30 +374,10 @@ class RouteFactory{
                     data = JSON.stringify(data);
                     mimeType = 'application/json';
                 }
-                //计算hash
-                const hash = App.crypto.createHash('md5');
-                hash.update(data,'utf8');
-                const etag:string = hash.digest('hex');
-                //last modified
-                const lastModified:string = new Date().toUTCString();
-                //压缩
-                let zipData:string = await new Promise((res,rej)=>{
-                    App.zlib.gzip(data,(err,r)=>{
-                        if(err){
-                            return;
-                        }
-                        res(r);
-                    });
-                });
                 ret = {
-                    etag:etag,
-                    lastModified:lastModified,
                     data:data,
-                    zipData:zipData,
                     mimeType:mimeType
                 };
-                //加入缓存
-                await WebCache.add(route.path,ret);
         }
         return ret;
         

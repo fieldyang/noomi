@@ -1,11 +1,9 @@
-import { TransactionManager } from "./transactionmanager";
 import { IConnectionManager } from "./connectionmanager";
-import { getConnection, EntityManager, Connection, RelaenManager } from "relaen";
-import { Util } from "../tools/util";
-
+import { TransactionManager } from "./transactionmanager";
 
 /**
- * mysql连接管理器
+ * relaen连接管理器
+ * @since 0.4.7
  */
 class RelaenConnectionManager implements IConnectionManager{
     /**
@@ -19,7 +17,7 @@ class RelaenConnectionManager implements IConnectionManager{
     /**
      * relaen connection对象
      */
-    connection:Connection;
+    connection:any;
     /**
      * 数据库配置项，示例如下：
      * ```
@@ -50,15 +48,8 @@ class RelaenConnectionManager implements IConnectionManager{
      * @param cfg 配置对象 {usePool:使用连接池,useTransaction:是否启用事务机制,其它配置参考options属性说明}
      */
     constructor(cfg:any){
+        const {RelaenManager} = require('relaen');
         //entity路径换成绝对路径
-        // if(cfg.entities){
-        //     cfg.entities.forEach((item,i)=>{
-        //         if(typeof item === 'string'){
-        //             cfg.entities[i] = Util.getAbsPath([item]);
-        //             console.log(cfg.entities[i]);
-        //         }
-        //     });
-        // }
         this.options = cfg;
         //relan 初始化
         try{
@@ -66,7 +57,6 @@ class RelaenConnectionManager implements IConnectionManager{
         }catch(e){
             console.log(e);
         }
-        
     }
 
     /**
@@ -74,14 +64,20 @@ class RelaenConnectionManager implements IConnectionManager{
      * @returns sequelize对象
      */
     async getConnection(){
-        return await getConnection();
+        let conn = TransactionManager.getConnection();
+        if(conn){
+            return conn;
+        }
+        //从 relaen获取
+        const {getConnection} = require('relaen');
+        return getConnection();
     }
 
     /**
      * 释放连接，不做任何操作
      * @param conn 
      */
-    async release(conn?:Connection){
+    async release(conn?:any){
         conn.close();
     }
 }

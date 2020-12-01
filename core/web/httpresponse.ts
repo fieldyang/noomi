@@ -15,7 +15,7 @@ interface IResponseWriteCfg{
     /**
      * 字符集，默认utf8
      */             
-    charset?:BufferEncoding;   
+    charset?:string;   
 
     /**
      * mime类型，默认text/html
@@ -82,7 +82,7 @@ export class HttpResponse extends ServerResponse{
         this.writeCookie();
         this.setCorsHead();
         let data:string|Buffer|object = config.data || '';
-        let charset:BufferEncoding = config.charset || 'utf8';
+        let charset = config.charset || 'utf8';
         if(!(data instanceof Buffer)){
             if(typeof data === 'object'){
                 data = JSON.stringify(data);

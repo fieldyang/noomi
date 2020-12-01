@@ -12,12 +12,12 @@ interface IWebCacheObj{
     /**
      * ETag
      */
-    etag:string;
+    etag?:string;
     
     /**
      * 最后修改时间串
      */
-    lastModified:string;
+    lastModified?:string;
     
     /**
      * 文件mime type
