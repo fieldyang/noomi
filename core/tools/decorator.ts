@@ -311,13 +311,13 @@ function Transaction(){
 
 /**
  * @exclude
- * Model装饰器，装饰属性
+ * 数据模型装饰器，装饰类
  * @since 0.4.8
- * @param name  模型名
+ * @param types     验证集{validatorName:参数数组(可以是空数组)}
  */ 
-function Model(modelClass:string){
-    return (target:any,name:string,desc:any)=>{
-        target.__modelName = modelClass;  
+function DataModel(clazz:object){
+    return (target)=>{
+        target.prototype.__modelClass = clazz;
     }
 }
 
@@ -328,7 +328,7 @@ function Model(modelClass:string){
  * @param type  数据类型 number,string,boolean,array
  */ 
 function DataType(type:string){
-    return (target:BaseModel,name:string,desc:any)=>{
+    return (target:any,name:string)=>{
         target.__setType(name,type);
     }
 }
@@ -340,10 +340,9 @@ function DataType(type:string){
  * @param types     验证集{validatorName:参数数组(可以是空数组)}
  */ 
 function DataValidator(types:object){
-    return (target:BaseModel,name:string,desc:any)=>{
+    return (target:any,name:string)=>{
         target.__setValidator(name,types);
     }
 }
 
-
-export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction,Model,DataType,DataValidator}
+export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction,DataModel,DataType,DataValidator}

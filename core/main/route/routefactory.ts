@@ -216,7 +216,7 @@ class RouteFactory{
      * @param req           request 对象
      * @param res           response 对象
      * @param params        调用参数对象
-     * @returns             错误码或0
+     * @returns             0 正常 1异常
      */
     static async handleRoute(pathOrRoute:string|IRoute,req:HttpRequest,res:HttpResponse,params?:object):Promise<number|IWebCacheObj>{
         let route:IRoute;
@@ -251,7 +251,11 @@ class RouteFactory{
         }
         //设置model
         if(typeof route.instance.setModel === 'function'){
-            route.instance.setModel(params);
+            let r = route.instance.setModel(params);
+            if(r !== null){  //setmodel异常
+                this.handleException(res,r);
+            }
+            return 1;
         }
 
         let func = route.instance[route.method]; 
@@ -264,8 +268,8 @@ class RouteFactory{
             return await this.handleResult(route,re);
         }catch(e){
             this.handleException(res,e);
+            return 1;
         }
-        return 0;
     }
 
     /**
@@ -421,6 +425,10 @@ class RouteFactory{
         let eh:RouteErrorHandler = InstanceFactory.getInstance(this.errorHandler);
         if(eh){
             eh.handle(res,e);
+        }else{
+            res.writeToClient({
+                data:e
+            });
         }
     }
 

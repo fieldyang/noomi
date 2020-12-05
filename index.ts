@@ -28,6 +28,7 @@ export * from './core/web/webcache';
 
 export * from './core/locales/msg_en';
 export * from './core/locales/msg_zh';
+export * from './core/locales/modeltip';
 
 export * from './core/main/aopfactory';
 export * from './core/main/aopproxy';
@@ -42,6 +43,7 @@ export * from './core/tools/decorator';
 export * from './core/tools/errorfactory';
 export * from './core/tools/filewatcher';
 export * from './core/tools/launchhookmanager';
+export * from './core/tools/model';
 export * from './core/tools/ncache';
 export * from './core/tools/pagefactory';
 export * from './core/tools/redisfactory';

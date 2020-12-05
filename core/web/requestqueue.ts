@@ -114,7 +114,9 @@ class RequestQueue{
         //从路由查找
         data = await RouteFactory.handleRoute(path,request,response);
         //静态资源
-        if(!data){  
+        if(data === 1){  //路由处理异常  
+            return;
+        }else if(!data){
             //从web cache获取数据
             data = await WebCache.load(request,response,path);
             if(!data){

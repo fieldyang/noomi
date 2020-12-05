@@ -5,9 +5,9 @@ export class MUser extends BaseModel{
 
     @DataType('int')
     @DataValidator({
-        min:1
+        between:[1,150]
     })
-    userId:number;
+    age:number;
 
     @DataType('string')
     @DataValidator({
@@ -21,4 +21,39 @@ export class MUser extends BaseModel{
     })
     pwd:string;
 
+    @DataType('string')
+    @DataValidator({
+        mobile:[]   
+    })
+    myMobile:string;
+
+    @DataType('string')
+    @DataValidator({
+        email:[]   
+    })
+    myEmail:string;
+
+    @DataType('string')
+    @DataValidator({
+        url:[]   
+    })
+    myHome:string;
+
+    @DataType('string')
+    @DataValidator({
+        betweenLength:[6,20],
+        checkPwd:[]
+    })
+    pwd2:string;
+
+    /**
+     * 自定义验证
+     * @param value 
+     */
+    checkPwd(value){
+        if(this['pwd'] === value){
+            return null;
+        }
+        return "密码和验证密码不一致";
+    }
 }

@@ -5,7 +5,7 @@ class DataValidator{
     /**
      * 验证器集合
      */
-    private static valiators:Map<string,Function>;
+    private static valiators:Map<string,Function> = new Map();
 
     /**
      * 是否拥有该名字的验证器
@@ -47,15 +47,14 @@ class DataValidator{
      * @param paramArr  附加参数，根据调用确定
      * @returns         通过/不通过
      */
-    static valid(name:string,value:any,paramArr:any[]):boolean{
+    static validate(name:string,value:any,paramArr:any[]):boolean{
         if(!this.valiators.has(name)){
             return false;
         }
         let foo = this.valiators.get(name);
+        let arr = [value];
         if(Array.isArray(paramArr)){
-            paramArr.unshift(value);
-        }else{
-            paramArr = [value];
+            arr = arr.concat(paramArr);
         }
         return foo.apply(null,paramArr);
     }

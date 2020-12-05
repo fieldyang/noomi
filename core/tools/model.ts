@@ -1,6 +1,8 @@
 import { DataValidator } from "./validator";
 import { NoomiModelTip } from "../locales/modeltip";
 import { App } from './application';
+import { ErrorFactory } from "relaen";
+import { Util } from "./util";
 /**
  * 模型驱动 模型接口
  */
@@ -25,33 +27,52 @@ interface IModelCfg{
 /**
  * 基础模型
  */
-class BaseModel implements IModel{
+class BaseModel{
+    private __props:Map<string,IModelCfg>;
 
-    __props:Map<string,any>;
-
-    constructor(){
-        this.__props = new Map();
+    /**
+     * 转换和验证，返回数据格式或验证不正确的属性消息集合
+     */
+    public __handle():object{
+        if(!this.__props){
+            return null;
+        }
+        let errObj = {};
+        for(let o of this.__props){
+            let prop = o[0];
+            let po:IModelCfg = o[1];
+            if(!this.__transform(prop)){ //数据格式转换
+                errObj[prop] =  NoomiModelTip[App.language][po.type];
+            }else{ //校验
+                let r = this.__validate(prop);
+                if(r!==null){
+                    errObj[prop] = r;
+                }
+            } 
+        }
+        return Object.getOwnPropertyNames(errObj).length === 0?null:errObj;
     }
-
     /**
      * 验证
      * @param name  属性名
      * @returns     null或字符串(表示验证异常)
      */
-    __valid(name:string){
+    private __validate(name:string){
+        if(!this.__props){
+            return null;
+        }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg || !cfg.validators){
             return true;
         }
         let value = this[name];
         for(let vn of Object.getOwnPropertyNames(cfg.validators)){
-            let vld = cfg.validators[vn];
-            //
             if(DataValidator.hasValidator(vn)){
-                if(DataValidator.valid(vn,value,cfg.validators[vn])){
+                let r = DataValidator.validate(vn,value,cfg.validators[vn]);
+                if(r){
                     return null;
                 }
-                return NoomiModelTip[App.language][vn];
+                return Util.compileString(NoomiModelTip[App.language][vn],cfg.validators[vn]);
             }else if(this[vn] && typeof this[vn] === 'function'){ //模型自定义校验器
                 return this[vn](value);
             }
@@ -63,17 +84,25 @@ class BaseModel implements IModel{
      * @param name  属性名
      * @returns     true 转换成功 false转换失败
      */
-    __transform(name:string):boolean{
+    private __transform(name:string):boolean{
+        if(!this.__props){
+            return true;
+        }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg || !cfg.type || this[name] === undefined || this[name] === null){
             return;
         }
         let v = this[name];
         switch(cfg.type){
-            case 'number':      //数字
-                if(/^\d+$/.test(v)){
+            case 'int':         //整数
+                if(/^[1-9]\d*$/.test(v)){
                     v = parseInt(v);
-                }else if(/^\d+(\.?\d+)?$/.test(v)){
+                }else{
+                    return false;
+                }
+                break;
+            case 'float':       //小数
+                if(/^\d+(\.?\d+)?$/.test(v)){
                     v = parseFloat(v);
                 }else{
                     return false;
@@ -109,11 +138,14 @@ class BaseModel implements IModel{
      * @param name          属性名
      * @param validators    验证器
      */
-    __setValidator(name:string,validators:object){
+    public __setValidator(name:string,validators:object){
+        if(!this.__props){
+            this.__props = new Map();
+        }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg){
             cfg = {
-                type:null,
+                type:'string',
                 validators:validators
             }
             this.__props.set(name,cfg);
@@ -127,7 +159,7 @@ class BaseModel implements IModel{
      * @param name      属性名
      * @param type      属性类型
      */
-    __setType(name:string,type:string){
+    public __setType(name:string,type:string){
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg){
             cfg = {

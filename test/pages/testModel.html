@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>noomi-testmodel</title>
+    <style>
+        label{width:100px;}
+    </style>
+</head>
+
+<body>
+    <p><label>用户名:</label><input type='text' id='userName'></p>
+    <p><label>密码:</label><input type='text' id='pwd'></p>
+    <p><label>确认密码:</label><input type='text' id='pwd2'></p>
+    <p><label>手机号:</label><input type='text' id='myMobile'></p>
+    <p><label>电子邮箱:</label><input type='text' id='myEmail'></p>
+    <p><label>年龄:</label><input type='text' id='age'></p>
+    <p><label>个人主页:</label><input type='text' id='myHome'></p>
+
+    <button onclick='ok()'>确定</button>
+
+</body>
+<script>
+    function ok(){
+
+        let xhr = new XMLHttpRequest();
+        xhr.onload = ()=>{
+            console.log(xhr.responseText);
+        }
+        
+        let url = '/userop/add?' + 
+                'userName=' + document.querySelector('#userName').value + '&' +
+                'pwd=' + document.querySelector('#pwd').value + '&' +
+                'pwd2=' + document.querySelector('#pwd2').value + '&' +
+                'myMobile=' + document.querySelector('#myMobile').value + '&' +
+                'myEmail=' + document.querySelector('#myEmail').value + '&' +
+                'age=' + document.querySelector('#age').value + '&' +
+                'myHome=' + document.querySelector('#myHome').value;
+        console.log(url);
+        xhr.open(url,'GET');
+        xhr.send();    
+    }
+    
+</script>
+</html>

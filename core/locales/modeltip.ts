@@ -3,7 +3,8 @@
  */
 var NoomiModelTip = {
     zh:{
-        "number":"要求数字",
+        "int":"要求整数",
+        "float":"要求小数",
         "string":"要求字符串",
         "boolean":"要求布尔型",
         "array":"要求数组",
