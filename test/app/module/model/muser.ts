@@ -46,6 +46,9 @@ export class MUser extends BaseModel{
     })
     pwd2:string;
 
+    @DataType('int')
+    userTypeId:number;
+
     /**
      * 自定义验证
      * @param value 
@@ -56,4 +59,6 @@ export class MUser extends BaseModel{
         }
         return "密码和验证密码不一致";
     }
+
+    
 }

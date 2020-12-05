@@ -51,7 +51,7 @@ class UserAction extends BaseRoute{
         },{
             "value":2,
             "type":"chain",
-            "url":"/user/last",
+            "url":"/user/last1",
             "params":["type"]
         },{
             value:3,

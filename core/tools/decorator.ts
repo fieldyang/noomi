@@ -345,4 +345,15 @@ function DataValidator(types:object){
     }
 }
 
-export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction,DataModel,DataType,DataValidator}
+/**
+ * @exclude
+ * 数据null检查，装饰路由方法
+ * @since 0.4.8
+ * @param props     待检查属性数组
+ */ 
+function NullCheck(props:Array<string>){
+    return (target:any,name:string)=>{
+        target.__addNullCheck(name,props);
+    }
+}
+export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction,DataModel,DataType,DataValidator,NullCheck}

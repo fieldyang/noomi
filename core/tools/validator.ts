@@ -49,14 +49,20 @@ class DataValidator{
      */
     static validate(name:string,value:any,paramArr:any[]):boolean{
         if(!this.valiators.has(name)){
-            return false;
+            return true;
         }
         let foo = this.valiators.get(name);
-        let arr = [value];
-        if(Array.isArray(paramArr)){
-            arr = arr.concat(paramArr);
+        
+        let arr = [];
+        //处理参数值
+        if(value !== undefined){
+            arr.push(value);
+            if(Array.isArray(paramArr)){
+                arr = arr.concat(paramArr);
+            }
         }
-        return foo.apply(null,paramArr);
+        
+        return foo.apply(null,arr);
     }
 }
 
@@ -64,6 +70,9 @@ class DataValidator{
  * 初始化验证器
  */
 DataValidator.addValidators({
+    "nullable":function(value){
+        return value!==undefined && value !== null;
+    },
     "min":function(value,min){
         return value>=min;
     },

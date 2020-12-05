@@ -9,6 +9,7 @@ var NoomiModelTip = {
         "boolean":"要求布尔型",
         "array":"要求数组",
 
+        "nullable":"不能为空",
         "min":"值必须大于等于${0}",
         "max":"值必须小于等于${0}",
         "between":"值必须在${0}-${1}之间",
@@ -22,7 +23,24 @@ var NoomiModelTip = {
         "legal":"内容不符合国内法规"
     },
     en:{
+        "int":"Need input integer",
+        "float":"Need input float",
+        "string":"Need input string",
+        "boolean":"Need input boolean",
+        "array":"Need input array",
 
+        "nullable":"Not allow empty",
+        "min":"Value must >= ${0}",
+        "max":"Value must <= ${0}",
+        "between":"Value must between ${0} and ${1}",
+        "minLength":"Value length must >= ${0}",
+        "maxLength":"Value length must <= ${0}",
+        "betweenLength":"Value length must between ${0} and ${1}",
+        "email":"Value is not a valid email",
+        "url":"Value is not a valid url",
+        "mobile":"Value is not a valid mobile no",
+        "idno":"Value is not a valid ID No",
+        "legal":"Value is illegal"
     }
 }
 export{NoomiModelTip}

@@ -26,9 +26,8 @@ export * from './core/web/staticresource';
 export * from './core/web/webconfig';
 export * from './core/web/webcache';
 
-export * from './core/locales/msg_en';
-export * from './core/locales/msg_zh';
-export * from './core/locales/modeltip';
+export * from './core/locales/noomitip';
+export * from './core/locales/noomimodeltip';
 
 export * from './core/main/aopfactory';
 export * from './core/main/aopproxy';

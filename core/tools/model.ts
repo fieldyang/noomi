@@ -1,5 +1,5 @@
 import { DataValidator } from "./validator";
-import { NoomiModelTip } from "../locales/modeltip";
+import { NoomiModelTip } from "../locales/noomimodeltip";
 import { App } from './application';
 import { ErrorFactory } from "relaen";
 import { Util } from "./util";
@@ -37,6 +37,7 @@ class BaseModel{
         if(!this.__props){
             return null;
         }
+        
         let errObj = {};
         for(let o of this.__props){
             let prop = o[0];
@@ -63,20 +64,23 @@ class BaseModel{
         }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg || !cfg.validators){
-            return true;
+            return null;
         }
         let value = this[name];
         for(let vn of Object.getOwnPropertyNames(cfg.validators)){
             if(DataValidator.hasValidator(vn)){
                 let r = DataValidator.validate(vn,value,cfg.validators[vn]);
-                if(r){
-                    return null;
+                if(!r){
+                    return Util.compileString(NoomiModelTip[App.language][vn],cfg.validators[vn]);
                 }
-                return Util.compileString(NoomiModelTip[App.language][vn],cfg.validators[vn]);
             }else if(this[vn] && typeof this[vn] === 'function'){ //模型自定义校验器
-                return this[vn](value);
+                let r = this[vn](value);
+                if(r !== null){
+                    return r;
+                } 
             }
         }
+        return null;
     }
 
     /**
@@ -89,10 +93,11 @@ class BaseModel{
             return true;
         }
         let cfg:IModelCfg = this.__props.get(name);
-        if(!cfg || !cfg.type || this[name] === undefined || this[name] === null){
-            return;
-        }
+        
         let v = this[name];
+        if(!cfg || !cfg.type || v === undefined || v === null){
+            return true;
+        }
         switch(cfg.type){
             case 'int':         //整数
                 if(/^[1-9]\d*$/.test(v)){
@@ -153,6 +158,30 @@ class BaseModel{
             cfg.validators = validators;
         }
     }
+
+    /**
+     * 给属性增加指定校验器
+     * @param name 
+     * @param validatorName 
+     * @param params 
+     */
+    public __addValidator(name:string,validatorName:string,params?:[]){
+        if(!this.__props){
+            this.__props = new Map();
+        }
+        let cfg:IModelCfg = this.__props.get(name);
+        if(!cfg){
+            cfg = {
+                type:'string',
+                validators:{}
+            }
+            this.__props.set(name,cfg);
+        }else if(!cfg.validators){
+            cfg.validators = {};
+        }
+        //增加校验器
+        cfg.validators[validatorName] = params || [];
+    }   
 
     /**
      * 设置数据类型

@@ -1,5 +1,5 @@
 import { BaseRoute } from "../../../../core/main/route/baseroute";
-import { Instance, Router, Route, DataModel } from "../../../../core/tools/decorator";
+import { Instance, Router, Route, DataModel, NullCheck } from "../../../../core/tools/decorator";
 import { MUser } from "../model/muser";
 
 
@@ -10,6 +10,7 @@ import { MUser } from "../model/muser";
 
 @DataModel(MUser)
 export class UserRoute extends BaseRoute{
+    @NullCheck(['userTypeId'])
     add(){
         console.log(this.model);
     }
