@@ -7,6 +7,7 @@ import { FilterFactory } from '../web/filterfactory';
 import { TransactionManager } from '../database/transactionmanager';
 import { RouteFactory } from '../main/route/routefactory';
 import { NoomiError } from './errorfactory';
+import { BaseModel } from './model';
 
 
 /**
@@ -307,4 +308,42 @@ function Transaction(){
         });
     }
 }
-export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction}
+
+/**
+ * @exclude
+ * Model装饰器，装饰属性
+ * @since 0.4.8
+ * @param name  模型名
+ */ 
+function Model(modelClass:string){
+    return (target:any,name:string,desc:any)=>{
+        target.__modelName = modelClass;  
+    }
+}
+
+/**
+ * @exclude
+ * 模型属性装饰器，装饰属性
+ * @since 0.4.8
+ * @param type  数据类型 number,string,boolean,array
+ */ 
+function DataType(type:string){
+    return (target:BaseModel,name:string,desc:any)=>{
+        target.__setType(name,type);
+    }
+}
+
+/**
+ * @exclude
+ * 模型属性装饰器，装饰属性
+ * @since 0.4.8
+ * @param types     验证集{validatorName:参数数组(可以是空数组)}
+ */ 
+function DataValidator(types:object){
+    return (target:BaseModel,name:string,desc:any)=>{
+        target.__setValidator(name,types);
+    }
+}
+
+
+export {Instance,Router,Route,WebFilter,Inject,Aspect,Pointcut,Before,After,Around,AfterReturn,AfterThrow,Transactioner,Transaction,Model,DataType,DataValidator}

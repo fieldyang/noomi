@@ -1,14 +1,17 @@
 import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { SecurityFactory } from "../../../../core/tools/securityfactory";
 import { OrmFactory } from "../dao/impl/ormfactory";
-import { Instance, Router, Route } from "../../../../core/tools/decorator";
+import { Instance, Router, Route, Model } from "../../../../core/tools/decorator";
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
+import { MUser } from "../model/muser";
 
 
 @Router({
     namespace:'/user'
 })
 export class LoginAction extends BaseRoute{
+    @Model()
+    model:MUser;
     toPage:string;
     @Route({
         "path":"/login",
