@@ -4,15 +4,15 @@ import { MUser } from "../model/muser";
 
 
 @Router({
-    namespace:'/userop',
+    namespace:'/user/op',
     path:'/'
 })
 
 @DataModel(MUser)
 export class UserRoute extends BaseRoute{
-    // @NullCheck(['userTypeId'])
+    @NullCheck(['userName'])
     add(){
         console.log(this.model);
+        return {success:true};
     }
-    
 }

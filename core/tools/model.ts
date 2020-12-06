@@ -66,6 +66,10 @@ class BaseModel{
             return null;
         }
         let value = this[name];
+        //值为空且有nullable
+        if((value ===undefined || value === null) && !cfg.validators['nullable']){
+            return null;
+        }
         for(let vn of Object.getOwnPropertyNames(cfg.validators)){
             if(Validator.hasValidator(vn)){
                 let r = Validator.validate(vn,value,cfg.validators[vn]);
@@ -188,6 +192,9 @@ class BaseModel{
      * @param type      属性类型
      */
     public __setType(name:string,type:string){
+        if(!this.__props){
+            this.__props = new Map();
+        }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg){
             cfg = {
