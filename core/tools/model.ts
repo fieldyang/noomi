@@ -1,7 +1,6 @@
-import { DataValidator } from "./validator";
+import { Validator } from "./validator";
 import { NoomiModelTip } from "../locales/noomimodeltip";
 import { App } from './application';
-import { ErrorFactory } from "relaen";
 import { Util } from "./util";
 /**
  * 模型驱动 模型接口
@@ -31,7 +30,7 @@ class BaseModel{
     private __props:Map<string,IModelCfg>;
 
     /**
-     * 转换和验证，返回数据格式或验证不正确的属性消息集合
+     * 转换和验证，返回数据类型或验证不正确的属性消息集合
      */
     public __handle():object{
         if(!this.__props){
@@ -68,8 +67,8 @@ class BaseModel{
         }
         let value = this[name];
         for(let vn of Object.getOwnPropertyNames(cfg.validators)){
-            if(DataValidator.hasValidator(vn)){
-                let r = DataValidator.validate(vn,value,cfg.validators[vn]);
+            if(Validator.hasValidator(vn)){
+                let r = Validator.validate(vn,value,cfg.validators[vn]);
                 if(!r){
                     return Util.compileString(NoomiModelTip[App.language][vn],cfg.validators[vn]);
                 }

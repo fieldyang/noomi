@@ -39,7 +39,7 @@
                 'age=' + document.querySelector('#age').value + '&' +
                 'myHome=' + document.querySelector('#myHome').value;
         console.log(url);
-        xhr.open(url,'GET');
+        xhr.open('GET',url);
         xhr.send();    
     }
     

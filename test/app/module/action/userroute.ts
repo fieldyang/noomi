@@ -10,7 +10,7 @@ import { MUser } from "../model/muser";
 
 @DataModel(MUser)
 export class UserRoute extends BaseRoute{
-    @NullCheck(['userTypeId'])
+    // @NullCheck(['userTypeId'])
     add(){
         console.log(this.model);
     }

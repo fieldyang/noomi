@@ -92,7 +92,10 @@ class BaseRoute{
      * @param methodName 方法名
      */
     public __getNullCheck(methodName:string):Array<string>{
-        return this.__nullCheckMap.get(methodName);
+        if(this.__nullCheckMap){
+            return this.__nullCheckMap.get(methodName);
+        }
+        return null;
     }
 }
 

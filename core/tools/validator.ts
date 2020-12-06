@@ -1,7 +1,7 @@
 /**
  * 模型验证器
  */
-class DataValidator{
+class Validator{
     /**
      * 验证器集合
      */
@@ -69,7 +69,7 @@ class DataValidator{
 /**
  * 初始化验证器
  */
-DataValidator.addValidators({
+Validator.addValidators({
     "nullable":function(value){
         return value!==undefined && value !== null;
     },
@@ -105,5 +105,5 @@ DataValidator.addValidators({
     }
 });
 
-export{DataValidator}
+export{Validator}
 

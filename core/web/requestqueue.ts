@@ -119,6 +119,8 @@ class RequestQueue{
                 data = await RouteFactory.handleRoute(route,request,response);
             }catch(e){
                 RouteFactory.handleException(response,e);
+                //输出
+                console.log(e);
                 return;
             }
         }else{ //静态资源

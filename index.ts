@@ -49,3 +49,4 @@ export * from './core/tools/redisfactory';
 export * from './core/tools/securityfactory';
 export * from './core/tools/threadlocal';
 export * from './core/tools/util';
+export * from './core/tools/validator';
