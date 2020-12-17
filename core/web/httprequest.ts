@@ -145,36 +145,40 @@ class HttpRequest extends IncomingMessage{
     formHandle():Promise<object>{
         let req:IncomingMessage = this.srcReq;
         let contentString = req.headers['content-type'];
+        let contentType:string[];
+        //multipart/form-data 提交
+        let isMultiple:boolean = false;
         //非文件multipart/form-data方式
         if(contentString){
-            let contentType:string[] = contentString.split(';');
-            if(contentType[0] !== 'multipart/form-data'){
-                return new Promise((resolve,reject)=>{
-                    let lData:Buffer = Buffer.from('');
-                    req.on('data',(chunk:Buffer)=>{
-                        lData = Buffer.concat([lData,chunk]);
-                    });
-                    req.on('end',()=>{
-                        let r;
-                        //处理charset
-                        let charset:string = 'utf8';
-                        if(contentType.length>1){
-                            let a1:string[] = contentType[1].split('=');
-                            if(a1.length>1){
-                                charset = a1[1].trim();
-                            }
-                        }
-                        
-                        let data:string = lData.toString(<BufferEncoding>charset);
-                        if(contentType[0] === 'application/json'){
-                            r = JSON.parse(data);
-                        }else{
-                            r = App.qs.parse(data);
-                        }
-                        resolve(r);
-                    });
+            contentType = contentString.split(';');
+            isMultiple = contentType[0] === 'multipart/form-data';
+        }
+        
+        if(!isMultiple){
+            return new Promise((resolve,reject)=>{
+                let lData:Buffer = Buffer.from('');
+                req.on('data',(chunk:Buffer)=>{
+                    lData = Buffer.concat([lData,chunk]);
                 });
-            }
+                req.on('end',()=>{
+                    let r;
+                    //处理charset
+                    let charset:string = 'utf8';
+                    if(contentType && contentType.length>1){
+                        let a1:string[] = contentType[1].split('=');
+                        if(a1.length>1){
+                            charset = a1[1].trim();
+                        }
+                    }
+                    let data:string = lData.toString(<BufferEncoding>charset);
+                    if(contentType && contentType[0] === 'application/json'){
+                        r = JSON.parse(data);
+                    }else{
+                        r = App.qs.parse(data);
+                    }
+                    resolve(r);
+                });
+            });
         }
 
         let contentLen:number = parseInt(req.headers['content-length']);
@@ -250,7 +254,7 @@ class HttpRequest extends IncomingMessage{
                     }
                     handleLine(newBuf,rowChar);
                     rowChar = '';
-                    rowStartIndex = ++i;
+                    rowStartIndex = i+1;
                 }
             }
             
@@ -281,17 +285,20 @@ class HttpRequest extends IncomingMessage{
                 if(isFile){
                     writeStream.end();
                 }
-
-                if(returnObj.hasOwnProperty(dataKey)){
-                    //新建数组
-                    if(!Array.isArray(returnObj[dataKey])){
-                        returnObj[dataKey] = [returnObj[dataKey]];
+                //空字符串不处理
+                if(value !== ''){
+                    if(returnObj.hasOwnProperty(dataKey)){
+                        //新建数组
+                        if(!Array.isArray(returnObj[dataKey])){
+                            returnObj[dataKey] = [returnObj[dataKey]];
+                        }
+                        //新值入数组
+                        returnObj[dataKey].push(value);
+                    }else{
+                        returnObj[dataKey] = value;
                     }
-                    //新值入数组
-                    returnObj[dataKey].push(value);
-                }else{
-                    returnObj[dataKey] = value;
                 }
+                
                 startField = true;
                 dispLineNo = 1;
                 isFile = false;
@@ -326,7 +333,6 @@ class HttpRequest extends IncomingMessage{
                             let fn2 = App.uuid.v1() + fn1.substr(fn1.lastIndexOf('.'));
                             //得到绝对路径
                             let filePath = Util.getAbsPath([tmpDir,fn2]);
-
                             value = {
                                 fileName:fn1,
                                 path:filePath

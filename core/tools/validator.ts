@@ -71,7 +71,7 @@ class Validator{
  */
 Validator.addValidators({
     "nullable":function(value){
-        return value!==undefined && value !== null;
+        return value!==undefined && value !== null && value !== "";
     },
     "min":function(value,min){
         return value>=min;

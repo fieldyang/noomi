@@ -98,9 +98,20 @@ class BaseModel{
         let cfg:IModelCfg = this.__props.get(name);
         
         let v = this[name];
+        //不存在类型，也不存在值，则不处理
         if(!cfg || !cfg.type || v === undefined || v === null){
             return true;
         }
+        //非字符串，需要去掉两端空格
+        if(cfg.type !== 'string'){
+            v = v.trim();
+        }
+        //非字符串，且为''，则删除
+        if(v === '' && cfg.type !== 'string'){
+            delete this[name];
+            return true;
+        }
+
         switch(cfg.type){
             case 'int':         //整数
                 if(/^[1-9]\d*$/.test(v)){

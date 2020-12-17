@@ -71,9 +71,9 @@
                     switch (method) {
                         case 'GET':
                             let pa;
-                            if (nodom.Util.isObject(config.params)) {
+                            if (typeof config.params === 'object') {
                                 let ar = [];
-                                nodom.Util.getOwnProps(config.params).forEach(function (key) {
+                                Objeect.getOwnPropertyNames(config.params).forEach(function (key) {
                                     ar.push(key + '=' + config.params[key]);
                                 });
                                 pa = ar.join('&');
@@ -90,6 +90,7 @@
                         case 'POST':
                             if (config.params instanceof FormData) {
                                 data = config.params;
+                                console.log(data);
                             }
                             else {
                                 let fd = new FormData();
@@ -102,7 +103,7 @@
                     }
                     req.open(method, url, async, config.user, config.pwd);
                     if (config.header) {
-                        nodom.Util.getOwnProps(config.header).forEach((item) => {
+                        Object.getOwnPropertyNames(config.header).forEach((item) => {
                             req.setRequestHeader(item, config.header[item]);
                         });
                     }
@@ -110,11 +111,11 @@
                 }).catch((re) => {
                     switch (re.type) {
                         case "error":
-                            throw new nodom.NodomError("notexist1", nodom.TipMsg.TipWords['resource'], re.url);
+                            throw "error";
                         case "timeout":
-                            throw new nodom.NodomError("timeout");
+                            throw "timeout";
                         case "jsonparse":
-                            throw new nodom.NodomError("jsonparse");
+                            throw "parse error";
                     }
                 });
         }
@@ -123,6 +124,7 @@
             let fd = new FormData();
             fd.append('userName',document.querySelector('#userName').value);
             fd.append('pwd',document.querySelector('#pwd').value);
+            fd.append('age','');
             // let xhr = new XMLHttpRequest();
             // xhr.onload = ()=>{
             //     console.log(xhr.responseText);
@@ -131,7 +133,7 @@
             // xhr.send(fd);
             request({
                 url:'/user/login',
-                method:'post',
+                method:'POST',
                 params:fd,
                 type:'json'
             }).then(r=>{

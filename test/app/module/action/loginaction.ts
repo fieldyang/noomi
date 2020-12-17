@@ -1,7 +1,7 @@
 import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { SecurityFactory } from "../../../../core/tools/securityfactory";
 import { OrmFactory } from "../dao/impl/ormfactory";
-import { Instance, Router, Route } from "../../../../core/tools/decorator";
+import { Instance, Router, Route, NullCheck, DataModel } from "../../../../core/tools/decorator";
 import { getConnection, closeConnection } from "../../../../core/database/connectionmanager";
 import { MUser } from "../model/muser";
 
@@ -9,6 +9,7 @@ import { MUser } from "../model/muser";
 @Router({
     namespace:'/user'
 })
+@DataModel(MUser)
 export class LoginAction extends BaseRoute{
     toPage:string;
     @Route({
@@ -18,6 +19,7 @@ export class LoginAction extends BaseRoute{
             "url":"${toPage}"
         }]
     })
+    @NullCheck(['userName','pwd'])
     async login(){
         let un = this.model.userName;
         let pwd = this.model.pwd;
