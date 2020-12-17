@@ -21,13 +21,124 @@
     </style>
 </head>
 <body>
-    <form action='/user/login' method='post'>
+    <!-- <form action='/user/login' method='post'>
         <div><label>用户名:</label><input type='text' name='userName'></div>
         <div><label>密&nbsp;&nbsp;码:</label><input type='text' name='pwd'></div>
         <input type='submit'>
-    </form>
+    </form> -->
+    <div><label>用户名:</label><input type='text' name='userName' id='userName'></div>
+        <div><label>密&nbsp;&nbsp;码:</label><input type='text' name='pwd' id='pwd'></div>
+        <button onclick='login()'>login</button>
     <script>
-        console.log(document.cookie);
+
+        function request(config){
+                return new Promise((resolve, reject) => {
+                    if (typeof config === 'string') {
+                        config = {
+                            url: config
+                        };
+                    }
+                    config.params = config.params || {};
+                    if (config.rand) {
+                        config.params.$rand = Math.random();
+                    }
+                    let url = config.url;
+                    const async = config.async === false ? false : true;
+                    const req = new XMLHttpRequest();
+                    req.withCredentials = config.withCredentials;
+                    const method = config.method || 'GET';
+                    req.timeout = async ? config.timeout : 0;
+                    req.onload = () => {
+                        if (req.status === 200) {
+                            let r = req.responseText;
+                            if (config.type === 'json') {
+                                try {
+                                    r = JSON.parse(r);
+                                }
+                                catch (e) {
+                                    reject({ type: "jsonparse" });
+                                }
+                            }
+                            resolve(r);
+                        }
+                        else {
+                            reject({ type: 'error', url: url });
+                        }
+                    };
+                    req.ontimeout = () => reject({ type: 'timeout' });
+                    req.onerror = () => reject({ type: 'error', url: url });
+                    let data = null;
+                    switch (method) {
+                        case 'GET':
+                            let pa;
+                            if (nodom.Util.isObject(config.params)) {
+                                let ar = [];
+                                nodom.Util.getOwnProps(config.params).forEach(function (key) {
+                                    ar.push(key + '=' + config.params[key]);
+                                });
+                                pa = ar.join('&');
+                            }
+                            if (pa !== undefined) {
+                                if (url.indexOf('?') !== -1) {
+                                    url += '&' + pa;
+                                }
+                                else {
+                                    url += '?' + pa;
+                                }
+                            }
+                            break;
+                        case 'POST':
+                            if (config.params instanceof FormData) {
+                                data = config.params;
+                            }
+                            else {
+                                let fd = new FormData();
+                                for (let o in config.params) {
+                                    fd.append(o, config.params[o]);
+                                }
+                                data = fd;
+                            }
+                            break;
+                    }
+                    req.open(method, url, async, config.user, config.pwd);
+                    if (config.header) {
+                        nodom.Util.getOwnProps(config.header).forEach((item) => {
+                            req.setRequestHeader(item, config.header[item]);
+                        });
+                    }
+                    req.send(data);
+                }).catch((re) => {
+                    switch (re.type) {
+                        case "error":
+                            throw new nodom.NodomError("notexist1", nodom.TipMsg.TipWords['resource'], re.url);
+                        case "timeout":
+                            throw new nodom.NodomError("timeout");
+                        case "jsonparse":
+                            throw new nodom.NodomError("jsonparse");
+                    }
+                });
+        }
+
+        function login(){
+            let fd = new FormData();
+            fd.append('userName',document.querySelector('#userName').value);
+            fd.append('pwd',document.querySelector('#pwd').value);
+            // let xhr = new XMLHttpRequest();
+            // xhr.onload = ()=>{
+            //     console.log(xhr.responseText);
+            // }
+            // xhr.open('post','/user/login');
+            // xhr.send(fd);
+            request({
+                url:'/user/login',
+                method:'post',
+                params:fd,
+                type:'json'
+            }).then(r=>{
+                console.log(r);
+            })
+        }
+        // console.log(document.cookie);
     </script>
 </body>
 </html>
