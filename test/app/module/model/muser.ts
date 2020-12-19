@@ -59,6 +59,4 @@ export class MUser extends BaseModel{
         }
         return "密码和验证密码不一致";
     }
-
-    
 }

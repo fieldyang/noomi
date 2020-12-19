@@ -27,16 +27,24 @@ interface IModelCfg{
  * 基础模型
  */
 class BaseModel{
-    private __props:Map<string,IModelCfg>;
+    /**
+     * 通过注解器注入的属性map
+     */
+    private __srcPropMap:Map<string,IModelCfg>;
 
+    /**
+     * 实际使用props
+     */
+    private __props:Map<string,IModelCfg>;
+    constructor(){
+        this.__props = new Map();
+        this.__props = Util.clone(this.__srcPropMap);
+        console.log(this.__props);
+    }
     /**
      * 转换和验证，返回数据类型或验证不正确的属性消息集合
      */
     public __handle():object{
-        if(!this.__props){
-            return null;
-        }
-        
         let errObj = {};
         for(let o of this.__props){
             let prop = o[0];
@@ -58,9 +66,6 @@ class BaseModel{
      * @returns     null或字符串(表示验证异常)
      */
     private __validate(name:string){
-        if(!this.__props){
-            return null;
-        }
         let cfg:IModelCfg = this.__props.get(name);
         if(!cfg || !cfg.validators){
             return null;
@@ -92,9 +97,6 @@ class BaseModel{
      * @returns     true 转换成功 false转换失败
      */
     private __transform(name:string):boolean{
-        if(!this.__props){
-            return true;
-        }
         let cfg:IModelCfg = this.__props.get(name);
         
         let v = this[name];
@@ -158,26 +160,48 @@ class BaseModel{
      * @param validators    验证器
      */
     public __setValidator(name:string,validators:object){
-        if(!this.__props){
-            this.__props = new Map();
+        if(!this.__srcPropMap){
+            this.__srcPropMap = new Map();
         }
-        let cfg:IModelCfg = this.__props.get(name);
+        let cfg:IModelCfg = this.__srcPropMap.get(name);
         if(!cfg){
             cfg = {
                 type:'string',
                 validators:validators
             }
-            this.__props.set(name,cfg);
+            this.__srcPropMap.set(name,cfg);
         }else{
             cfg.validators = validators;
         }
     }
 
+    
+    /**
+     * 设置数据类型
+     * @param name      属性名
+     * @param type      属性类型
+     */
+    public __setType(name:string,type:string){
+        if(!this.__srcPropMap){
+            this.__srcPropMap = new Map();
+        }
+        let cfg:IModelCfg = this.__srcPropMap.get(name);
+        if(!cfg){
+            cfg = {
+                type:type,
+                validators:null
+            }
+            this.__srcPropMap.set(name,cfg);
+        }else{
+            cfg.type=type;
+        }
+    }
+
     /**
      * 给属性增加指定校验器
-     * @param name 
-     * @param validatorName 
-     * @param params 
+     * @param name              属性名
+     * @param validatorName     校验器名
+     * @param params            校验参数
      */
     public __addValidator(name:string,validatorName:string,params?:[]){
         if(!this.__props){
@@ -196,28 +220,6 @@ class BaseModel{
         //增加校验器
         cfg.validators[validatorName] = params || [];
     }   
-
-    /**
-     * 设置数据类型
-     * @param name      属性名
-     * @param type      属性类型
-     */
-    public __setType(name:string,type:string){
-        if(!this.__props){
-            this.__props = new Map();
-        }
-        let cfg:IModelCfg = this.__props.get(name);
-        if(!cfg){
-            cfg = {
-                type:type,
-                validators:null
-            }
-            this.__props.set(name,cfg);
-        }else{
-            cfg.type=type;
-        }
-    }
-
 }
 
 export{IModel,BaseModel}

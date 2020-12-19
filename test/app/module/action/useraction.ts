@@ -1,7 +1,8 @@
-import { Inject, Instance, Router, Route } from "../../../../core/tools/decorator";
+import { Inject, Instance, Router, Route, DataModel, NullCheck } from "../../../../core/tools/decorator";
 import { UserService } from "../service/userservice";
 import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { DataImpl } from "../service/dataimpl";
+import { MUser } from "../model/muser";
 
 /**
  * 测试用户
@@ -10,7 +11,7 @@ import { DataImpl } from "../service/dataimpl";
     namespace:'/user',
     path:'/'
 })
-
+@DataModel(MUser)
 class UserAction extends BaseRoute{
     userName:string;
     @Inject("userService")
@@ -26,6 +27,7 @@ class UserAction extends BaseRoute{
     @Route({
         path:'/addres'
     })
+
     async addres(){
         try{
             let r = await this.dataImpl.add();
@@ -60,6 +62,7 @@ class UserAction extends BaseRoute{
             params:['downloadPath']
         }]
     })
+    @NullCheck(['userName'])
     getinfo(params){
         console.log(this.model);
         if(params.type==1){
@@ -80,6 +83,7 @@ class UserAction extends BaseRoute{
     }
 
     @Route('/showinfo')
+    @NullCheck(['age'])
     async showinfo(params){
         return await new Promise((resolve,reject)=>{
             if(params.userName === 'aaa'){
