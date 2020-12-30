@@ -9,6 +9,11 @@ export class MUser extends BaseModel{
     })
     age:number;
 
+    @DataValidator({
+        check:[['F','M']]
+    })
+    sexy:string;
+
     @DataType('string')
     @DataValidator({
         betweenLength:[2,20]
@@ -58,5 +63,12 @@ export class MUser extends BaseModel{
             return null;
         }
         return "密码和验证密码不一致";
+    }
+
+    check(value,arr){
+        if(arr.includes(value)){
+            return null;
+        }
+        return "";
     }
 }

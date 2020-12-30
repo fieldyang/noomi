@@ -39,7 +39,6 @@ class BaseModel{
     constructor(){
         this.__props = new Map();
         this.__props = Util.clone(this.__srcPropMap);
-        console.log(this.__props);
     }
     /**
      * 转换和验证，返回数据类型或验证不正确的属性消息集合
@@ -82,7 +81,7 @@ class BaseModel{
                     return Util.compileString(NoomiModelTip[App.language][vn],cfg.validators[vn]);
                 }
             }else if(this[vn] && typeof this[vn] === 'function'){ //模型自定义校验器
-                let r = this[vn](value);
+                let r = this[vn](value,cfg.validators[vn]);
                 if(r !== null){
                     return r;
                 } 

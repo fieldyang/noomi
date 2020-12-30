@@ -1,5 +1,5 @@
 import {UserType} from './usertype'
-import { Entity, BaseEntity, Id, Column, ManyToOne, JoinColumn, EntityProxy } from 'relaen';
+import { Entity,Id,Column,ManyToOne,JoinColumn,EntityProxy, BaseEntity} from 'relaen';
 
 @Entity("t_user",'test')
 export class User extends BaseEntity{
@@ -33,7 +33,7 @@ export class User extends BaseEntity{
 	private sexy:string;
 
 	@ManyToOne({entity:'UserType'})
-	@JoinColumn({name:'user_type_id',refName:'user_type_id'})
+	@JoinColumn({name:'user_type_id',refName:'user_type_id',nullable:true})
 	private userType:UserType;
 
 	constructor(idValue?:number){
