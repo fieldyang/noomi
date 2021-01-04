@@ -19,12 +19,7 @@ export class UserRoute extends BaseRoute{
             const fs = require('fs');
             let pathMdl = require('path');
             let path = pathMdl.resolve('log.out');
-            let st = new Date().getTime();
-            for(let i=0;i<100;i++){
-                await this.userService.addUser1();
-            }
-
-            fs.writeFileSync(path,(new Date().getTime()-st).toString());
+            await this.userService.addUser1();
             return{success:true};
         }catch(e){
             console.log(e);

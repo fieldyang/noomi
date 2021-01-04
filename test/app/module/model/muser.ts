@@ -1,7 +1,8 @@
 import { BaseModel } from "../../../../core/tools/model";
 import { DataType, DataValidator} from "../../../../core/tools/decorator";
+import { MBase } from "./mbase";
 
-export class MUser extends BaseModel{
+export class MUser extends MBase{
 
     @DataType('int')
     @DataValidator({
@@ -10,7 +11,7 @@ export class MUser extends BaseModel{
     age:number;
 
     @DataValidator({
-        check:[['F','M']]
+        in:[['F','M']]
     })
     sexy:string;
 
@@ -54,6 +55,11 @@ export class MUser extends BaseModel{
     @DataType('int')
     userTypeId:number;
 
+    @DataType('string')
+    @DataValidator({
+        url:[]
+    })
+    url:string;
     /**
      * 自定义验证
      * @param value 
