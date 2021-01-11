@@ -1,9 +1,9 @@
 import { Transactioner, Instance } from "../../../../core/tools/decorator";
 
 import { WebConfig } from "../../../../core/web/webconfig";
-import { EntityManagerFactory, EntityManager, Transaction } from "relaen";
+import {EntityManager} from "relaen";
 import { User } from "../dao/entity/user";
-import { getConnection } from "../../../../core/database/connectionmanager";
+import { getConnection, getManager } from "../../../../core/database/connectionmanager";
 
 //Transactioner注解器把UserService类的所有方法注册为事务方法
 @Transactioner()
@@ -64,13 +64,12 @@ export class UserService{
     }
 
     async addUser1(){
-        let conn = await getConnection();
-        let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
-        let user:User = new User();
-        user.setUserName('test');
-        user.setAge(10);
-        user.setSexy('F');
-        await user.save();
-        em.close();
+        for(let i=0;i<100;i++){
+            let em:EntityManager = await getManager();
+            let user:User = new User();
+            user.setUserName('test');
+            await user.save();
+            em.close();
+        }
     }
 }

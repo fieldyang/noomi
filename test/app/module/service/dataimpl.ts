@@ -9,6 +9,8 @@ import { Transaction, Instance, Transactioner, Inject } from "../../../../core/t
 import { UserService } from "./userservice";
 import { User } from "../dao/entity/user";
 import { Connection, EntityManagerFactory ,EntityManager} from "relaen";
+import { UserInfo } from "../dao/entity/userinfo";
+
 // import { Resource } from "../dao/pojo/resource";
 // import { EntityManager } from "typeorm";
 // import ResourceAuthority from "../dao/pojosequelize/resourceauthority";
@@ -58,19 +60,21 @@ class DataImpl{
         // res.url = url;
         // let manager:EntityManager = await getManager();
         // let r1 = await manager.save(res);
-
-        //relaen
-        let conn:Connection = await getConnection();
-        let em:EntityManager = EntityManagerFactory.createEntityManager(conn);
-        let user:User = new User(100);
-        user.setUserName('yang');
-        user.setAge(10);
-        user.setSexy('M');
-        await user.save(true);
-        em.close();
-        await conn.close();
-        return 2;
         
+        //relaen
+        // let em:EntityManager = await getManager();
+        let user:User = new User(id);
+        user.setUserName('aaaa');
+        await user.save(true);
+        // em.save(user);
+        let ui:UserInfo = new UserInfo();
+        ui.setRealName('yang');
+        ui.setAge(10);
+        ui.setSexy('M');
+        ui.setUser(user);
+        await ui.save(true);
+        // await em.close();
+        return 2;
     }
     // @Transaction()
     async addResAuth(){

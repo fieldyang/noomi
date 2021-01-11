@@ -1,5 +1,6 @@
-import {UserType} from './usertype'
-import { Entity,Id,Column,ManyToOne,JoinColumn,EntityProxy, BaseEntity} from 'relaen';
+import {BaseEntity,Entity,Column,Id,OneToMany,EntityProxy, OneToOne} from 'relaen';
+import {GroupUser} from './groupuser';
+import {UserInfo} from './userinfo';
 
 @Entity("t_user",'test')
 export class User extends BaseEntity{
@@ -14,27 +15,30 @@ export class User extends BaseEntity{
 	@Column({
 		name:'user_name',
 		type:'string',
-		nullable:false
+		nullable:true,
+		length:32
 	})
 	private userName:string;
 
 	@Column({
-		name:'age',
-		type:'int',
-		nullable:false
-	})
-	private age:number;
-
-	@Column({
-		name:'sexy',
+		name:'user_pwd',
 		type:'string',
-		nullable:false
+		nullable:true,
+		length:32
 	})
-	private sexy:string;
+	private userPwd:string;
 
-	@ManyToOne({entity:'UserType'})
-	@JoinColumn({name:'user_type_id',refName:'user_type_id',nullable:true})
-	private userType:UserType;
+	@OneToMany({
+		entity:'GroupUser',
+		mappedBy:'user'
+	})
+	private groupUsers:Array<GroupUser>;
+
+	@OneToOne({
+		entity:'UserInfo',
+		mappedBy:'user'
+	})
+	private userInfo:Array<UserInfo>;
 
 	constructor(idValue?:number){
 		super();
@@ -54,25 +58,25 @@ export class User extends BaseEntity{
 		this.userName = value;
 	}
 
-	public getAge():number{
-		return this.age;
+	public getUserPwd():string{
+		return this.userPwd;
 	}
-	public setAge(value:number){
-		this.age = value;
-	}
-
-	public getSexy():string{
-		return this.sexy;
-	}
-	public setSexy(value:string){
-		this.sexy = value;
+	public setUserPwd(value:string){
+		this.userPwd = value;
 	}
 
-	public async getUserType():Promise<UserType>{
-		return await EntityProxy.get(this,'userType');
+	public async getGroupUsers():Promise<Array<GroupUser>>{
+		return await EntityProxy.get(this,'groupUsers');
 	}
-	public setUserType(value:UserType){
-		this.userType = value;
+	public setGroupUsers(value:Array<GroupUser>){
+		this.groupUsers = value;
+	}
+
+	public async getUserInfo():Promise<Array<UserInfo>>{
+		return await EntityProxy.get(this,'userInfo');
+	}
+	public setUserInfo(value:Array<UserInfo>){
+		this.userInfo = value;
 	}
 
 }
