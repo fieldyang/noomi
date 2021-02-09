@@ -2,6 +2,7 @@ import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { Instance, Router, Route, DataModel, NullCheck, Inject } from "../../../../core/tools/decorator";
 import { MUser } from "../model/muser";
 import { UserService } from "../service/userservice";
+import { RBase } from "./rbase";
 
 
 @Router({
@@ -10,12 +11,13 @@ import { UserService } from "../service/userservice";
 })
 
 @DataModel(MUser)
-export class UserRoute extends BaseRoute{
+export class UserRoute extends RBase{
     @Inject('userService')
     userService:UserService;
-    // @NullCheck(['userName'])
+    @NullCheck(['userName'])
     async add(){
         try{
+            console.log(this.model);
             const fs = require('fs');
             let pathMdl = require('path');
             let path = pathMdl.resolve('log.out');

@@ -27,12 +27,13 @@
 <script>
     function post(){
         let xhr = new XMLHttpRequest();
-        xhr.open('GET','/test/pages/files/file1.js');
-        let form = new FormData(document.querySelector('form'));
-        // xhr.setRequestHeader('Content-Type','multipart/form-data');
+        xhr.open('POSt','/user/op/add');
+        let form = new FormData();
+        // form.append('age',0);
+        xhr.setRequestHeader('Content-Type','application/json');
         // xhr.withCredentials = true;
         xhr.setRequestHeader('x-token','123456');
-        xhr.send();
+        xhr.send(JSON.stringify({'age':0}));
         xhr.onload = (x)=>{
             console.log(xhr.responseText);
         }
