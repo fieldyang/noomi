@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" href="TemplateData/style.css"> -->
+    <link rel="stylesheet" href="index.css" />
+    <script src='res/webgl.loader.js'></script>
+    <script src='index.js'></script>
+    <title>大型航天器无控陨落预报模拟分析系统</title>
+</head>
+<body>
+    <div class='orbit'>
+        <div class='loading'>资源加载中，请稍后！</div>
+        <div class='header'>
+            <div class='title'>
+                大型航天器无控陨落预报模拟分析系统
+            </div>
+            <div class='showct'>
+                <div class='itemct'>
+                    <div class='item'>
+                        <label>时间:</label>
+                        <span name='time'></span>
+                    </div>
+                    <div class='item'>
+                        <label>飞行时长:</label>
+                        <span name='flytime'></span>
+                    </div>
+                    <div class='item'>
+                        <label>速度:</label>
+                        <span name='velocity'></span>
+                    </div>
+                </div>
+                <div class='itemct'>
+                    <div class='item'>
+                        <label>经度:</label>
+                        <span name='lamda'></span>
+                    </div>
+                    <div class='item'>
+                        <label>纬度:</label>
+                        <span name='b'></span>
+                    </div>
+                    <div class='item'>
+                        <label>平均速度:</label>
+                        <span name='av'></span>
+                    </div>
+                </div>
+                <div class='itemct'>
+                    <div class='item'>
+                        <label>轨道倾角:</label>
+                        <span name='i'></span>
+                    </div>
+                    <div class='item'>
+                        <label>远地点高度:</label>
+                        <span name='ra'></span>
+                    </div>
+                    <div class='item'>
+                        <label>近地点高度:</label>
+                        <span name='rp'></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='center'>
+            <div class='left'>
+                <canvas class="earth"></canvas>
+            </div>
+            <div class='right'>
+                <div class='ct'>
+                    <canvas class='map'></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
