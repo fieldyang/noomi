@@ -3,16 +3,17 @@ import { UserService } from "../service/userservice";
 import { BaseRoute } from "../../../../core/main/route/baseroute";
 import { DataImpl } from "../service/dataimpl";
 import { MUser } from "../model/muser";
+import { RBase } from "./rbase";
 
 /**
  * 测试用户
  */
-@Router({
-    namespace:'/user',
-    path:'/'
-})
+// @Router({
+//     namespace:'/user',
+//     path:'/'
+// })
 @DataModel(MUser)
-class UserAction extends BaseRoute{
+class UserAction extends RBase{
     userName:string;
     @Inject("userService")
     userService:UserService;
