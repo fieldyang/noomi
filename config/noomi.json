@@ -9,10 +9,10 @@
 	// "launchhook":"launchhook.json",
 	
 	// "aop":"aop.json",
-	"database":"database/relaen.json",
+	"database":"database/relaen.json"
 	// "route":"route.json",
 	// "filter":"filter.json",
-	"redis":"redis.json"
+	// "redis":"redis.json"
 	// "security":"security.json"
 	
 }

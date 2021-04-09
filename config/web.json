@@ -2,7 +2,7 @@
     "web_config":{
         "upload_tmp_dir":"/upload/tmp", //上传临时目录，相对于项目根目录，以/开始
         "upload_max_size":0,			//上传内容最大字节数
-        "static_path":["/test/pages","/upload"], 		//静态资源路径
+        "static_path":["/test","/upload"], 		//静态资源路径
         "welcome":"/test/pages/index.html", 	//welcome 页面
         //跨域设置
         "cors":{
