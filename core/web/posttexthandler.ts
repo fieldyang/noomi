@@ -25,9 +25,16 @@ import { Util } from "../tools/util";
      * @returns     文本串/json对象
      */
     public getResult():any{
+        if(!this.buf || this.buf.length === 0){
+            return;
+        }
         let charset = this.mimeType.charset || 'utf8';
         let s = this.buf.toString(charset);
-        if(this.mimeType.type === 'application/json'){
+        if(this.mimeType.type === 'application/x-www-form-urlencoded'){ //urlencode
+            s = decodeURIComponent(s);
+            return App.qs.parse(s);
+        }
+        if(this.mimeType.type === 'application/json'){ // json
             return JSON.parse(s);
         }
         return {data:s};

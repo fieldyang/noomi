@@ -45,6 +45,11 @@ export class PostFormHandler{
     private returnObj:any;
 
     /**
+     * 当前属性为文件类型
+     */
+    private isFile:boolean;
+
+    /**
      * @param boundary      属性分隔符
      * @param tmpDir        文件临时存储路径
      */
@@ -66,11 +71,13 @@ export class PostFormHandler{
         let ind:number = buf1.indexOf(this.boundary);
         if(ind !== -1){
             while((ind=buf1.indexOf(this.boundary)) !== -1){
-                if(this.valueStarted) { //表示有值
+                if(this.valueStarted) { //有值
                     //待写内容
                     let buf2 = buf1.subarray(0,ind-this.lineBreak.length);
-                    if(this.value && this.value.fileName){ //文件
-                        App.fs.writeFileSync(this.value.path,buf2,{flag:'a+'});
+                    if(this.isFile){
+                        if(this.value.fileName){ //文件
+                            App.fs.writeFileSync(this.value.path,buf2,{flag:'a+'});
+                        }
                     }else{ //普通串
                         this.value = (this.value?Buffer.concat([this.value,buf2]):buf2).toString();
                     }
@@ -89,6 +96,7 @@ export class PostFormHandler{
                     this.propName = undefined;
                     this.value = undefined;
                     this.valueStarted = undefined;
+                    this.isFile = undefined;
                 }
                 //处理属性名
                 //去掉boundary
@@ -98,12 +106,14 @@ export class PostFormHandler{
                 //更新buf1
                 buf1 = this.buf;
             }
-        }else if(this.value){
-            if(this.value && this.value.fileName){ //当前为文件
-                //直接把上一帧写文件
-                App.fs.writeFileSync(this.value.path,this.buf,{flag:'a+'});
-                //保留当前帧
-                this.buf = buf;
+        }else if(this.valueStarted){ //有值
+            if(this.isFile){
+                if(this.buf && this.value.fileName){ //当前为文件
+                    //直接把上一帧写文件
+                    App.fs.writeFileSync(this.value.path,this.buf,{flag:'a+'});
+                    //保留当前帧
+                    this.buf = buf;
+                }
             }else{ //不是文件，添加到buf
                 this.buf = buf1;
             }
@@ -159,8 +169,12 @@ export class PostFormHandler{
                 this.handleFileType();
             }
             if(this.value.fileType){
-                if(this.readLine() !== null){
-                    this.valueStarted = true;
+                let r;
+                while((r=this.readLine()) !== null){
+                    if(r === ''){
+                        this.valueStarted = true;
+                        break;
+                    }
                 }
             }
         }else if(this.readLine() !== null){
@@ -193,13 +207,15 @@ export class PostFormHandler{
             for(let i=2;i<arr.length;i++){
                 let s = arr[i].trim();
                 if(s.startsWith('filename=')){
+                    this.isFile = true;
                     let a1 = s.split('=');
-                    let fn = a1[1];
-                    let fn1 = fn.substring(1,fn.length-1).trim();
                     //文件名为空，此项不存
                     if(a1[1] == '""'){
-                        this.propName = undefined;
+                        this.value = {};
+                        return;
                     }
+                    let fn = a1[1];
+                    let fn1 = fn.substring(1,fn.length-1).trim();
                     let fn2 = App.uuid.v1() + fn1.substr(fn1.lastIndexOf('.'));
                     //得到绝对路径
                     let filePath = Util.getAbsPath([this.saveDir,fn2]);

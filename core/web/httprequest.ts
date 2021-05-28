@@ -146,7 +146,7 @@ export class HttpRequest extends IncomingMessage{
     /**
      * POST时的参数处理
      * @returns     参数值对象
-     */ 
+     */
     postHandle():Promise<object>{
         let req:IncomingMessage = this.srcReq;
         let contentString = req.headers['content-type'];
@@ -160,7 +160,6 @@ export class HttpRequest extends IncomingMessage{
         if(maxSize > 0 && contentLen > maxSize){
             return Promise.reject(new NoomiError('0501'));
         }
-        
         //临时目录，默认 /upload/tmp
         let tmpDir:string = WebConfig.get('upload_tmp_dir') || '/upload/tmp';
         let tmpDir1 = Util.getAbsPath([tmpDir]);
@@ -168,19 +167,17 @@ export class HttpRequest extends IncomingMessage{
         if(!App.fs.existsSync(tmpDir1)){
             App.fs.mkdirSync(tmpDir1,{recursive:true});
         }
-        
         let fileHandler:PostFileHandler;
         let formHandler:PostFormHandler;
         let textHandler:PostTextHandler;
         //post类型 2:form-data 1:文本串 2:独立文件 
         let postType:number;
-        
         if(contentTypeObj.boundary){
             formHandler = new PostFormHandler(contentTypeObj.boundary,tmpDir);
             postType = 0;
-        
         }else if(contentTypeObj.type.startsWith('text/') ||
-            contentTypeObj.type === 'application/json'){  //文本
+            contentTypeObj.type === 'application/json' ||
+            contentTypeObj.type === 'application/x-www-form-urlencoded'){  //文本
             textHandler = new PostTextHandler(contentTypeObj);
             postType = 1;
         }else if(contentTypeObj.type.startsWith('image') ||
@@ -190,7 +187,6 @@ export class HttpRequest extends IncomingMessage{
             postType = 2;
             fileHandler = new PostFileHandler(tmpDir,contentTypeObj.type);
         }
-        
         return new Promise((resolve,reject)=>{
             req.on('data',(chunk:Buffer)=>{
                 switch(postType){
