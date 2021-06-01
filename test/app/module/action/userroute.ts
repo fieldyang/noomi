@@ -14,18 +14,18 @@ import { RBase } from "./rbase";
 export class UserRoute extends RBase{
     @Inject('userService')
     userService:UserService;
-    @NullCheck(['userName'])
+    // @NullCheck(['userName'])
     async add(){
-        try{
-            console.log(this.model);
-            const fs = require('fs');
-            let pathMdl = require('path');
-            let path = pathMdl.resolve('log.out');
-            await this.userService.addUser1();
-            return{success:true};
-        }catch(e){
-            console.log(e);
-            return{success:false,result:e};
-        }
+        // try{
+        //     console.log(this.model);
+        //     const fs = require('fs');
+        //     let pathMdl = require('path');
+        //     let path = pathMdl.resolve('log.out');
+        //     await this.userService.addUser1();
+        //     return{success:true};
+        // }catch(e){
+        //     console.log(e);
+        //     return{success:false,result:e};
+        // }
     }
 }
