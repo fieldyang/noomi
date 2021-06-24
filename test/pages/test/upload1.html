@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src='../js/nodom.js'></script>
 <body>
-<form id="form1" enctype="multipart/form-data" method='post' action='/upload'>
+<!-- <form id="form1" enctype="multipart/form-data" method='post' action='/upload'> -->
+<form>
     <div>
         <span>用户名:</span><input type='text' name='userName' />
     </div>
@@ -13,7 +15,7 @@
         <span>出生日期:</span><input type='date' name='birth' />
     </div>
     <div>
-        <span>头像:</span><input name='file' type='file' name='headImg' multiple='multiple'/>
+        <span>头像:</span><input id='file1' name='file' type='file' name='headImg' multiple='multiple'/>
     </div>
     <div>
         <span>描述:</span><textarea name='desc' style='width:100%;height:200px;'></textarea>
@@ -25,17 +27,38 @@
 <div id='result'></div> -->
 </body>
 <script>
+    // function upload(){
+    //     let xhr = new XMLHttpRequest();
+    //     // let formData = new FormData(document.querySelector('form'));
+    //     let formData = new FormData();
+    //     formData.append('file',document.querySelector("[name='file']").files[0]);
+    //     xhr.open('POST','/upload');
+    //     xhr.onload = ()=>{
+    //         console.log(xhr);
+    //         document.querySelector('#result').innerHTML = xhr.responseText;
+    //     }
+    //     xhr.send(formData);
+    // }
+
     function upload(){
-        let xhr = new XMLHttpRequest();
-        // let formData = new FormData(document.querySelector('form'));
-        let formData = new FormData();
-        formData.append('file',document.querySelector("[name='file']").files[0]);
-        xhr.open('POST','/upload');
-        xhr.onload = ()=>{
-            console.log(xhr);
-            document.querySelector('#result').innerHTML = xhr.responseText;
+        let form = new FormData();
+        let el = document.querySelector('#file1');
+        for (let f of el.files) {
+            form.append('file', f);
         }
-        xhr.send(formData);
+        nodom.request({
+            url: '/upload',
+            method: 'POST',
+            params: form,
+            header: {
+                'Content-Type': 'multipart/form-data'
+            },
+            type: 'json'
+        }).then((r) => {
+            model.set(me.extraDataName + '.state', 0);
+            model.query(me.dataName).push(r);
+        });
     }
+    
 </script>
 </html>
