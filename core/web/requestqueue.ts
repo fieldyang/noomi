@@ -8,6 +8,7 @@ import { PageFactory } from "../tools/pagefactory";
 import { HttpResponse } from "./httpresponse";
 import { Util } from "../tools/util";
 import { WebCache, IWebCacheObj } from "./webcache";
+import { NoomiConst } from "./noomiconst";
 
 /**
  * @exclude

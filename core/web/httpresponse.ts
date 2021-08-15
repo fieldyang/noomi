@@ -3,6 +3,7 @@ import { HttpCookie } from "./httpcookie";
 import { WebConfig } from "./webconfig";
 import { App } from "../tools/application";
 import { Stats } from "fs";
+import { NoomiConst } from "./noomiconst";
 
 /**
  * response回写配置项

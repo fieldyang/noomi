@@ -1,7 +1,7 @@
 /**
  * noomi 常量
  */
-class NoomiConst{
+export class NoomiConst{
     /**
      * 重定向
      */
