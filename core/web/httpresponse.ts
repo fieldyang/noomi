@@ -195,6 +195,7 @@ export class HttpResponse extends ServerResponse{
     /**
      * 重定向
      * @param page  跳转路径url 
+     * @returns     'REDIRECT'
      */
     redirect(page:string){
         this.writeCookie();
@@ -206,6 +207,7 @@ export class HttpResponse extends ServerResponse{
             }
         );
         this.srcRes.end();
+        return NoomiConst.redirect;
     }
 
     /**

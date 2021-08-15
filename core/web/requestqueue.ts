@@ -117,6 +117,10 @@ class RequestQueue{
             //执行
             try{
                 data = await RouteFactory.handleRoute(route,request,response);
+                //重定向直接返回
+                if(data && data === NoomiConst.redirect || data.data === NoomiConst.redirect){
+                    return;
+                }
             }catch(e){
                 RouteFactory.handleException(response,e);
                 //输出
@@ -132,51 +136,65 @@ class RequestQueue{
             }
         }
         
-        if(data){
-            if(typeof data === 'number'){
-                if(data !== 0){
-                    let page = PageFactory.getErrorPage(data);
-                    if(page && App.fs.existsSync(Util.getAbsPath([page]))){
-                        response.redirect(page);
-                    }else{
-                        response.writeToClient({
-                            statusCode:data
-                        });
-                    }
-                }
-            }else if(typeof data === 'object'){
-                let cData:IWebCacheObj = <IWebCacheObj>data;
-                //json格式为utf8，zip和流用binary
-                let charset = data.mimeType && data.mimeType.indexOf('/json') === -1 || gzip&&cData.zipData?'binary':'utf8';
-                //写web cache相关参数
-                WebCache.writeCacheToClient(response,cData.etag,cData.lastModified);
-                //可能只缓存静态资源信息，所以需要判断数据
-                if(gzip && cData.zipData){
+        this.handleResult(response,data,path,gzip);
+        
+    }
+
+    /**
+     * 处理结果
+     * @param response  response对象
+     * @param data      数据或数据对象
+     * @param path      资源路径
+     * @param isZip     是否zip
+     * @returns         void
+     * @since 0.5.5
+     */
+    private static handleResult(response:HttpResponse,data:any,path:string,isZip:boolean){
+        if(!data){
+            return;
+        }
+        if(typeof data === 'number'){
+            if(data !== 0){
+                let page = PageFactory.getErrorPage(data);
+                if(page && App.fs.existsSync(Util.getAbsPath([page]))){
+                    response.redirect(page);
+                }else{
                     response.writeToClient({
-                        data:cData.zipData,
-                        type:cData.mimeType,
-                        size:cData.zipSize,
-                        zip:'gzip',
-                        charset:charset
-                    });
-                }else if(cData.etag){  //文件
-                    response.writeFileToClient({
-                        data:Util.getAbsPath([path]),
-                        type:cData.mimeType,
-                        size:cData.dataSize
-                    });
-                }else{ //数据
-                    response.writeToClient({
-                        data:cData.data,
-                        type:cData.mimeType,
-                        size:cData.dataSize,
-                        charset:charset
+                        statusCode:data
                     });
                 }
             }
+        }else if(typeof data === 'object'){
+            let cData:IWebCacheObj = <IWebCacheObj>data;
+            //json格式为utf8，zip和流用binary
+            let charset = data.mimeType && data.mimeType.indexOf('/json') === -1 || isZip&&cData.zipData?'binary':'utf8';
+            //写web cache相关参数
+            WebCache.writeCacheToClient(response,cData.etag,cData.lastModified);
+            //可能只缓存静态资源信息，所以需要判断数据
+            if(isZip && cData.zipData){ //压缩数据
+                response.writeToClient({
+                    data:cData.zipData,
+                    type:cData.mimeType,
+                    size:cData.zipSize,
+                    zip:'gzip',
+                    charset:charset
+                });
+            }else if(cData.etag){  //文件
+                response.writeFileToClient({
+                    data:Util.getAbsPath([path]),
+                    type:cData.mimeType,
+                    size:cData.dataSize
+                });
+            }else{ //数据
+                response.writeToClient({
+                    data:cData.data,
+                    type:cData.mimeType,
+                    size:cData.dataSize,
+                    charset:charset
+                });
+            }
         }
     }
-
     /**
      * 设置允许处理标志
      * @param v 

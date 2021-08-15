@@ -264,12 +264,8 @@ class RouteFactory{
             throw new NoomiError("1010");
         }
         
-        try{
-            let re = await func.call(route.instance,route.instance||params);
-            return await this.handleResult(route,re);
-        }catch(e){
-            throw e;
-        }
+        let re = await func.call(route.instance,route.instance||params);
+        return await this.handleResult(route,re);
     }
 
     /**
